@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Norvia.API/Norvia.API.csproj" />
+  <Project Path="Norvia.Application/Norvia.Application.csproj" />
+  <Project Path="Norvia.Domain/Norvia.Domain.csproj" />
+  <Project Path="Norvia.Infrastructure/Norvia.Infrastructure.csproj" />
+</Solution>

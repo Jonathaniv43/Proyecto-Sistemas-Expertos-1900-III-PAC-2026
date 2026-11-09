@@ -1,0 +1,189 @@
+# ============================================
+# SISTEMA OPERATIVO
+# ============================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+
+
+# ============================================
+# VARIABLES DE ENTORNO / SECRETOS
+# ============================================
+
+.env
+.env.*
+!.env.example
+
+# Certificados y claves privadas
+*.pfx
+*.p12
+*.key
+*.pem
+
+
+# ============================================
+# .NET / C#
+# ============================================
+
+# Compilación
+[Bb]in/
+[Oo]bj/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.bak
+*.cache
+
+# Archivos generados por Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Logs
+*.log
+
+
+# ============================================
+# VISUAL STUDIO
+# ============================================
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Visual Studio Code
+.history/
+.vscode/
+
+
+# ============================================
+# NODE.JS / JAVASCRIPT
+# ============================================
+
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+out/
+
+# Vite
+.vite/
+
+# npm
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+
+# ============================================
+# DOCKER
+# ============================================
+
+# Docker overrides locales
+docker-compose.override.yml
+
+# Docker local environment
+docker-compose.local.yml
+
+
+# ============================================
+# BASES DE DATOS / DATOS LOCALES
+# ============================================
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Dumps de bases de datos
+*.sql.gz
+*.dump
+
+
+# ============================================
+# ARCHIVOS GENERADOS
+# ============================================
+
+*.pid
+*.seed
+*.pid.lock
+
+# Archivos temporales generales
+*.swp
+*.swo
+
+
+# ============================================
+# CARPETAS DE IDE / EDITORES
+# ============================================
+
+.vs/
+.vscode/
+.idea/
+
+
+# ============================================
+# ARCHIVOS DE CONFIGURACIÓN LOCAL
+# ============================================
+
+appsettings.Local.json
+appsettings.Development.local.json
+appsettings.*.local.json
+
+
+# ============================================
+# BACKUPS
+# ============================================
+
+*.old
+*.orig
+*.backup
+*.bak

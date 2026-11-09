@@ -1,0 +1,15 @@
+# infra/docker-compose.yml
+version: '3.8'
+services:
+  db-norvia:
+    image: postgres:16-alpine
+    container_name: postgres-norvia
+    env_file:
+      - .env # Inyecta las variables exclusivas del contenedor
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
