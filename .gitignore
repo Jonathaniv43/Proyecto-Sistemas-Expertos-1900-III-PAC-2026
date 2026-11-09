@@ -17,7 +17,8 @@ $RECYCLE.BIN/
 # Linux
 *~
 .directory
-
+CLAUDE.md
+docs/
 
 # ============================================
 # VARIABLES DE ENTORNO / SECRETOS

@@ -1,5 +1,7 @@
 # infra/docker-compose.yml
-version: '3.8'
+# Nombre fijo del proyecto: sin él, Compose usa el nombre de la carpeta ("infra")
+# y el volumen choca con el de otros proyectos que también tengan una carpeta infra/.
+name: norvia
 services:
   db-norvia:
     image: postgres:16-alpine
@@ -7,7 +9,7 @@ services:
     env_file:
       - .env # Inyecta las variables exclusivas del contenedor
     ports:
-      - "5433:5433"
+      - "5433:5432" # host:contenedor (Postgres escucha en 5432 dentro)
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

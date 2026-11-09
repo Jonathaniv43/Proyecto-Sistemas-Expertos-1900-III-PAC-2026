@@ -1,12 +1,17 @@
-using DotNetEnv; 
+using DotNetEnv;
+using Norvia.Infrastructure;
+
+// Carga el .env antes de crear el builder para que sus variables entren en IConfiguration.
+Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
-Env.Load();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
