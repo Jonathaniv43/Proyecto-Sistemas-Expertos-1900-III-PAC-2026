@@ -8,9 +8,14 @@ namespace Norvia.Infrastructure.Persistence.Configurations;
 /// <summary>Atajos para aplicar las convenciones del modelo de datos (§1 y §2).</summary>
 internal static class ConfiguracionExtensions
 {
-    /// <summary>Columna "*En" con la hora del servidor (DEFAULT now()).</summary>
-    public static PropertyBuilder<DateTime> FechaDelServidor(this PropertyBuilder<DateTime> propiedad) =>
+    /// <summary>Columna "*En" con la hora de PostgreSQL (DEFAULT now()). EF no envía el DateTime de C#.</summary>
+    public static PropertyBuilder<DateTime> FechaDelServidor(this PropertyBuilder<DateTime> propiedad)
+    {
         propiedad.HasDefaultValueSql("now()");
+        propiedad.ValueGeneratedOnAdd();
+        propiedad.Metadata.SetBeforeSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+        return propiedad;
+    }
 
     /// <summary>
     /// Booleano con DEFAULT true. El centinela true hace que EF sí envíe los false
