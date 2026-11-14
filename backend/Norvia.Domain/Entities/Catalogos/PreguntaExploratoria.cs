@@ -7,6 +7,7 @@ public class PreguntaExploratoria
     public Guid CategoriaRiesgoId { get; set; }
     public string Texto { get; set; } = string.Empty;
     public TipoRespuestaPregunta TipoRespuesta { get; set; }
+    public bool Obligatoria { get; set; } = true;
     public short Orden { get; set; }
     public Guid? PeligroId { get; set; }
     public bool Activa { get; set; } = true;

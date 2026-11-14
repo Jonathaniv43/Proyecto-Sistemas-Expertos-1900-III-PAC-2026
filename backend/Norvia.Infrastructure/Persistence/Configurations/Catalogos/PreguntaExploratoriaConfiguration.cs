@@ -14,7 +14,8 @@ public class PreguntaExploratoriaConfiguration : IEntityTypeConfiguration<Pregun
     {
         b.HasKey(p => p.Id);
         b.Property(p => p.Texto).HasMaxLength(500).IsRequired();
-        b.EnumComoTexto(p => p.TipoRespuesta, 15);
+        b.EnumComoTexto(p => p.TipoRespuesta, 25);
+        b.Property(p => p.Obligatoria).PorDefectoTrue();
         b.Property(p => p.Activa).PorDefectoTrue();
 
         b.HasOne(p => p.CategoriaRiesgo).WithMany(c => c.Preguntas).HasForeignKey(p => p.CategoriaRiesgoId);
@@ -23,6 +24,6 @@ public class PreguntaExploratoriaConfiguration : IEntityTypeConfiguration<Pregun
         b.HasIndex(p => new { p.CategoriaRiesgoId, p.Orden }).IsUnique();
 
         // Una respuesta libre no puede indicar exposición.
-        b.Check("TextoSinPeligro", "\"TipoRespuesta\" <> 'texto' OR \"PeligroId\" IS NULL");
+        b.Check("RespuestaBreveSinPeligro", "\"TipoRespuesta\" <> 'respuesta_breve' OR \"PeligroId\" IS NULL");
     }
 }
