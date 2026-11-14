@@ -29,7 +29,6 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options) : DbCont
     // Empresas
     public DbSet<Empresa> Empresa => Set<Empresa>();
     public DbSet<HistorialEstadoEmpresa> HistorialEstadoEmpresa => Set<HistorialEstadoEmpresa>();
-    public DbSet<Area> Area => Set<Area>();
 
     // Catálogos (globales)
     public DbSet<Rubro> Rubro => Set<Rubro>();
@@ -37,6 +36,8 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options) : DbCont
     public DbSet<Peligro> Peligro => Set<Peligro>();
     public DbSet<PreguntaExploratoria> PreguntaExploratoria => Set<PreguntaExploratoria>();
     public DbSet<OpcionPregunta> OpcionPregunta => Set<OpcionPregunta>();
+    public DbSet<PlantillaTarea> PlantillaTarea => Set<PlantillaTarea>();
+    public DbSet<PlantillaDocumento> PlantillaDocumento => Set<PlantillaDocumento>();
 
     // Riesgos
     public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();

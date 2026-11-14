@@ -17,5 +17,4 @@ public class Empresa
     public Rubro? Rubro { get; set; }
     public ICollection<VinculoEmpresa> Vinculos { get; set; } = new List<VinculoEmpresa>();
     public ICollection<HistorialEstadoEmpresa> HistorialEstados { get; set; } = new List<HistorialEstadoEmpresa>();
-    public ICollection<Area> Areas { get; set; } = new List<Area>();
 }

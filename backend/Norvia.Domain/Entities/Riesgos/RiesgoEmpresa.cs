@@ -9,7 +9,6 @@ public class RiesgoEmpresa : ITieneEmpresa
 
     /// <summary>Para peligros que no están en el catálogo.</summary>
     public string? DescripcionPeligro { get; set; }
-    public Guid AreaId { get; set; }
     public string? Actividad { get; set; }
     public EstadoRiesgo Estado { get; set; }
 
@@ -21,7 +20,6 @@ public class RiesgoEmpresa : ITieneEmpresa
 
     public Empresa Empresa { get; set; } = null!;
     public Peligro? Peligro { get; set; }
-    public Area Area { get; set; } = null!;
     public VinculoEmpresa? RevisadoPor { get; set; }
     public ICollection<EvaluacionRiesgo> Evaluaciones { get; set; } = new List<EvaluacionRiesgo>();
     public ICollection<Control> Controles { get; set; } = new List<Control>();

@@ -23,12 +23,7 @@ public class RiesgoEmpresaConfiguration : IEntityTypeConfiguration<RiesgoEmpresa
         b.HasOne(r => r.Empresa).WithMany().HasForeignKey(r => r.EmpresaId);
         b.HasOne(r => r.Peligro).WithMany().HasForeignKey(r => r.PeligroId); // Peligro es global: FK simple
 
-        // FK compuestas: el área y el revisor deben ser de la misma empresa (D15, RN-17).
-        b.HasOne(r => r.Area)
-            .WithMany(a => a.Riesgos)
-            .HasForeignKey(r => new { r.EmpresaId, r.AreaId })
-            .HasPrincipalKey(a => new { a.EmpresaId, a.Id });
-
+        // FK compuesta: el revisor debe ser de la misma empresa (D15). Sin áreas: el riesgo es de la empresa (D4).
         b.HasOne(r => r.RevisadoPor)
             .WithMany()
             .HasForeignKey(r => new { r.EmpresaId, r.RevisadoPorId })
@@ -40,12 +35,12 @@ public class RiesgoEmpresaConfiguration : IEntityTypeConfiguration<RiesgoEmpresa
         b.Check("SugeridoConOrigen",
             "\"Estado\" <> 'sugerido' OR (\"EncuestaId\" IS NOT NULL AND \"PeligroId\" IS NOT NULL)");
 
-        // Importar respuestas de nuevo no duplica sugerencias.
-        b.HasIndex(r => new { r.EncuestaId, r.PeligroId, r.AreaId })
+        // Calcular las sugerencias de nuevo no las duplica.
+        b.HasIndex(r => new { r.EncuestaId, r.PeligroId })
             .IsUnique()
             .HasFilter("\"EncuestaId\" IS NOT NULL");
 
-        // Matriz por área (§7).
-        b.HasIndex(r => new { r.EmpresaId, r.AreaId, r.Estado });
+        // Matriz de la empresa (§7).
+        b.HasIndex(r => new { r.EmpresaId, r.Estado });
     }
 }
