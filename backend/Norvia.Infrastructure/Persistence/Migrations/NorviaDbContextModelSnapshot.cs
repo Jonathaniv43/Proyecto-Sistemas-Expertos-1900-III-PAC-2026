@@ -286,6 +286,32 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Rol");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Codigo = "admin_empresa",
+                            Nombre = "Administrador de empresa"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Codigo = "responsable_sst",
+                            Nombre = "Responsable SST"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Codigo = "colaborador",
+                            Nombre = "Colaborador"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Codigo = "encuestado",
+                            Nombre = "Encuestado"
+                        });
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.RolPermiso", b =>
@@ -324,6 +350,20 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("RolStaffPlataforma");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Codigo = "admin_plataforma",
+                            Nombre = "Administrador de plataforma"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Codigo = "soporte_plataforma",
+                            Nombre = "Soporte de plataforma"
+                        });
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.RolStaffPlataformaPermiso", b =>
@@ -719,6 +759,36 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Rubro");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Activo = true,
+                            Codigo = "oficina",
+                            Nombre = "Oficina administrativa"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Activo = true,
+                            Codigo = "comercio",
+                            Nombre = "Comercio o tienda"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Activo = true,
+                            Codigo = "maquila_fabrica",
+                            Nombre = "Maquila o fábrica"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Activo = true,
+                            Codigo = "construccion",
+                            Nombre = "Construcción"
+                        });
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
