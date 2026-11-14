@@ -2,6 +2,8 @@ using DotNetEnv;
 using Norvia.API.Extensiones;
 using Norvia.API.Filtros;
 using Norvia.API.Middleware;
+using Norvia.API.Seguridad;
+using Norvia.Application.Common.Interfaces;
 using Norvia.Application;
 using Norvia.Infrastructure;
 using Norvia.Infrastructure.Persistence.Seed;
@@ -17,6 +19,8 @@ builder.Services.AddControllers(o => o.Filters.Add<ValidacionFiltro>());
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutenticacionJwt();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantActual, TenantActual>();
 
 var app = builder.Build();
 

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Infrastructure.Opciones;
 using Norvia.Infrastructure.Persistence;
+using Norvia.Infrastructure.Persistence.Interceptores;
 using Norvia.Infrastructure.Persistence.Seed;
 using Norvia.Infrastructure.Seguridad;
 using Norvia.Infrastructure.Tiempo;
@@ -18,7 +19,11 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException(
                 "Falta la cadena de conexión 'PostgresConnection'. Copiá example.env a .env en Norvia.API.");
 
-        services.AddDbContext<NorviaDbContext>(options => options.UseNpgsql(connectionString));
+        // ITenantActual lo registra la capa que conoce la sesión (la API, a partir del JWT).
+        services.AddScoped<AsignarEmpresaInterceptor>();
+        services.AddDbContext<NorviaDbContext>((sp, options) => options
+            .UseNpgsql(connectionString)
+            .AddInterceptors(sp.GetRequiredService<AsignarEmpresaInterceptor>()));
         services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 
         // Opciones: la configuración se lee solo aquí (patrón Options).
