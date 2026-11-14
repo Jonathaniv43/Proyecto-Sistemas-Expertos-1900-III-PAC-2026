@@ -19,5 +19,7 @@ public class RubroConfiguration : IEntityTypeConfiguration<Rubro>
         b.Property(r => r.Activo).PorDefectoTrue();
         b.HasIndex(r => r.Codigo).IsUnique();
         b.HasIndex(r => r.Nombre).IsUnique();
+
+        b.HasData(Seed.CatalogoBase.Rubros); // HU-097
     }
 }
