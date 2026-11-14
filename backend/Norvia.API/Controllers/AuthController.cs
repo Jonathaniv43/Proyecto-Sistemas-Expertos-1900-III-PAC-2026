@@ -1,38 +1,34 @@
 using Microsoft.AspNetCore.Mvc;
-using Norvia.Application.Features.Auth.DTOs;
-using Norvia.Application.Features.Auth.Interfaces;
+using Norvia.API.Extensiones;
+using Norvia.Application.Features.Auth.CerrarSesion;
+using Norvia.Application.Features.Auth.LoginEmpresa;
+using Norvia.Application.Features.Auth.LoginPlataforma;
+using Norvia.Application.Features.Auth.RefrescarSesion;
 
 namespace Norvia.API.Controllers;
 
+/// <summary>Módulo Auth. Cada acción usa solo el servicio de su caso de uso.</summary>
 [ApiController]
 [Route("api/auth")]
-public class AuthController(IAuthServicio auth) : ControllerBase
+public sealed class AuthController : ControllerBase
 {
     [HttpPost("login/empresa")]
-    public async Task<IActionResult> LoginEmpresa([FromBody] LoginEmpresaRequest request, CancellationToken cancellationToken)
-    {
-        var r = await auth.LoginEmpresaAsync(request, cancellationToken);
-        return r.Ok ? Ok(r.Tokens) : Unauthorized();
-    }
+    public async Task<IActionResult> LoginEmpresa(
+        LoginEmpresaRequest request, [FromServices] LoginEmpresaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [HttpPost("login/plataforma")]
-    public async Task<IActionResult> LoginPlataforma([FromBody] LoginRequest request, CancellationToken cancellationToken)
-    {
-        var r = await auth.LoginPlataformaAsync(request, cancellationToken);
-        return r.Ok ? Ok(r.Tokens) : Unauthorized();
-    }
+    public async Task<IActionResult> LoginPlataforma(
+        LoginPlataformaRequest request, [FromServices] LoginPlataformaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshRequest request, CancellationToken cancellationToken)
-    {
-        var r = await auth.RefreshAsync(request, cancellationToken);
-        return r.Ok ? Ok(r.Tokens) : Unauthorized();
-    }
+    public async Task<IActionResult> Refrescar(
+        RefrescarSesionRequest request, [FromServices] RefrescarSesionServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken)
-    {
-        await auth.LogoutAsync(request, cancellationToken);
-        return NoContent();
-    }
+    public async Task<IActionResult> CerrarSesion(
+        CerrarSesionRequest request, [FromServices] CerrarSesionServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 }
