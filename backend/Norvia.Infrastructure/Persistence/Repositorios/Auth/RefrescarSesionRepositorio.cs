@@ -7,7 +7,10 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Auth;
 public sealed class RefrescarSesionRepositorio(NorviaDbContext db) : IRefrescarSesionRepositorio
 {
     public Task<RefreshToken?> BuscarRefreshAsync(string tokenHash, CancellationToken cancellationToken) =>
+        // IgnoreQueryFilters: el refresh es anónimo (el access token ya venció); el vínculo se obtiene
+        // por el hash del refresh, que solo conoce su dueño.
         db.RefreshToken
+            .IgnoreQueryFilters()
             .Include(t => t.Acceso).ThenInclude(a => a.Staff).ThenInclude(s => s!.RolStaffPlataforma)
             .Include(t => t.VinculoEmpresa).ThenInclude(v => v!.Rol)
             .Include(t => t.VinculoEmpresa).ThenInclude(v => v!.Empresa)
