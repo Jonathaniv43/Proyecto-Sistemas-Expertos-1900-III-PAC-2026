@@ -15,6 +15,8 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options) : DbCont
     // Acceso (globales, salvo VinculoEmpresa e HistorialEstadoVinculo)
     public DbSet<Persona> Persona => Set<Persona>();
     public DbSet<Usuario> Usuario => Set<Usuario>();
+    public DbSet<Acceso> Acceso => Set<Acceso>();
+    public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
     public DbSet<StaffPlataforma> StaffPlataforma => Set<StaffPlataforma>();
     public DbSet<RolStaffPlataforma> RolStaffPlataforma => Set<RolStaffPlataforma>();
     public DbSet<Rol> Rol => Set<Rol>();

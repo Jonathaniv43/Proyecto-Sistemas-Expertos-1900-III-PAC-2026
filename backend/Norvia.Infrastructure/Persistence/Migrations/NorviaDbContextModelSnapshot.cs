@@ -22,6 +22,48 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.Acceso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("DebeCambiarPassword")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("Verificado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Acceso", t =>
+                        {
+                            t.HasCheckConstraint("CK_Acceso_EmailEnMinusculas", "\"Email\" = lower(\"Email\")");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.HistorialEstadoVinculo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -178,6 +220,51 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccesoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime>("ExpiraEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TipoSesion")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid?>("VinculoEmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccesoId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("VinculoEmpresaId");
+
+                    b.ToTable("RefreshToken", t =>
+                        {
+                            t.HasCheckConstraint("CK_RefreshToken_TipoSesion", "\"TipoSesion\" IN ('empresa', 'plataforma')");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.Rol", b =>
                 {
                     b.Property<short>("Id")
@@ -260,6 +347,9 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("AccesoId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("Activo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -270,35 +360,17 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<bool>("DebeCambiarPassword")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("character varying(254)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<short>("RolStaffPlataformaId")
                         .HasColumnType("smallint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("AccesoId")
                         .IsUnique();
 
                     b.HasIndex("RolStaffPlataformaId");
 
-                    b.ToTable("StaffPlataforma", t =>
-                        {
-                            t.HasCheckConstraint("CK_StaffPlataforma_EmailEnMinusculas", "\"Email\" = lower(\"Email\")");
-                        });
+                    b.ToTable("StaffPlataforma");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.Usuario", b =>
@@ -334,20 +406,13 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("AccesoId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
-
-                    b.Property<bool>("DebeCambiarPassword")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("character varying(254)");
 
                     b.Property<Guid>("EmpresaId")
                         .HasColumnType("uuid");
@@ -357,11 +422,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<Guid>("PersonaId")
                         .HasColumnType("uuid");
 
@@ -370,20 +430,20 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
+                    b.HasIndex("AccesoId");
 
                     b.HasIndex("PersonaId");
 
                     b.HasIndex("RolId");
+
+                    b.HasIndex("EmpresaId", "AccesoId")
+                        .IsUnique();
 
                     b.HasIndex("EmpresaId", "PersonaId")
                         .IsUnique();
 
                     b.ToTable("VinculoEmpresa", t =>
                         {
-                            t.HasCheckConstraint("CK_VinculoEmpresa_EmailEnMinusculas", "\"Email\" = lower(\"Email\")");
-
                             t.HasCheckConstraint("CK_VinculoEmpresa_Estado", "\"Estado\" IN ('activo', 'suspendido', 'baja')");
                         });
                 });
@@ -900,6 +960,24 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("VinculoEmpresa");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.RefreshToken", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Acceso.Acceso", "Acceso")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("AccesoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "VinculoEmpresa")
+                        .WithMany()
+                        .HasForeignKey("VinculoEmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Acceso");
+
+                    b.Navigation("VinculoEmpresa");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.RolPermiso", b =>
                 {
                     b.HasOne("Norvia.Domain.Entities.Acceso.Permiso", "Permiso")
@@ -940,11 +1018,19 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.StaffPlataforma", b =>
                 {
+                    b.HasOne("Norvia.Domain.Entities.Acceso.Acceso", "Acceso")
+                        .WithOne("Staff")
+                        .HasForeignKey("Norvia.Domain.Entities.Acceso.StaffPlataforma", "AccesoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Norvia.Domain.Entities.Acceso.RolStaffPlataforma", "RolStaffPlataforma")
                         .WithMany("Staff")
                         .HasForeignKey("RolStaffPlataformaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Acceso");
 
                     b.Navigation("RolStaffPlataforma");
                 });
@@ -962,6 +1048,12 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VinculoEmpresa", b =>
                 {
+                    b.HasOne("Norvia.Domain.Entities.Acceso.Acceso", "Acceso")
+                        .WithMany("Vinculos")
+                        .HasForeignKey("AccesoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
                         .WithMany("Vinculos")
                         .HasForeignKey("EmpresaId")
@@ -979,6 +1071,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasForeignKey("RolId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Acceso");
 
                     b.Navigation("Empresa");
 
@@ -1156,6 +1250,15 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Peligro");
 
                     b.Navigation("RevisadoPor");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.Acceso", b =>
+                {
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("Staff");
+
+                    b.Navigation("Vinculos");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.Permiso", b =>
