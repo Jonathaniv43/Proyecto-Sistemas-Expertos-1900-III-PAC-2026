@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Auth.CerrarSesion;
 using Norvia.Application.Features.Auth.LoginEmpresa;
@@ -10,6 +11,7 @@ namespace Norvia.API.Controllers;
 /// <summary>Módulo Auth. Cada acción usa solo el servicio de su caso de uso.</summary>
 [ApiController]
 [Route("api/auth")]
+[AllowAnonymous]
 public sealed class AuthController : ControllerBase
 {
     [HttpPost("login/empresa")]
@@ -31,4 +33,14 @@ public sealed class AuthController : ControllerBase
     public async Task<IActionResult> CerrarSesion(
         CerrarSesionRequest request, [FromServices] CerrarSesionServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+}
+
+//prueba hu-095
+[ApiController]
+[Route("api/prueba")]
+public sealed class PruebaController : ControllerBase
+{
+    [HttpGet("plataforma")] public IActionResult Plataforma() => Ok("pasó");
+    [HttpGet("empresa")] public IActionResult Empresa() => Ok("pasó");
+    [HttpGet("sin-permiso")] public IActionResult SinPermiso() => Ok("pasó");
 }

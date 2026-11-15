@@ -28,12 +28,13 @@ app.UseMiddleware<ManejoErroresMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 }
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseMiddleware<AutorizacionPermisosMiddleware>(); //este debe ir antes del middleware (app.UseCors()), para que las preflight OPTIONS no caigan aquí.
 app.UseAuthorization();
 app.MapControllers();
 

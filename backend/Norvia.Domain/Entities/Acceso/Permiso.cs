@@ -3,7 +3,7 @@ namespace Norvia.Domain.Entities.Acceso;
 /// <summary>Operación de la API y tipo de sesión en que aplica (D20, D24).</summary>
 public class Permiso
 {
-    public short Id { get; set; }
+    public Guid Id { get; set; } = Guid.CreateVersion7();
     public string Codigo { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public AlcancePermiso Alcance { get; set; }

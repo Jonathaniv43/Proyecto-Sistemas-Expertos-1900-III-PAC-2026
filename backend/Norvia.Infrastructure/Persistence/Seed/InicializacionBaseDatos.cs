@@ -8,6 +8,7 @@ public static class InicializacionBaseDatos
     public static async Task InicializarBaseDatosAsync(this IServiceProvider servicios, CancellationToken cancellationToken = default)
     {
         using var scope = servicios.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<PermisosSeeder>().EjecutarAsync(cancellationToken);
         await scope.ServiceProvider.GetRequiredService<StaffSeeder>().EjecutarAsync(cancellationToken);
     }
 }

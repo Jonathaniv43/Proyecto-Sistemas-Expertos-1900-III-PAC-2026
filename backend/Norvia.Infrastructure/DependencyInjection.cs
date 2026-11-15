@@ -56,6 +56,8 @@ public static class DependencyInjection
         }
 
         services.AddScoped<StaffSeeder>();
+        services.AddScoped<PermisosSeeder>();
+        services.AddScoped<IAutorizadorPermisos, AutorizadorPermisos>();
 
         return services;
     }
