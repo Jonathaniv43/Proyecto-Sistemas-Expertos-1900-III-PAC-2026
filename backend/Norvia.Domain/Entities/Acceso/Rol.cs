@@ -3,6 +3,11 @@ namespace Norvia.Domain.Entities.Acceso;
 /// <summary>Rol dentro de una empresa (VinculoEmpresa.RolId).</summary>
 public class Rol
 {
+    public const short AdminEmpresaId = 1;
+    public const short ResponsableSstId = 2;
+    public const short ColaboradorId = 3;
+    public const short EncuestadoId = 4;
+
     public short Id { get; set; }
     public string Codigo { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
