@@ -1,4 +1,5 @@
 using FluentValidation;
+using Norvia.Application.Common.Validacion;
 
 namespace Norvia.Application.Features.Empresas.RegistrarEmpresa;
 
@@ -35,9 +36,6 @@ public sealed class RegistrarEmpresaValidator : AbstractValidator<RegistrarEmpre
             .MaximumLength(254)
             .EmailAddress();
 
-        RuleFor(x => x.Password)
-            .NotEmpty()
-            .MinimumLength(15)
-            .MaximumLength(64);
+        RuleFor(x => x.Password).CumplePoliticaContrasena(); // HU-114
     }
 }

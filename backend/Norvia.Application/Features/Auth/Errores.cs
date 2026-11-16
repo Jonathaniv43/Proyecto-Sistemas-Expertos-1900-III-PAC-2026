@@ -11,4 +11,7 @@ public static class Errores
 
     public static readonly Error SesionInvalida =
         new("auth.sesion_invalida", "La sesión no es válida o expiró.", TipoError.NoAutorizado);
+
+    public static readonly Error ContrasenaActualIncorrecta =
+        new("auth.contrasena_actual_incorrecta", "La contraseña actual no es correcta.", TipoError.Validacion);
 }

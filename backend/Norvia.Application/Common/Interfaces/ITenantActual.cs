@@ -15,6 +15,9 @@ public interface ITenantActual
     /// <summary>Vínculo autenticado (claim <c>vinculo_id</c>); nulo si no hay sesión de empresa.</summary>
     Guid? VinculoEmpresaId { get; }
 
+    /// <summary>Acceso (credenciales) de la sesión, del claim <c>sub</c>; existe en sesiones de empresa y de staff.</summary>
+    Guid? AccesoId { get; }
+
     /// <summary>Tipo de sesión del token; nulo si la petición es anónima.</summary>
     TipoSesion? TipoSesion { get; }
 }

@@ -17,10 +17,14 @@ public static class CatalogoPermisos
     public static readonly PermisoDef[] Todos =
     [
         // EJEMPLO de forma: reemplaza rutas y roles por los reales (ver 05-actores-roles.md).
-        // El encuestado solo debe aparecer en estos tres.
+        // El encuestado solo debe aparecer en estos tres y en el cambio de contraseña (HU-114).
         Empresa("encuesta.responder", "Responder encuesta", "POST", "api/encuestas/{id}/respuestas", "encuestado"),
         Empresa("notificacion.listar", "Ver notificaciones", "GET", "api/notificaciones", "encuestado"),
         Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
+
+        // HU-114: cambiar la contraseña propia (incluye el primer ingreso con contraseña temporal).
+        Empresa("auth.contrasena.establecer", "Cambiar mi contraseña", "POST", "api/auth/contrasena/establecer",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),
