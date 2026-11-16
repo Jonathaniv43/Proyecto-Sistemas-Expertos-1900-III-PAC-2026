@@ -841,6 +841,29 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.TipoDocumentoIdentidadCatalogo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique();
+
+                    b.ToTable("TipoDocumentoIdentidad", (string)null);
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
                 {
                     b.Property<Guid>("Id")

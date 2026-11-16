@@ -51,6 +51,7 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<PlantillaTarea> PlantillaTarea => Set<PlantillaTarea>();
     public DbSet<PlantillaDocumento> PlantillaDocumento => Set<PlantillaDocumento>();
     public DbSet<PlantillaCorreo> PlantillaCorreo => Set<PlantillaCorreo>();
+    public DbSet<TipoDocumentoIdentidadCatalogo> TipoDocumentoIdentidad => Set<TipoDocumentoIdentidadCatalogo>();
 
     // Riesgos
     public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();

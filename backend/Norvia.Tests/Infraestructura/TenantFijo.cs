@@ -1,5 +1,5 @@
 using Norvia.Application.Common.Interfaces;
-using Norvia.Domain.Enums;
+using Enums = Norvia.Domain.Enums;
 
 namespace Norvia.Tests.Infraestructura;
 
@@ -9,5 +9,5 @@ public sealed class TenantFijo(Guid? empresaId) : ITenantActual
     public Guid? EmpresaId => empresaId;
     public Guid? VinculoEmpresaId => null;
     public Guid? AccesoId => null;
-    public TipoSesion? TipoSesion => empresaId is null ? null : Domain.Enums.TipoSesion.Empresa;
+    public Enums.TipoSesion? TipoSesion => empresaId is null ? null : Enums.TipoSesion.Empresa;
 }

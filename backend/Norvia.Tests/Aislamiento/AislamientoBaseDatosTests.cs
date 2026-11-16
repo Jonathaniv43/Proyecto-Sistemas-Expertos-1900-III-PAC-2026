@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Enums;
 using Norvia.Tests.Infraestructura;
 using Npgsql;

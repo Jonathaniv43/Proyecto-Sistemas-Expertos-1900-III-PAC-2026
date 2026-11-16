@@ -30,11 +30,19 @@ public sealed class RegistrarEmpresaServicio(
         var email = request.Email.Trim().ToLowerInvariant();
         if (await repositorio.ExisteEmailAsync(email, cancellationToken)) return Errores.EmailDuplicado;
 
-        var tipoDocumento = request.TipoDocumento.Trim().ToLowerInvariant() == "pasaporte"
-            ? TipoDocumentoIdentidad.Pasaporte
-            : TipoDocumentoIdentidad.Dni;
+        var tipoDocumento = request.TipoDocumento.Trim().ToLowerInvariant();
+        if (!await repositorio.TipoDocumentoIdentidadExisteAsync(tipoDocumento, cancellationToken))
+            return Errores.TipoDocumentoInvalido;
+        var tipoEnum = tipoDocumento switch
+        {
+            "dni" => TipoDocumentoIdentidad.Dni,
+            "pasaporte" => TipoDocumentoIdentidad.Pasaporte,
+            "otro" => TipoDocumentoIdentidad.Otro,
+            _ => default
+        };
+
         var numeroDocumento = request.NumeroDocumento.Trim();
-        if (await repositorio.ExisteDocumentoAsync(tipoDocumento, numeroDocumento, cancellationToken))
+        if (await repositorio.ExisteDocumentoAsync(tipoEnum, numeroDocumento, cancellationToken))
             return Errores.DocumentoDuplicado;
 
         var rubroCodigo = request.RubroCodigo.Trim().ToLowerInvariant();
@@ -57,7 +65,7 @@ public sealed class RegistrarEmpresaServicio(
             SegundoNombre = string.IsNullOrWhiteSpace(request.SegundoNombre) ? null : request.SegundoNombre.Trim(),
             PrimerApellido = request.PrimerApellido.Trim(),
             SegundoApellido = string.IsNullOrWhiteSpace(request.SegundoApellido) ? null : request.SegundoApellido.Trim(),
-            TipoDocumento = tipoDocumento,
+            TipoDocumento = tipoEnum,
             NumeroDocumento = numeroDocumento
         };
 

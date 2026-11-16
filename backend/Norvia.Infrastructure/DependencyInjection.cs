@@ -67,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<StaffSeeder>();
         services.AddScoped<PermisosSeeder>();
         services.AddScoped<PlantillasCorreoSeeder>();
+        services.AddScoped<TiposDocumentoIdentidadSeeder>();
 
         return services;
     }
