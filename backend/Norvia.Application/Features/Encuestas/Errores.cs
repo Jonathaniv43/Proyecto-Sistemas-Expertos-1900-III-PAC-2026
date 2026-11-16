@@ -45,4 +45,23 @@ public static class Errores
     public static readonly Error TipoRespuestaInvalido = new("encuestas.tipo_respuesta_invalido",
         "El tipo de respuesta indicado no existe.",
         TipoError.Validacion);
+
+    public static readonly Error YaParticipo = new("encuestas.ya_participo",
+        "Ya respondiste esta encuesta. Solo se permite una participación por persona.",
+        TipoError.Conflicto);
+
+    public static readonly Error VersionObsoleta = new("encuestas.version_obsoleta",
+        "La versión indicada no es la versión publicada vigente de esta encuesta.",
+        TipoError.Conflicto);
+
+    public static readonly Error EncuestaSinVersionPublicada = new("encuestas.sin_version_publicada",
+        "La encuesta no tiene una versión publicada para consultar o responder.",
+        TipoError.Conflicto);
+
+    public static readonly Error RespuestaInvalida = new("encuestas.respuesta_invalida",
+        "Las respuestas no cumplen las reglas de las preguntas (obligatorias, tipo u opciones).",
+        TipoError.Validacion);
+
+    public static Error RespuestaInvalidaDetalle(string detalle) =>
+        new("encuestas.respuesta_invalida", detalle, TipoError.Validacion);
 }
