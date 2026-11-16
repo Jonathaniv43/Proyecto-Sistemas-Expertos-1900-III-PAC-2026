@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Empresas;
+using Norvia.Infrastructure.Data;
 
 namespace Norvia.Infrastructure.Persistence.Repositorios.Empresas;
 
