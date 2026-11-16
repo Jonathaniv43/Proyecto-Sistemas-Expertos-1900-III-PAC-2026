@@ -23,13 +23,13 @@ public sealed class Escenario(NorviaApiFactory api)
 {
     public const string PasswordAdmin = "Admin#Pruebas2026";
 
-    public async Task<EmpresaDePrueba> CrearEmpresaAsync(string nombre)
+    public async Task<EmpresaDePrueba> CrearEmpresaAsync(string nombre, short? rubroId = null)
     {
         using var scope = api.Services.CreateScope();
         var hasher = scope.ServiceProvider.GetRequiredService<IHasherPassword>();
         var cifrador = scope.ServiceProvider.GetRequiredService<ICifradorEmpresaId>();
 
-        var empresa = new Empresa { RazonSocial = $"{nombre} S. de R.L.", RTN = RtnUnico(), Estado = EstadoEmpresa.Activa };
+        var empresa = new Empresa { RazonSocial = $"{nombre} S. de R.L.", RTN = RtnUnico(), Estado = EstadoEmpresa.Activa, RubroId = rubroId };
         var persona = new Persona { PrimerNombre = "Admin", PrimerApellido = nombre };
         var acceso = new Acceso { Email = $"admin.{Guid.NewGuid():N}@pruebas.hn", Verificado = true };
         acceso.PasswordHash = hasher.Hashear(acceso, PasswordAdmin);
@@ -66,6 +66,18 @@ public sealed class Escenario(NorviaApiFactory api)
             new { email = NorviaApiFactory.StaffEmail, password = NorviaApiFactory.StaffPassword });
         respuesta.EnsureSuccessStatusCode();
         return await ConToken(respuesta);
+    }
+
+    /// <summary>Agrega una persona con el rol indicado (HU-020) y abre su sesión en esa empresa.</summary>
+    public async Task<HttpClient> ClienteConRolAsync(EmpresaDePrueba empresa, string rolCodigo)
+    {
+        var email = $"{rolCodigo}.{Guid.NewGuid():N}@pruebas.hn";
+        var r = await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
+        {
+            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo, passwordTemporal = "Temporal#2026"
+        });
+        r.EnsureSuccessStatusCode();
+        return await ClienteEmpresaAsync(email, "Temporal#2026", empresa.IdEmpresaCifrado);
     }
 
     /// <summary>Agrega un colaborador con cuenta nueva usando la API (HU-020) y devuelve el id del vínculo.</summary>
