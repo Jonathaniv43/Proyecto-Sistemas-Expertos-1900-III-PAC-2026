@@ -3,4 +3,5 @@
   <Project Path="Norvia.Application/Norvia.Application.csproj" />
   <Project Path="Norvia.Domain/Norvia.Domain.csproj" />
   <Project Path="Norvia.Infrastructure/Norvia.Infrastructure.csproj" />
+  <Project Path="Norvia.Tests/Norvia.Tests.csproj" />
 </Solution>

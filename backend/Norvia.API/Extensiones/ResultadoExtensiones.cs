@@ -9,6 +9,12 @@ public static class ResultadoExtensiones
     public static IActionResult AHttp<T>(this Resultado<T> resultado, ControllerBase controller) =>
         resultado.EsExito ? controller.Ok(resultado.Valor) : Problema(resultado.Error!, controller);
 
+    /// <summary>Como <see cref="AHttp{T}"/>, pero responde 201 Created cuando el caso de uso crea un recurso.</summary>
+    public static IActionResult AHttpCreado<T>(this Resultado<T> resultado, ControllerBase controller) =>
+        resultado.EsExito
+            ? controller.StatusCode(StatusCodes.Status201Created, resultado.Valor)
+            : Problema(resultado.Error!, controller);
+
     public static IActionResult AHttp(this Resultado resultado, ControllerBase controller) =>
         resultado.EsExito ? controller.NoContent() : Problema(resultado.Error!, controller);
 

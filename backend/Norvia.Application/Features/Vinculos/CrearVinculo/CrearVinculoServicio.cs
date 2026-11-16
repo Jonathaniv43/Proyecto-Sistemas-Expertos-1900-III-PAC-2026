@@ -1,0 +1,33 @@
+using Norvia.Application.Common.CasosDeUso;
+using Norvia.Application.Common.Interfaces;
+using Norvia.Application.Common.Resultados;
+using Norvia.Application.Features.Vinculos.CrearVinculo.DTOs;
+
+namespace Norvia.Application.Features.Vinculos.CrearVinculo;
+
+/// <summary>
+/// Da acceso a la empresa de la sesión con el rol elegido (HU-020, RN-02, D5). Para una cuenta nueva
+/// el administrador indica la contraseña temporal.
+/// </summary>
+public sealed class CrearVinculoServicio(
+    ICrearVinculoRepositorio repositorio,
+    AltaDeVinculo alta,
+    IUnidadDeTrabajo unidadDeTrabajo) : IServicioCasoDeUso
+{
+    public async Task<Resultado<CrearVinculoResponseDto>> EjecutarAsync(CrearVinculoRequestDto request, CancellationToken ct)
+    {
+        var rol = await repositorio.BuscarRolAsync(request.RolCodigo.Trim(), ct);
+        if (rol is null) return Errores.RolInvalido;
+
+        var datos = new DatosPersonaAlta(request.Email, request.PrimerNombre, request.SegundoNombre,
+            request.PrimerApellido, request.SegundoApellido);
+        var preparado = await alta.PrepararAsync(datos, rol.Id, request.PasswordTemporal, generarSiFalta: false, ct);
+        if (!preparado.EsExito) return preparado.Error!;
+
+        await unidadDeTrabajo.GuardarCambiosAsync(ct);
+
+        var (vinculo, persona, acceso, cuentaNueva, _) = preparado.Valor;
+        return new CrearVinculoResponseDto(vinculo.Id, persona.Id, acceso.Email, persona.NombreCompleto, rol.Codigo,
+            vinculo.Estado, vinculo.CreadoEn, cuentaNueva);
+    }
+}

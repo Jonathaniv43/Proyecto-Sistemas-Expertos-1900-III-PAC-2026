@@ -15,8 +15,11 @@ public sealed class RegistrarEmpresaRepositorio(NorviaDbContext db) : IRegistrar
     public Task<bool> ExisteEmailAsync(string emailNormalizado, CancellationToken cancellationToken) =>
         db.Acceso.AnyAsync(a => a.Email == emailNormalizado, cancellationToken);
 
-    public Task<bool> ExisteDocumentoAsync(TipoDocumentoIdentidad tipo, string numeroDocumento, CancellationToken cancellationToken) =>
-        db.Persona.AnyAsync(p => p.TipoDocumento == tipo && p.NumeroDocumento == numeroDocumento, cancellationToken);
+    public Task<bool> ExisteDocumentoAsync(TipoDocumentoIdentidad tipoDocumento, string numeroDocumento, CancellationToken cancellationToken) =>
+        db.Persona.AnyAsync(p => p.TipoDocumento == tipoDocumento && p.NumeroDocumento == numeroDocumento, cancellationToken);
+
+    public Task<bool> TipoDocumentoIdentidadExisteAsync(string codigo, CancellationToken cancellationToken) =>
+        db.TipoDocumentoIdentidad.AnyAsync(t => t.Codigo == codigo, cancellationToken);
 
     public Task<short?> BuscarRubroIdActivoAsync(string codigo, CancellationToken cancellationToken) =>
         db.Rubro
