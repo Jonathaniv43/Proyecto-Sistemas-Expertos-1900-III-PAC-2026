@@ -29,6 +29,11 @@ public static class CatalogoPermisos
         // HU-020: agregar personas a la empresa.
         Empresa("vinculo.crear", "Agregar persona a la empresa", "POST", "api/vinculos", "admin_empresa"),
 
+        // HU-021: administrar el acceso de las personas.
+        Empresa("vinculo.listar", "Listar personas con acceso", "GET", "api/vinculos", "admin_empresa"),
+        Empresa("vinculo.leer", "Ver el acceso de una persona", "GET", "api/vinculos/{id}", "admin_empresa"),
+        Empresa("vinculo.actualizar", "Cambiar rol o estado de un acceso", "PATCH", "api/vinculos/{id}", "admin_empresa"),
+
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),
         Plataforma("catalogo.rubro.crear", "Crear rubro", "POST", "api/rubros", "admin_plataforma"),
