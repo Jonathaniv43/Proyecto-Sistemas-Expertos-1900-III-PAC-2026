@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Norvia.Application.Common.Interfaces;
 using Sesion = Norvia.Domain.Enums.TipoSesion;
 
@@ -10,9 +12,19 @@ namespace Norvia.API.Seguridad;
 public sealed class TenantActual : ITenantActual
 {
     private readonly Lazy<(Guid? Empresa, Guid? Vinculo, Sesion? Tipo)> _datos;
+    private readonly Lazy<Guid?> _acceso;
 
     public TenantActual(IHttpContextAccessor accesor, ICifradorEmpresaId cifrador)
     {
+        _acceso = new(() =>
+        {
+            var usuario = accesor.HttpContext?.User;
+            if (usuario?.Identity?.IsAuthenticated != true)
+                return null;
+            var sub = (usuario.FindFirst(JwtRegisteredClaimNames.Sub) ?? usuario.FindFirst(ClaimTypes.NameIdentifier))?.Value;
+            return Guid.TryParse(sub, out var id) ? id : null;
+        });
+
         _datos = new(() =>
         {
             var usuario = accesor.HttpContext?.User;
@@ -39,5 +51,6 @@ public sealed class TenantActual : ITenantActual
 
     public Guid? EmpresaId => _datos.Value.Empresa;
     public Guid? VinculoEmpresaId => _datos.Value.Vinculo;
+    public Guid? AccesoId => _acceso.Value;
     public Sesion? TipoSesion => _datos.Value.Tipo;
 }
