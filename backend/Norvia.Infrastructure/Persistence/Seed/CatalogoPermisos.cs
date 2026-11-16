@@ -38,6 +38,10 @@ public static class CatalogoPermisos
         Empresa("vinculo.leer", "Ver el acceso de una persona", "GET", "api/vinculos/{id}", "admin_empresa"),
         Empresa("vinculo.actualizar", "Cambiar rol o estado de un acceso", "PATCH", "api/vinculos/{id}", "admin_empresa"),
 
+        // HU-029: elegir categorías de riesgo para una encuesta.
+        Empresa("encuesta.categoria.listar", "Ver categorías de riesgo disponibles", "GET", "api/encuestas/categorias-disponibles",
+            "responsable_sst"),
+
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),
         Plataforma("catalogo.rubro.crear", "Crear rubro", "POST", "api/rubros", "admin_plataforma"),
