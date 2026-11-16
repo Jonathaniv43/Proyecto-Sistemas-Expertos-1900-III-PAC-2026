@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
-using Norvia.Domain.Enums;
+using Norvia.Domain.Entities.Catalogos;
 using Norvia.Tests.Infraestructura;
 
 namespace Norvia.Tests.Aislamiento;

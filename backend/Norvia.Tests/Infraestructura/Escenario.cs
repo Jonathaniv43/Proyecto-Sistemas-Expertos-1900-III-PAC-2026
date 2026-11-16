@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Empresas;
+using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Tests.Infraestructura;

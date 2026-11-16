@@ -7,5 +7,6 @@ public enum TipoError
     NoAutorizado,   // 401
     Prohibido,      // 403
     NoEncontrado,   // 404
-    Conflicto       // 409
+    Conflicto,      // 409
+    Servidor        // 500
 }

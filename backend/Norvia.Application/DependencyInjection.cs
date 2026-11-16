@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.CasosDeUso;
@@ -9,6 +10,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        ValidatorOptions.Global.LanguageManager.Culture = new CultureInfo("es");
+
         var ensamblado = typeof(DependencyInjection).Assembly;
 
         services.AddValidatorsFromAssembly(ensamblado);

@@ -34,6 +34,7 @@ public static class ResultadoExtensiones
         TipoError.Prohibido => StatusCodes.Status403Forbidden,
         TipoError.NoEncontrado => StatusCodes.Status404NotFound,
         TipoError.Conflicto => StatusCodes.Status409Conflict,
+        TipoError.Servidor => StatusCodes.Status500InternalServerError,
         _ => StatusCodes.Status500InternalServerError
     };
 

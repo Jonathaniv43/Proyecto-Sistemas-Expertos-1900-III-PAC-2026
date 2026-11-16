@@ -63,6 +63,10 @@ docs/
 # VS Code
 .vscode/
 
+# Cursor (reglas y config del editor; solo local)
+.cursor/
+**/.cursor/
+
 # Test results
 TestResults/
 [Tt]est[Rr]esult*/
@@ -169,6 +173,10 @@ docker-compose.local.yml
 .vs/
 .vscode/
 .idea/
+
+# Cursor (reglas y config del editor; solo local)
+.cursor/
+**/.cursor/
 
 
 # ============================================

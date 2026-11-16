@@ -4,9 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Infrastructure.Data;
 using Norvia.Infrastructure.Opciones;
+using Norvia.Application.Common.Correo;
 using Norvia.Infrastructure.Persistence;
 using Norvia.Infrastructure.Persistence.Interceptores;
 using Norvia.Infrastructure.Persistence.Seed;
+using Norvia.Infrastructure.Correo;
 using Norvia.Infrastructure.Seguridad;
 using Norvia.Infrastructure.Tiempo;
 
@@ -45,6 +47,12 @@ public static class DependencyInjection
         services.AddSingleton<ICifradorEmpresaId, CifradorEmpresaId>();
         services.AddSingleton<ITokenServicio, JwtTokenServicio>();
         services.AddSingleton<IHasherPassword, HasherPassword>();
+        services.AddSingleton<IGeneradorContrasenaTemporal, GeneradorContrasenaTemporal>();
+
+        services.AddOptions<CorreoOpciones>()
+            .Bind(configuration.GetSection(CorreoOpciones.Seccion));
+        services.AddScoped<IPlantillasCorreo, PlantillasCorreoDb>();
+        services.AddSingleton<IEnvioCorreo, SmtpEnvioCorreo>();
 
         // Repositorios por slice: I<CasoDeUso>Repositorio → <CasoDeUso>Repositorio.
         var repositorios = typeof(DependencyInjection).Assembly.GetTypes()
@@ -58,6 +66,8 @@ public static class DependencyInjection
 
         services.AddScoped<StaffSeeder>();
         services.AddScoped<PermisosSeeder>();
+        services.AddScoped<PlantillasCorreoSeeder>();
+        services.AddScoped<TiposDocumentoIdentidadSeeder>();
 
         return services;
     }
