@@ -44,6 +44,9 @@ public static class CatalogoPermisos
         Empresa("empresa.perfil.actualizar", "Actualizar perfil de la empresa", "PATCH", "api/empresas/perfil",
             "admin_empresa"),
 
+        // HU-029: elegir categorías de riesgo para una encuesta.
+        Empresa("encuesta.categoria.listar", "Ver categorías de riesgo disponibles", "GET", "api/encuestas/categorias-disponibles",
+            "responsable_sst"),
 
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),
