@@ -22,6 +22,9 @@ public static class DependencyInjection
         // Piezas compartidas solo por los slices del módulo Auth.
         services.AddScoped<EmisorSesion>();
 
+        // Pieza compartida solo por los slices de alta del módulo Vinculos (HU-020, HU-115).
+        services.AddScoped<Features.Vinculos.AltaDeVinculo>();
+
         return services;
     }
 }

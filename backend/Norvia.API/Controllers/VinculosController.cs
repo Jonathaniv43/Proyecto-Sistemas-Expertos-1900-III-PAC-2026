@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Vinculos.ActualizarVinculo;
 using Norvia.Application.Features.Vinculos.ActualizarVinculo.DTOs;
+using Norvia.Application.Features.Vinculos.CrearEncuestado;
+using Norvia.Application.Features.Vinculos.CrearEncuestado.DTOs;
+using Norvia.Application.Features.Vinculos.CrearEncuestadosLote;
+using Norvia.Application.Features.Vinculos.CrearEncuestadosLote.DTOs;
 using Norvia.Application.Features.Vinculos.CrearVinculo;
 using Norvia.Application.Features.Vinculos.CrearVinculo.DTOs;
 using Norvia.Application.Features.Vinculos.DTOs;
@@ -50,4 +54,23 @@ public sealed class VinculosController : ControllerBase
         Guid id, ActualizarVinculoRequestDto request, [FromServices] ActualizarVinculoServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-115: alta individual de un encuestado (rol fijo).</summary>
+    [HttpPost("encuestados")]
+    [ProducesResponseType(typeof(CrearEncuestadoResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CrearEncuestado(
+        CrearEncuestadoRequestDto request, [FromServices] CrearEncuestadoServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-115: alta de encuestados por lote; informa las filas con problemas y sigue con las demás.</summary>
+    [HttpPost("encuestados/lote")]
+    [ProducesResponseType(typeof(CrearEncuestadosLoteResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CrearEncuestadosLote(
+        CrearEncuestadosLoteRequestDto request, [FromServices] CrearEncuestadosLoteServicio servicio,
+        CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(request, cancellationToken));
 }
