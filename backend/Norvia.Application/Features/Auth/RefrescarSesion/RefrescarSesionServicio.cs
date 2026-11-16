@@ -38,7 +38,7 @@ public sealed class RefrescarSesionServicio(
             return Errores.SesionInvalida;
         }
 
-        var (nueva, respuesta) = emisor.Emitir(sesion, ahora);
+        var (nueva, respuesta) = emisor.Emitir(sesion, ahora, fila.Acceso.DebeCambiarPassword);
         repo.AgregarRefresh(nueva);
         await uow.GuardarCambiosAsync(cancellationToken);   // borrar + crear: una sola transacción
         return respuesta;

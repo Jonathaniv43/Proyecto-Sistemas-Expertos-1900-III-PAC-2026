@@ -29,6 +29,10 @@ public static class CatalogoPermisos
         // HU-020: agregar personas a la empresa.
         Empresa("vinculo.crear", "Agregar persona a la empresa", "POST", "api/vinculos", "admin_empresa"),
 
+        // HU-115: cuentas de encuestados (individual y por lote).
+        Empresa("vinculo.encuestado.crear", "Agregar encuestado", "POST", "api/vinculos/encuestados", "admin_empresa"),
+        Empresa("vinculo.encuestado.lote", "Agregar encuestados por lote", "POST", "api/vinculos/encuestados/lote", "admin_empresa"),
+
         // HU-021: administrar el acceso de las personas.
         Empresa("vinculo.listar", "Listar personas con acceso", "GET", "api/vinculos", "admin_empresa"),
         Empresa("vinculo.leer", "Ver el acceso de una persona", "GET", "api/vinculos/{id}", "admin_empresa"),
