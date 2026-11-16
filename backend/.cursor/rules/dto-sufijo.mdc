@@ -1,0 +1,30 @@
+---
+description: DTOs con sufijo Dto; DTOs/ y Validators/ por caso de uso (slice)
+alwaysApply: true
+---
+
+# DTOs y organización del slice
+
+Fuente de verdad del equipo: `Proyecto Docs/.../16-arquitectura-backend-frontend.md` §3.
+
+## Nombres (obligatorio)
+
+| Rol | Patrón | Ejemplo |
+|-----|--------|---------|
+| Entrada | `<Caso>RequestDto` | `LoginPlataformaRequestDto` |
+| Salida | `<Algo>ResponseDto` | `SesionResponseDto` |
+
+No usar `Request` / `Response` sin el sufijo `Dto`.
+
+## Dónde (obligatorio)
+
+- `Features/<Modulo>/<CasoDeUso>/DTOs/` — `*RequestDto` (y response propio del caso si aplica).
+- `Features/<Modulo>/<CasoDeUso>/Validators/` — `AbstractValidator<*RequestDto>`.
+- `Features/<Modulo>/<CasoDeUso>/` — servicio + `I*Repositorio`.
+- `*ResponseDto` compartido por varios slices del mismo módulo → `Features/<Modulo>/DTOs/` (p. ej. `SesionResponseDto`).
+- **Prohibido** carpeta `Interfaces/` en el módulo; la interfaz del repo vive en el slice.
+- Controllers solo hablan `*Dto`, nunca entidades de `Norvia.Domain`.
+
+## No son DTO (no forzar sufijo)
+
+Entidades, enums, `Error` / `Resultado`, `SesionToken`, `ContextoAccesoRecurso` (entrada interna del slice `PermitirAccesoRecurso/`, no contrato HTTP).

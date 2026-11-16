@@ -50,6 +50,7 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<OpcionPregunta> OpcionPregunta => Set<OpcionPregunta>();
     public DbSet<PlantillaTarea> PlantillaTarea => Set<PlantillaTarea>();
     public DbSet<PlantillaDocumento> PlantillaDocumento => Set<PlantillaDocumento>();
+    public DbSet<PlantillaCorreo> PlantillaCorreo => Set<PlantillaCorreo>();
 
     // Riesgos
     public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();

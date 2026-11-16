@@ -18,6 +18,7 @@ public class PersonaConfiguration : IEntityTypeConfiguration<Persona>
         b.Property(p => p.PrimerApellido).HasMaxLength(80).IsRequired();
         b.Property(p => p.SegundoApellido).HasMaxLength(80);
         b.EnumComoTexto(p => p.TipoDocumento, 15);
+        b.Property(p => p.TipoDocumentoEspecificacion).HasMaxLength(80);
         b.Property(p => p.NumeroDocumento).HasMaxLength(50);
         b.Property(p => p.Telefono).HasMaxLength(30);
         b.Property(p => p.CreadoEn).FechaDelServidor();

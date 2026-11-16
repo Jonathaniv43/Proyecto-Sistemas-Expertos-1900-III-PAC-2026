@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa;
+using Norvia.Application.Features.Empresas.RegistrarEmpresa.DTOs;
 
 namespace Norvia.API.Controllers;
 
@@ -10,8 +12,10 @@ namespace Norvia.API.Controllers;
 public sealed class EmpresasController : ControllerBase
 {
     [HttpPost]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(RegistrarEmpresaResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Registrar(
-        RegistrarEmpresaRequest request,
+        RegistrarEmpresaRequestDto request,
         [FromServices] RegistrarEmpresaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);

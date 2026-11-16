@@ -1,0 +1,30 @@
+---
+description: Norvia es Code First — esquema, datos de catálogo y cambios van por código C# / migraciones EF, no por SQL manual en la BD
+alwaysApply: true
+---
+
+# Code First (obligatorio)
+
+Norvia usa **EF Core Code First**. La fuente de verdad es el **código** (entidades, configuraciones, migraciones, seeders), no scripts SQL sueltos ni cambios a mano en PostgreSQL.
+
+## Hacer
+
+- Cambiar modelo en `Norvia.Domain` + `Configurations` en Infrastructure.
+- Generar/aplicar migraciones: `dotnet ef migrations add …` y `dotnet ef database update`.
+- Datos fijos de catálogo: `HasData` / migraciones / seeders en C# (`CatalogoBase`, `PermisosSeeder`, `StaffSeeder`).
+- Credenciales y lógica de negocio (hash, cifrado, validación): solo vía API o seeders, nunca inserts crudos en SQL.
+
+## No hacer
+
+- No editar tablas/columnas/constraints directamente en pgAdmin/psql “para arreglar” el esquema.
+- No dejar el modelo C# y la BD desalineados: si hace falta SQL excepcional en una migración, va **dentro** del archivo de migración EF, versionado en el repo.
+- No inventar filas de usuarios/staff en SQL sin hash: usar seeders o endpoints.
+
+## Flujo típico
+
+1. Entidad / FK / índice en código.
+2. Migración EF.
+3. `database update`.
+4. Seeder o API para datos de prueba.
+
+Si la BD quedó inconsistente en **dev**, preferir migraciones + reseed o reset documentado; no “parches” SQL permanentes fuera del Code First.
