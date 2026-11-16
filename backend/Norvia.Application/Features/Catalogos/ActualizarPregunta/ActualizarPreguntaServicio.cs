@@ -1,8 +1,8 @@
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
-using Norvia.Application.Features.Catalogos.DTOs;
 using Norvia.Application.Features.Catalogos.ActualizarPregunta.DTOs;
+using Norvia.Application.Features.Catalogos.DTOs;
 using Norvia.Domain.Entities.Catalogos;
 
 namespace Norvia.Application.Features.Catalogos.ActualizarPregunta;
@@ -17,7 +17,6 @@ public sealed class ActualizarPreguntaServicio(
         var pregunta = await repositorio.BuscarAsync(id, ct);
         if (pregunta is null) return Errores.PreguntaNoEncontrada;
 
-        // Las referencias solo se exigen activas si cambian; así se puede editar algo que ya apuntaba a un inactivo.
         var categoriaId = request.CategoriaRiesgoId ?? pregunta.CategoriaRiesgoId;
         var cambiaCategoria = categoriaId != pregunta.CategoriaRiesgoId;
         if (cambiaCategoria && !await repositorio.CategoriaActivaExisteAsync(categoriaId, ct))
@@ -44,8 +43,11 @@ public sealed class ActualizarPreguntaServicio(
 
         if (request.CambiaRespuesta)
         {
-            // El validador garantiza que vienen el tipo y las opciones.
-            pregunta.TipoRespuesta = request.TipoRespuesta!.Value;
+            var codigo = TipoRespuestaPreguntaCatalogo.NormalizarCodigo(request.TipoRespuestaCodigo);
+            var tipoId = await repositorio.BuscarTipoIdPorCodigoAsync(codigo, ct);
+            if (tipoId is null) return Errores.TipoRespuestaInvalido;
+
+            pregunta.TipoRespuestaPreguntaId = tipoId.Value;
             pregunta.PeligroId = request.PeligroId;
             repositorio.ReemplazarOpciones(pregunta, request.Opciones!.Select(o => new OpcionPregunta
             {

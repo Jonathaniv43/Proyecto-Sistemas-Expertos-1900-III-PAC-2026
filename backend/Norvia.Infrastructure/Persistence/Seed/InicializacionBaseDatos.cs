@@ -11,6 +11,7 @@ public static class InicializacionBaseDatos
         await scope.ServiceProvider.GetRequiredService<PermisosSeeder>().EjecutarAsync(cancellationToken);
         await scope.ServiceProvider.GetRequiredService<PlantillasCorreoSeeder>().EjecutarAsync(cancellationToken);
         await scope.ServiceProvider.GetRequiredService<TiposDocumentoIdentidadSeeder>().EjecutarAsync(cancellationToken);
+        await scope.ServiceProvider.GetRequiredService<TiposRespuestaPreguntaSeeder>().EjecutarAsync(cancellationToken);
         await scope.ServiceProvider.GetRequiredService<StaffSeeder>().EjecutarAsync(cancellationToken);
     }
 }

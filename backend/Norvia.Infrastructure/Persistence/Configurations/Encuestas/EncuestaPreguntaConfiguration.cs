@@ -12,7 +12,6 @@ public class EncuestaPreguntaConfiguration : IEntityTypeConfiguration<EncuestaPr
         b.TablaDeEmpresa();
 
         b.Property(p => p.Texto).HasMaxLength(500).IsRequired();
-        b.EnumComoTexto(p => p.TipoRespuesta, 25);
         b.Property(p => p.Obligatoria).PorDefectoTrue();
 
         b.HasOne(p => p.Empresa).WithMany().HasForeignKey(p => p.EmpresaId);
@@ -20,12 +19,16 @@ public class EncuestaPreguntaConfiguration : IEntityTypeConfiguration<EncuestaPr
             .WithMany(v => v.Preguntas)
             .HasForeignKey(p => new { p.EmpresaId, p.EncuestaVersionId })
             .HasPrincipalKey(v => new { v.EmpresaId, v.Id });
+        b.HasOne(p => p.EncuestaSeccion)
+            .WithMany(s => s.Preguntas)
+            .HasForeignKey(p => p.EncuestaSeccionId)
+            .IsRequired(false);
+        b.HasOne(p => p.CategoriaRiesgo).WithMany().HasForeignKey(p => p.CategoriaRiesgoId);
         b.HasOne(p => p.PreguntaExploratoria).WithMany().HasForeignKey(p => p.PreguntaExploratoriaId);
+        b.HasOne(p => p.TipoRespuestaPregunta).WithMany().HasForeignKey(p => p.TipoRespuestaPreguntaId);
         b.HasOne(p => p.Peligro).WithMany().HasForeignKey(p => p.PeligroId);
 
         b.HasIndex(p => new { p.EncuestaVersionId, p.Orden }).IsUnique();
         b.HasAlternateKey(p => new { p.EncuestaVersionId, p.Id });
-
-        b.Check("RespuestaBreveSinPeligro", "\"TipoRespuesta\" <> 'respuesta_breve' OR \"PeligroId\" IS NULL");
     }
 }

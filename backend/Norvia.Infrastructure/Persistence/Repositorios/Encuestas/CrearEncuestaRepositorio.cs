@@ -17,6 +17,8 @@ public sealed class CrearEncuestaRepositorio(NorviaDbContext db) : ICrearEncuest
             .Where(c => c.RubroId == rubroId && c.Activa && categoriaIds.Contains(c.Id))
             .Include(c => c.Preguntas.Where(p => p.Activa))
                 .ThenInclude(p => p.Opciones)
+            .Include(c => c.Preguntas.Where(p => p.Activa))
+                .ThenInclude(p => p.TipoRespuestaPregunta)
             .AsSplitQuery()
             .ToListAsync(ct);
 

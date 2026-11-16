@@ -760,24 +760,19 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<string>("TipoRespuesta")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
+                    b.Property<Guid>("TipoRespuestaPreguntaId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PeligroId");
 
+                    b.HasIndex("TipoRespuestaPreguntaId");
+
                     b.HasIndex("CategoriaRiesgoId", "Orden")
                         .IsUnique();
 
-                    b.ToTable("PreguntaExploratoria", t =>
-                        {
-                            t.HasCheckConstraint("CK_PreguntaExploratoria_RespuestaBreveSinPeligro", "\"TipoRespuesta\" <> 'respuesta_breve' OR \"PeligroId\" IS NULL");
-
-                            t.HasCheckConstraint("CK_PreguntaExploratoria_TipoRespuesta", "\"TipoRespuesta\" IN ('respuesta_breve', 'seleccion_unica', 'seleccion_multiple')");
-                        });
+                    b.ToTable("PreguntaExploratoria");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.Rubro", b =>
@@ -862,6 +857,45 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("TipoDocumentoIdentidad", (string)null);
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.TipoRespuestaPreguntaCatalogo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Activo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("InstruccionUi")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<short?>("MaxCaracteresRespuesta")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<bool>("RequiereOpciones")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique();
+
+                    b.ToTable("TipoRespuestaPregunta", (string)null);
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
@@ -1084,7 +1118,13 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("CategoriaRiesgoId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("EncuestaSeccionId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("EncuestaVersionId")
@@ -1109,30 +1149,63 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<string>("TipoRespuesta")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
+                    b.Property<Guid>("TipoRespuestaPreguntaId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasAlternateKey("EncuestaVersionId", "Id");
 
+                    b.HasIndex("CategoriaRiesgoId");
+
+                    b.HasIndex("EncuestaSeccionId");
+
                     b.HasIndex("PeligroId");
 
                     b.HasIndex("PreguntaExploratoriaId");
+
+                    b.HasIndex("TipoRespuestaPreguntaId");
 
                     b.HasIndex("EmpresaId", "EncuestaVersionId");
 
                     b.HasIndex("EncuestaVersionId", "Orden")
                         .IsUnique();
 
-                    b.ToTable("EncuestaPregunta", t =>
-                        {
-                            t.HasCheckConstraint("CK_EncuestaPregunta_RespuestaBreveSinPeligro", "\"TipoRespuesta\" <> 'respuesta_breve' OR \"PeligroId\" IS NULL");
+                    b.ToTable("EncuestaPregunta");
+                });
 
-                            t.HasCheckConstraint("CK_EncuestaPregunta_TipoRespuesta", "\"TipoRespuesta\" IN ('respuesta_breve', 'seleccion_unica', 'seleccion_multiple')");
-                        });
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaSeccion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EncuestaVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<short>("Orden")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EmpresaId", "Id");
+
+                    b.HasAlternateKey("EncuestaVersionId", "Id");
+
+                    b.HasIndex("EmpresaId", "EncuestaVersionId");
+
+                    b.HasIndex("EncuestaVersionId", "Orden")
+                        .IsUnique();
+
+                    b.ToTable("EncuestaSeccion");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaVersion", b =>
@@ -1561,9 +1634,17 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasForeignKey("PeligroId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Norvia.Domain.Entities.Catalogos.TipoRespuestaPreguntaCatalogo", "TipoRespuestaPregunta")
+                        .WithMany()
+                        .HasForeignKey("TipoRespuestaPreguntaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("CategoriaRiesgo");
 
                     b.Navigation("Peligro");
+
+                    b.Navigation("TipoRespuestaPregunta");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
@@ -1664,11 +1745,21 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaPregunta", b =>
                 {
+                    b.HasOne("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", "CategoriaRiesgo")
+                        .WithMany()
+                        .HasForeignKey("CategoriaRiesgoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaSeccion", "EncuestaSeccion")
+                        .WithMany("Preguntas")
+                        .HasForeignKey("EncuestaSeccionId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Norvia.Domain.Entities.Catalogos.Peligro", "Peligro")
                         .WithMany()
@@ -1680,8 +1771,44 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasForeignKey("PreguntaExploratoriaId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Norvia.Domain.Entities.Catalogos.TipoRespuestaPreguntaCatalogo", "TipoRespuestaPregunta")
+                        .WithMany()
+                        .HasForeignKey("TipoRespuestaPreguntaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaVersion", "EncuestaVersion")
                         .WithMany("Preguntas")
+                        .HasForeignKey("EmpresaId", "EncuestaVersionId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CategoriaRiesgo");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("EncuestaSeccion");
+
+                    b.Navigation("EncuestaVersion");
+
+                    b.Navigation("Peligro");
+
+                    b.Navigation("PreguntaExploratoria");
+
+                    b.Navigation("TipoRespuestaPregunta");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaSeccion", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaVersion", "EncuestaVersion")
+                        .WithMany("Secciones")
                         .HasForeignKey("EmpresaId", "EncuestaVersionId")
                         .HasPrincipalKey("EmpresaId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1690,10 +1817,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("EncuestaVersion");
-
-                    b.Navigation("Peligro");
-
-                    b.Navigation("PreguntaExploratoria");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaVersion", b =>
@@ -1880,11 +2003,18 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Opciones");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaSeccion", b =>
+                {
+                    b.Navigation("Preguntas");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.EncuestaVersion", b =>
                 {
                     b.Navigation("Categorias");
 
                     b.Navigation("Preguntas");
+
+                    b.Navigation("Secciones");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Riesgos.RiesgoEmpresa", b =>

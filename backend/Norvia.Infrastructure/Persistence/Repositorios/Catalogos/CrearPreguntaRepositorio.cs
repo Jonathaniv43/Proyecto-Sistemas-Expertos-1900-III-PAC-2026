@@ -18,5 +18,11 @@ public sealed class CrearPreguntaRepositorio(NorviaDbContext db) : ICrearPregunt
         await db.PreguntaExploratoria.Where(p => p.CategoriaRiesgoId == categoriaRiesgoId)
             .MaxAsync(p => (short?)p.Orden, ct) ?? 0;
 
+    public Task<Guid?> BuscarTipoIdPorCodigoAsync(string codigo, CancellationToken ct) =>
+        db.TipoRespuestaPregunta.AsNoTracking()
+            .Where(t => t.Activo && t.Codigo == codigo)
+            .Select(t => (Guid?)t.Id)
+            .FirstOrDefaultAsync(ct);
+
     public void Agregar(PreguntaExploratoria pregunta) => db.PreguntaExploratoria.Add(pregunta);
 }

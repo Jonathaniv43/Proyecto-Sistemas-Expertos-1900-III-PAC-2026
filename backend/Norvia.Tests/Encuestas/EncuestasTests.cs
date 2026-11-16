@@ -46,9 +46,16 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         }
 
         var detalle = await Escenario.Json(await sst.GetAsync($"/api/encuestas/{encuestaId}"));
-        var preguntas = detalle.GetProperty("versionBorrador").GetProperty("preguntas").EnumerateArray().ToList();
+        var borrador = detalle.GetProperty("versionBorrador");
+        var secciones = borrador.GetProperty("secciones").EnumerateArray().ToList();
+        Assert.Single(secciones);
+        Assert.False(string.IsNullOrWhiteSpace(secciones[0].GetProperty("titulo").GetString()));
+        var preguntas = borrador.GetProperty("preguntas").EnumerateArray().ToList();
         Assert.Equal(["¿Levantas cargas pesadas?", "Observaciones"],
             preguntas.Select(p => p.GetProperty("texto").GetString()));
+        Assert.False(string.IsNullOrEmpty(preguntas[0].GetProperty("instruccionUi").GetString()));
+        Assert.Equal("seleccion_unica", preguntas[0].GetProperty("tipoRespuestaCodigo").GetString());
+        Assert.Equal(secciones[0].GetProperty("id").GetGuid(), preguntas[0].GetProperty("seccionId").GetGuid());
     }
 
     [Fact]
@@ -103,13 +110,14 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         {
             titulo = "Encuesta Editada v1",
             instrucciones = "Instrucciones v1",
+            secciones = Array.Empty<object>(),
             preguntas = new object[]
             {
                 new
                 {
                     id = preguntaCopiadaId,
                     texto = "¿Manipulas cargas mayores a 20 kg?",
-                    tipoRespuesta = "seleccion_unica",
+                    tipoRespuestaCodigo = "seleccion_unica",
                     obligatoria = true,
                     peligroId,
                     orden = 1,
@@ -123,7 +131,7 @@ public sealed class EncuestasTests(NorviaApiFactory api)
                 {
                     id = (Guid?)null,
                     texto = "Pregunta personalizada",
-                    tipoRespuesta = "respuesta_breve",
+                    tipoRespuestaCodigo = "respuesta_breve",
                     obligatoria = false,
                     peligroId = (Guid?)null,
                     orden = 2,
@@ -147,13 +155,14 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         var edicionV2 = await sst.PutAsJsonAsync($"/api/encuestas/{encuestaId}/borrador", new
         {
             instrucciones = "Instrucciones v2",
+            secciones = Array.Empty<object>(),
             preguntas = new object[]
             {
                 new
                 {
                     id = (Guid?)null,
                     texto = "Nueva pregunta v2",
-                    tipoRespuesta = "respuesta_breve",
+                    tipoRespuestaCodigo = "respuesta_breve",
                     obligatoria = true,
                     peligroId = (Guid?)null,
                     orden = 1,
@@ -213,9 +222,10 @@ public sealed class EncuestasTests(NorviaApiFactory api)
 
         var rEditar = await otroSst.PutAsJsonAsync($"/api/encuestas/{encuestaId}/borrador", new
         {
+            secciones = Array.Empty<object>(),
             preguntas = new object[]
             {
-                new { texto = "Intento ajeno", tipoRespuesta = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
+                new { texto = "Intento ajeno", tipoRespuestaCodigo = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
             }
         });
         Assert.Equal(HttpStatusCode.Forbidden, rEditar.StatusCode);
@@ -248,9 +258,10 @@ public sealed class EncuestasTests(NorviaApiFactory api)
 
         var editar = await sst.PutAsJsonAsync($"/api/encuestas/{encuestaId}/borrador", new
         {
+            secciones = Array.Empty<object>(),
             preguntas = new object[]
             {
-                new { texto = "Cambio tardío", tipoRespuesta = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
+                new { texto = "Cambio tardío", tipoRespuestaCodigo = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
             }
         });
         Assert.Equal(HttpStatusCode.Conflict, editar.StatusCode);
@@ -261,15 +272,12 @@ public sealed class EncuestasTests(NorviaApiFactory api)
     }
 
     [Theory]
-    [InlineData("admin_empresa")]
     [InlineData("colaborador")]
     [InlineData("encuestado")]
     public async Task Otros_roles_no_pueden_crear_ni_listar_encuestas(string rol)
     {
         var empresa = await _escenario.CrearEmpresaAsync("Roles", await CrearRubroAsync());
-        var cliente = rol == "admin_empresa"
-            ? empresa.Cliente
-            : await _escenario.ClienteConRolAsync(empresa, rol);
+        var cliente = await _escenario.ClienteConRolAsync(empresa, rol);
 
         Assert.Equal(HttpStatusCode.Forbidden, (await cliente.GetAsync("/api/encuestas")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await cliente.PostAsJsonAsync("/api/encuestas", new
@@ -277,6 +285,22 @@ public sealed class EncuestasTests(NorviaApiFactory api)
             titulo = "No autorizado",
             categoriaRiesgoIds = new[] { Guid.NewGuid() }
         })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Admin_empresa_puede_listar_y_ver_tipos_respuesta()
+    {
+        var rubro = await CrearRubroAsync();
+        var empresa = await _escenario.CrearEmpresaAsync("AdminEnc", rubro);
+        var admin = empresa.Cliente;
+
+        Assert.Equal(HttpStatusCode.OK, (await admin.GetAsync("/api/encuestas")).StatusCode);
+
+        var tipos = await admin.GetAsync("/api/encuestas/tipos-respuesta");
+        Assert.Equal(HttpStatusCode.OK, tipos.StatusCode);
+        var lista = (await Escenario.Json(tipos)).EnumerateArray().ToList();
+        Assert.Contains(lista, t => t.GetProperty("codigo").GetString() == "respuesta_breve");
+        Assert.False(string.IsNullOrEmpty(lista[0].GetProperty("instruccionUi").GetString()));
     }
 
     // ---------- Helpers de catálogo ----------
@@ -293,6 +317,7 @@ public sealed class EncuestasTests(NorviaApiFactory api)
     private async Task<(Guid CategoriaId, Guid PreguntaActivaId, Guid PeligroId)> CrearCatalogoAsync(short rubroId)
     {
         await using var db = api.NuevoContexto(empresaId: null);
+        var tipos = await AsegurarTiposRespuestaAsync(db);
         var peligro = new Peligro
         {
             Codigo = $"pel_{Guid.NewGuid():N}"[..20],
@@ -304,7 +329,7 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         {
             CategoriaRiesgo = categoria,
             Texto = "¿Levantas cargas pesadas?",
-            TipoRespuesta = TipoRespuestaPregunta.SeleccionUnica,
+            TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoSeleccionUnica],
             Peligro = peligro,
             Orden = 1
         };
@@ -315,7 +340,7 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         {
             CategoriaRiesgo = categoria,
             Texto = "Observaciones",
-            TipoRespuesta = TipoRespuestaPregunta.RespuestaBreve,
+            TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve],
             Obligatoria = false,
             Orden = 2
         };
@@ -323,7 +348,7 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         {
             CategoriaRiesgo = categoria,
             Texto = "Inactiva",
-            TipoRespuesta = TipoRespuestaPregunta.RespuestaBreve,
+            TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve],
             Activa = false,
             Orden = 3
         };
@@ -331,5 +356,42 @@ public sealed class EncuestasTests(NorviaApiFactory api)
         db.AddRange(peligro, categoria, p1, p2, pInactiva);
         await db.SaveChangesAsync();
         return (categoria.Id, p1.Id, peligro.Id);
+    }
+
+    private static async Task<Dictionary<string, Guid>> AsegurarTiposRespuestaAsync(Norvia.Infrastructure.Data.NorviaDbContext db)
+    {
+        var existentes = await db.TipoRespuestaPregunta.ToDictionaryAsync(t => t.Codigo, t => t.Id);
+        if (existentes.Count > 0) return existentes;
+
+        var filas = new[]
+        {
+            new TipoRespuestaPreguntaCatalogo
+            {
+                Id = Guid.CreateVersion7(),
+                Codigo = TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve,
+                Nombre = "Respuesta breve",
+                InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve),
+                MaxCaracteresRespuesta = 500
+            },
+            new TipoRespuestaPreguntaCatalogo
+            {
+                Id = Guid.CreateVersion7(),
+                Codigo = TipoRespuestaPreguntaCatalogo.CodigoSeleccionUnica,
+                Nombre = "Selección única",
+                InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoSeleccionUnica),
+                RequiereOpciones = true
+            },
+            new TipoRespuestaPreguntaCatalogo
+            {
+                Id = Guid.CreateVersion7(),
+                Codigo = TipoRespuestaPreguntaCatalogo.CodigoSeleccionMultiple,
+                Nombre = "Selección múltiple",
+                InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoSeleccionMultiple),
+                RequiereOpciones = true
+            }
+        };
+        db.TipoRespuestaPregunta.AddRange(filas);
+        await db.SaveChangesAsync();
+        return filas.ToDictionary(t => t.Codigo, t => t.Id);
     }
 }

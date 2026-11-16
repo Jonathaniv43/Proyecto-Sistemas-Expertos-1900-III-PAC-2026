@@ -41,4 +41,8 @@ public static class Errores
     public static readonly Error PeligroInvalido = new("encuestas.peligro_invalido",
         "Uno o más peligros indicados no existen o están desactivados.",
         TipoError.Validacion);
+
+    public static readonly Error TipoRespuestaInvalido = new("encuestas.tipo_respuesta_invalido",
+        "El tipo de respuesta indicado no existe.",
+        TipoError.Validacion);
 }

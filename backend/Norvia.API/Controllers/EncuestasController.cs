@@ -10,13 +10,21 @@ using Norvia.Application.Features.Encuestas.ListarCategoriasDisponibles;
 using Norvia.Application.Features.Encuestas.ListarCategoriasDisponibles.DTOs;
 using Norvia.Application.Features.Encuestas.ListarEncuestas;
 using Norvia.Application.Features.Encuestas.ListarEncuestas.DTOs;
+using Norvia.Application.Features.Encuestas.ListarTiposRespuesta;
+using Norvia.Application.Features.Encuestas.ListarTiposRespuesta.DTOs;
 using Norvia.Application.Features.Encuestas.ObtenerEncuesta;
 using Norvia.Application.Features.Encuestas.ObtenerEncuesta.DTOs;
 using Norvia.Application.Features.Encuestas.PublicarVersionEncuesta;
 
 namespace Norvia.API.Controllers;
 
-/// <summary>Módulo Encuestas (M3). Cada acción usa solo el servicio de su caso de uso.</summary>
+/// <summary>
+/// Módulo Encuestas (M3).
+/// <para>
+/// El <c>PUT .../borrador</c> reemplaza el estado completo del borrador (secciones + preguntas).
+/// Publicar: <c>POST .../versiones/{versionId}/publicacion</c> sin body; si ya hay publicada, la marca reemplazada (RN-70).
+/// </para>
+/// </summary>
 [ApiController]
 [Route("api/encuestas")]
 public sealed class EncuestasController : ControllerBase
@@ -28,6 +36,13 @@ public sealed class EncuestasController : ControllerBase
     public async Task<IActionResult> ListarCategoriasDisponibles(
         [FromServices] ListarCategoriasDisponiblesServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(cancellationToken)).AHttp(this);
+
+    /// <summary>Tipos de respuesta con instrucción UI para el editor.</summary>
+    [HttpGet("tipos-respuesta")]
+    [ProducesResponseType(typeof(IReadOnlyList<TipoRespuestaPreguntaResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListarTiposRespuesta(
+        [FromServices] ListarTiposRespuestaServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(cancellationToken));
 
     /// <summary>HU-030: listado de encuestas de la empresa.</summary>
     [HttpGet]

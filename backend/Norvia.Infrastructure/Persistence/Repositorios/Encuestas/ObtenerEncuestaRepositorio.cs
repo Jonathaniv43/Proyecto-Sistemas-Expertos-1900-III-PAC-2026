@@ -12,8 +12,15 @@ public sealed class ObtenerEncuestaRepositorio(NorviaDbContext db) : IObtenerEnc
         db.Encuesta.AsNoTracking()
             .Include(e => e.Versiones.Where(v =>
                 v.Estado == EstadoVersionEncuesta.Publicada || v.Estado == EstadoVersionEncuesta.Borrador))
+                .ThenInclude(v => v.Secciones)
+            .Include(e => e.Versiones.Where(v =>
+                v.Estado == EstadoVersionEncuesta.Publicada || v.Estado == EstadoVersionEncuesta.Borrador))
                 .ThenInclude(v => v.Preguntas)
                     .ThenInclude(p => p.Opciones)
+            .Include(e => e.Versiones.Where(v =>
+                v.Estado == EstadoVersionEncuesta.Publicada || v.Estado == EstadoVersionEncuesta.Borrador))
+                .ThenInclude(v => v.Preguntas)
+                    .ThenInclude(p => p.TipoRespuestaPregunta)
             .AsSplitQuery()
             .FirstOrDefaultAsync(e => e.Id == id, ct);
 }

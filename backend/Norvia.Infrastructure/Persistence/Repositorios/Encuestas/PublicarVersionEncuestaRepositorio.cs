@@ -10,8 +10,13 @@ public sealed class PublicarVersionEncuestaRepositorio(NorviaDbContext db) : IPu
     public Task<Encuesta?> BuscarConVersionesAsync(Guid encuestaId, CancellationToken ct) =>
         db.Encuesta
             .Include(e => e.Versiones)
+                .ThenInclude(v => v.Secciones)
+            .Include(e => e.Versiones)
                 .ThenInclude(v => v.Preguntas)
                     .ThenInclude(p => p.Opciones)
+            .Include(e => e.Versiones)
+                .ThenInclude(v => v.Preguntas)
+                    .ThenInclude(p => p.TipoRespuestaPregunta)
             .AsSplitQuery()
             .FirstOrDefaultAsync(e => e.Id == encuestaId, ct);
 }

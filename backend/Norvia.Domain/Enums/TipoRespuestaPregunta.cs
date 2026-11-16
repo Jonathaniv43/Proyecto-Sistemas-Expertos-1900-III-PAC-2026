@@ -1,6 +1,10 @@
 namespace Norvia.Domain.Enums;
 
-/// <summary>Tipo de respuesta de una pregunta exploratoria.</summary>
+/// <summary>
+/// Legacy: no usar en entidades nuevas. Códigos de negocio en
+/// <see cref="Entities.Catalogos.TipoRespuestaPreguntaCatalogo"/>.
+/// </summary>
+[Obsolete("Usar TipoRespuestaPreguntaCatalogo y códigos string; se elimina cuando no queden referencias.")]
 public enum TipoRespuestaPregunta
 {
     RespuestaBreve,

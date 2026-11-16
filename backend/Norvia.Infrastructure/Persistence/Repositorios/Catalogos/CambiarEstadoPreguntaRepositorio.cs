@@ -9,5 +9,8 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Catalogos;
 public sealed class CambiarEstadoPreguntaRepositorio(NorviaDbContext db) : ICambiarEstadoPreguntaRepositorio
 {
     public Task<PreguntaExploratoria?> BuscarAsync(Guid id, CancellationToken ct) =>
-        db.PreguntaExploratoria.Include(p => p.Opciones).FirstOrDefaultAsync(e => e.Id == id, ct);
+        db.PreguntaExploratoria
+            .Include(p => p.Opciones)
+            .Include(p => p.TipoRespuestaPregunta)
+            .FirstOrDefaultAsync(e => e.Id == id, ct);
 }

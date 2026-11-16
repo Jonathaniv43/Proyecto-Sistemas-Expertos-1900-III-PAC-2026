@@ -1,7 +1,10 @@
+using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Encuestas;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Encuestas.DTOs;
+
+public sealed record EncuestaSeccionResponseDto(Guid Id, string Titulo, short Orden);
 
 public sealed record EncuestaVersionResponseDto(
     Guid Id,
@@ -9,6 +12,7 @@ public sealed record EncuestaVersionResponseDto(
     EstadoVersionEncuesta Estado,
     string? Instrucciones,
     DateTime? PublicadaEn,
+    IReadOnlyList<EncuestaSeccionResponseDto> Secciones,
     IReadOnlyList<EncuestaPreguntaResponseDto> Preguntas)
 {
     public static EncuestaVersionResponseDto De(EncuestaVersion version) => new(
@@ -17,28 +21,45 @@ public sealed record EncuestaVersionResponseDto(
         version.Estado,
         version.Instrucciones,
         version.PublicadaEn,
+        version.Secciones
+            .OrderBy(s => s.Orden)
+            .Select(s => new EncuestaSeccionResponseDto(s.Id, s.Titulo, s.Orden))
+            .ToList(),
         version.Preguntas
             .OrderBy(p => p.Orden)
-            .Select(p => new EncuestaPreguntaResponseDto(
-                p.Id,
-                p.PreguntaExploratoriaId,
-                p.Texto,
-                p.TipoRespuesta,
-                p.Obligatoria,
-                p.PeligroId,
-                p.Orden,
-                p.Opciones
-                    .OrderBy(o => o.Orden)
-                    .Select(o => new EncuestaOpcionResponseDto(o.Id, o.Texto, o.Orden, o.IndicaExposicion))
-                    .ToList()))
+            .Select(p =>
+            {
+                var tipo = p.TipoRespuestaPregunta;
+                var codigo = tipo?.Codigo ?? string.Empty;
+                var instruccion = tipo?.InstruccionUi
+                    ?? TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(codigo);
+                return new EncuestaPreguntaResponseDto(
+                    p.Id,
+                    p.EncuestaSeccionId,
+                    p.CategoriaRiesgoId,
+                    p.PreguntaExploratoriaId,
+                    p.Texto,
+                    codigo,
+                    instruccion,
+                    p.Obligatoria,
+                    p.PeligroId,
+                    p.Orden,
+                    p.Opciones
+                        .OrderBy(o => o.Orden)
+                        .Select(o => new EncuestaOpcionResponseDto(o.Id, o.Texto, o.Orden, o.IndicaExposicion))
+                        .ToList());
+            })
             .ToList());
 }
 
 public sealed record EncuestaPreguntaResponseDto(
     Guid Id,
+    Guid? SeccionId,
+    Guid? CategoriaRiesgoId,
     Guid? PreguntaExploratoriaId,
     string Texto,
-    TipoRespuestaPregunta TipoRespuesta,
+    string TipoRespuestaCodigo,
+    string InstruccionUi,
     bool Obligatoria,
     Guid? PeligroId,
     short Orden,

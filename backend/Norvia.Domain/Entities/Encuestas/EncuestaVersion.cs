@@ -17,5 +17,6 @@ public class EncuestaVersion : ITieneEmpresa
     public Encuesta Encuesta { get; set; } = null!;
     public VinculoEmpresa CreadaPor { get; set; } = null!;
     public ICollection<EncuestaCategoria> Categorias { get; set; } = new List<EncuestaCategoria>();
+    public ICollection<EncuestaSeccion> Secciones { get; set; } = new List<EncuestaSeccion>();
     public ICollection<EncuestaPregunta> Preguntas { get; set; } = new List<EncuestaPregunta>();
 }

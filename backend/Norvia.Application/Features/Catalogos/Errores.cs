@@ -15,6 +15,8 @@ public static class Errores
     public static readonly Error RubroInvalido = new("catalogos.rubro_invalido", "El rubro indicado no existe o está desactivado.", TipoError.Validacion);
     public static readonly Error CategoriaInvalida = new("catalogos.categoria_invalida", "La categoría indicada no existe o está desactivada.", TipoError.Validacion);
     public static readonly Error PeligroInvalido = new("catalogos.peligro_invalido", "El peligro indicado no existe o está desactivado.", TipoError.Validacion);
+    public static readonly Error TipoRespuestaInvalido = new("catalogos.tipo_respuesta_invalido",
+        "El tipo de respuesta indicado no existe.", TipoError.Validacion);
 
     public static readonly Error CodigoDuplicado = new("catalogos.codigo_duplicado", "Ya existe un elemento con ese código.", TipoError.Conflicto);
     public static readonly Error NombreDuplicado = new("catalogos.nombre_duplicado", "Ya existe un elemento con ese nombre.", TipoError.Conflicto);

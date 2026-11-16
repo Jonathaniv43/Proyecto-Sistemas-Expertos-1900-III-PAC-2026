@@ -9,7 +9,10 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Catalogos;
 public sealed class ActualizarPreguntaRepositorio(NorviaDbContext db) : IActualizarPreguntaRepositorio
 {
     public Task<PreguntaExploratoria?> BuscarAsync(Guid id, CancellationToken ct) =>
-        db.PreguntaExploratoria.Include(p => p.Opciones).FirstOrDefaultAsync(p => p.Id == id, ct);
+        db.PreguntaExploratoria
+            .Include(p => p.Opciones)
+            .Include(p => p.TipoRespuestaPregunta)
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
 
     public Task<bool> CategoriaActivaExisteAsync(Guid categoriaRiesgoId, CancellationToken ct) =>
         db.CategoriaRiesgo.AnyAsync(c => c.Id == categoriaRiesgoId && c.Activa, ct);
@@ -24,6 +27,12 @@ public sealed class ActualizarPreguntaRepositorio(NorviaDbContext db) : IActuali
     public Task<bool> OrdenOcupadoAsync(Guid categoriaRiesgoId, short orden, Guid excepto, CancellationToken ct) =>
         db.PreguntaExploratoria.AnyAsync(
             p => p.CategoriaRiesgoId == categoriaRiesgoId && p.Orden == orden && p.Id != excepto, ct);
+
+    public Task<Guid?> BuscarTipoIdPorCodigoAsync(string codigo, CancellationToken ct) =>
+        db.TipoRespuestaPregunta.AsNoTracking()
+            .Where(t => t.Activo && t.Codigo == codigo)
+            .Select(t => (Guid?)t.Id)
+            .FirstOrDefaultAsync(ct);
 
     public void ReemplazarOpciones(PreguntaExploratoria pregunta, IEnumerable<OpcionPregunta> nuevas)
     {

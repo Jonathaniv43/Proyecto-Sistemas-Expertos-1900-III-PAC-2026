@@ -17,6 +17,8 @@ public sealed class ListarCategoriasDisponiblesRepositorio(NorviaDbContext db) :
             .Where(c => c.RubroId == rubroId && c.Activa)
             .Include(c => c.Preguntas.Where(p => p.Activa))
                 .ThenInclude(p => p.Opciones)
+            .Include(c => c.Preguntas.Where(p => p.Activa))
+                .ThenInclude(p => p.TipoRespuestaPregunta)
             .OrderBy(c => c.Nombre)
             .AsSplitQuery()
             .ToListAsync(ct);

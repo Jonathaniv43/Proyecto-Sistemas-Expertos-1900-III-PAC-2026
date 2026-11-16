@@ -8,8 +8,8 @@ using Norvia.Domain.Enums;
 namespace Norvia.Application.Features.Encuestas.CrearEncuesta;
 
 /// <summary>
-/// HU-030: crea una encuesta en borrador con su primera versión y copia las preguntas activas
-/// de las categorías del rubro de la empresa (RN-10, RN-11, RN-12).
+/// HU-030: crea una encuesta en borrador con su primera versión, secciones por categoría elegida
+/// y copia las preguntas activas (RN-10, RN-11, RN-12).
 /// </summary>
 public sealed class CrearEncuestaServicio(
     ICrearEncuestaRepositorio repositorio,
@@ -49,7 +49,8 @@ public sealed class CrearEncuestaServicio(
             CreadaPorId = vinculoId
         };
 
-        short orden = 1;
+        short ordenSeccion = 1;
+        short ordenPregunta = 1;
         foreach (var categoria in categorias.OrderBy(c => c.Nombre))
         {
             version.Categorias.Add(new EncuestaCategoria
@@ -59,18 +60,29 @@ public sealed class CrearEncuestaServicio(
                 CategoriaRiesgoId = categoria.Id
             });
 
+            var seccion = new EncuestaSeccion
+            {
+                EmpresaId = empresaId,
+                EncuestaVersionId = version.Id,
+                Titulo = categoria.Nombre,
+                Orden = ordenSeccion++
+            };
+            version.Secciones.Add(seccion);
+
             foreach (var origen in categoria.Preguntas.OrderBy(p => p.Orden))
             {
                 var pregunta = new EncuestaPregunta
                 {
                     EmpresaId = empresaId,
                     EncuestaVersionId = version.Id,
+                    EncuestaSeccionId = seccion.Id,
+                    CategoriaRiesgoId = categoria.Id,
                     PreguntaExploratoriaId = origen.Id,
                     Texto = origen.Texto,
-                    TipoRespuesta = origen.TipoRespuesta,
+                    TipoRespuestaPreguntaId = origen.TipoRespuestaPreguntaId,
                     Obligatoria = origen.Obligatoria,
                     PeligroId = origen.PeligroId,
-                    Orden = orden++
+                    Orden = ordenPregunta++
                 };
 
                 foreach (var opcion in origen.Opciones.OrderBy(o => o.Orden))

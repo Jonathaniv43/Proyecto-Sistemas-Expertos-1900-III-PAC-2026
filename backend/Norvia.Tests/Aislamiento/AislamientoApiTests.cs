@@ -172,11 +172,29 @@ public sealed class AislamientoApiTests(NorviaApiFactory api)
         Guid categoriaId;
         await using (var db = api.NuevoContexto(empresaId: null))
         {
+            var tipoBreve = await db.TipoRespuestaPregunta
+                .Where(t => t.Codigo == TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve)
+                .Select(t => (Guid?)t.Id)
+                .FirstOrDefaultAsync();
+            if (tipoBreve is null)
+            {
+                var fila = new TipoRespuestaPreguntaCatalogo
+                {
+                    Id = Guid.CreateVersion7(),
+                    Codigo = TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve,
+                    Nombre = "Respuesta breve",
+                    InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve)
+                };
+                db.TipoRespuestaPregunta.Add(fila);
+                await db.SaveChangesAsync();
+                tipoBreve = fila.Id;
+            }
+
             rubroId = (short)(await db.Rubro.MaxAsync(r => r.Id) + 1);
             var rubro = new Rubro { Id = rubroId, Codigo = $"r_{Guid.NewGuid():N}"[..20], Nombre = $"Rubro {Guid.NewGuid():N}" };
             var cat = new CategoriaRiesgo { Rubro = rubro, Nombre = $"Cat {Guid.NewGuid():N}"[..20] };
             db.AddRange(rubro, cat,
-                new PreguntaExploratoria { CategoriaRiesgo = cat, Texto = "¿Hay ruido?", TipoRespuesta = Norvia.Domain.Enums.TipoRespuestaPregunta.RespuestaBreve, Orden = 1 });
+                new PreguntaExploratoria { CategoriaRiesgo = cat, Texto = "¿Hay ruido?", TipoRespuestaPreguntaId = tipoBreve.Value, Orden = 1 });
             await db.SaveChangesAsync();
             categoriaId = cat.Id;
         }
@@ -198,9 +216,10 @@ public sealed class AislamientoApiTests(NorviaApiFactory api)
         Assert.Equal(HttpStatusCode.NotFound, (await sstB.GetAsync($"/api/encuestas/{encuestaAId}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await sstB.PutAsJsonAsync($"/api/encuestas/{encuestaAId}/borrador", new
         {
+            secciones = Array.Empty<object>(),
             preguntas = new object[]
             {
-                new { texto = "Intento", tipoRespuesta = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
+                new { texto = "Intento", tipoRespuestaCodigo = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
             }
         })).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await sstB.PostAsync($"/api/encuestas/{encuestaAId}/versiones/{versionAId}/publicacion", null)).StatusCode);

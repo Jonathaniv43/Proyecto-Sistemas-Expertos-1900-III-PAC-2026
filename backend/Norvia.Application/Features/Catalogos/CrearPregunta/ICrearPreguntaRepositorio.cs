@@ -10,6 +10,8 @@ public interface ICrearPreguntaRepositorio
     /// <summary>Mayor <c>Orden</c> de las preguntas de la categoría; 0 si no tiene.</summary>
     Task<short> UltimoOrdenAsync(Guid categoriaRiesgoId, CancellationToken ct);
 
+    Task<Guid?> BuscarTipoIdPorCodigoAsync(string codigo, CancellationToken ct);
+
     /// <summary>Agrega la pregunta junto con sus opciones.</summary>
     void Agregar(PreguntaExploratoria pregunta);
 }
