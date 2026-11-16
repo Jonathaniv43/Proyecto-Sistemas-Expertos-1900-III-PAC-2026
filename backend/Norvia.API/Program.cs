@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using DotNetEnv;
 using Norvia.API.Extensiones;
 using Norvia.API.Filtros;
@@ -15,7 +17,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-builder.Services.AddControllers(o => o.Filters.Add<ValidacionFiltro>());
+builder.Services.AddControllers(o => o.Filters.Add<ValidacionFiltro>())
+    // Enums como texto en snake_case, igual que en la BD: "seleccion_unica", "ergonomico"…
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower, allowIntegerValues: false)));
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutenticacionJwt();
