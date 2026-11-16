@@ -80,6 +80,19 @@ public sealed class Escenario(NorviaApiFactory api)
         return (await Json(r)).GetProperty("id").GetGuid();
     }
 
+    /// <summary>Agrega un responsable SST y devuelve un cliente autenticado con ese rol.</summary>
+    public async Task<HttpClient> ClienteResponsableSstAsync(EmpresaDePrueba empresa, string email)
+    {
+        const string password = "Temporal#2026";
+        var r = await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
+        {
+            email, primerNombre = "Responsable", primerApellido = "Sst",
+            rolCodigo = "responsable_sst", passwordTemporal = password
+        });
+        r.EnsureSuccessStatusCode();
+        return await ClienteEmpresaAsync(email, password, empresa.IdEmpresaCifrado);
+    }
+
     public static async Task<JsonElement> Json(HttpResponseMessage r) =>
         JsonDocument.Parse(await r.Content.ReadAsStringAsync()).RootElement.Clone();
 

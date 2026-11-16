@@ -78,7 +78,7 @@ public sealed class RegistrarEmpresaServicio(
         var acceso = new Acceso
         {
             Email = email,
-            Verificado = true,
+            Verificado = false,
             DebeCambiarPassword = true
         };
         acceso.PasswordHash = hasherPassword.Hashear(acceso, passwordTemporal);
@@ -97,7 +97,8 @@ public sealed class RegistrarEmpresaServicio(
 
         var idEmpresaCifrado = cifrador.Cifrar(empresa.Id);
         var nombreRepresentante = persona.NombreCompleto;
-        var urlLogin = correoOpciones.Value.UrlBaseFrontend.TrimEnd('/');
+        var urlBase = correoOpciones.Value.UrlBaseFrontend.TrimEnd('/');
+        var urlVerificacion = $"{urlBase}/verificar-cuenta";
 
         var variables = new Dictionary<string, string>
         {
@@ -107,7 +108,8 @@ public sealed class RegistrarEmpresaServicio(
             ["Email"] = acceso.Email,
             ["PasswordTemporal"] = passwordTemporal,
             ["IdEmpresa"] = idEmpresaCifrado,
-            ["UrlLogin"] = urlLogin
+            ["UrlLogin"] = urlBase,
+            ["UrlVerificacion"] = urlVerificacion
         };
 
         var renderizado = await plantillas.RenderizarAsync(

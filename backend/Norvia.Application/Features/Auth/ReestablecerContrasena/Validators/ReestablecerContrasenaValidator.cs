@@ -1,12 +1,12 @@
 using FluentValidation;
 using Norvia.Application.Common.Validacion;
-using Norvia.Application.Features.Auth.EstablecerContrasena.DTOs;
+using Norvia.Application.Features.Auth.ReestablecerContrasena.DTOs;
 
-namespace Norvia.Application.Features.Auth.EstablecerContrasena.Validators;
+namespace Norvia.Application.Features.Auth.ReestablecerContrasena.Validators;
 
-public sealed class EstablecerContrasenaValidator : AbstractValidator<EstablecerContrasenaRequestDto>
+public sealed class ReestablecerContrasenaValidator : AbstractValidator<ReestablecerContrasenaRequestDto>
 {
-    public EstablecerContrasenaValidator()
+    public ReestablecerContrasenaValidator()
     {
         RuleFor(x => x.ContrasenaActual).NotEmpty().WithMessage("Ingrese su contraseña actual.");
         RuleFor(x => x.ContrasenaNueva)
