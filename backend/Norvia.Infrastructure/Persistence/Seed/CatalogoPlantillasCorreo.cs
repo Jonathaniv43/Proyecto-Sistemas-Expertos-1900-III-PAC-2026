@@ -12,8 +12,8 @@ public static class CatalogoPlantillasCorreo
             Id: 1,
             Codigo: "bienvenida_empresa",
             Nombre: "Bienvenida al registrar empresa",
-            Descripcion: "Se envía al representante tras POST api/empresas con credenciales temporales.",
-            Asunto: "Bienvenido a Norvia — acceso a tu empresa",
+            Descripcion: "Se envía al representante tras POST api/empresas con credenciales temporales y enlace de verificación.",
+            Asunto: "Bienvenido a Norvia — verificá tu cuenta",
             CuerpoHtml: """
                 <!DOCTYPE html>
                 <html lang="es">
@@ -22,13 +22,14 @@ public static class CatalogoPlantillasCorreo
                   <h2 style="color: #4f46e5;">Tu empresa está registrada</h2>
                   <p>Hola <strong>{{NombreRepresentante}}</strong>,</p>
                   <p>La empresa <strong>{{RazonSocial}}</strong> (RTN {{RTN}}) fue dada de alta en Norvia.</p>
-                  <p>Usá estas credenciales para iniciar sesión. Deberás cambiar la contraseña en el primer acceso.</p>
+                  <p>Antes de iniciar sesión debés <strong>verificar tu cuenta</strong> con el correo, la contraseña temporal y una contraseña nueva.</p>
                   <ul>
                     <li>Correo: <strong>{{Email}}</strong></li>
                     <li>Contraseña temporal: <strong>{{PasswordTemporal}}</strong></li>
                     <li>Identificador de empresa: <code>{{IdEmpresa}}</code></li>
                   </ul>
-                  <p><a href="{{UrlLogin}}" style="color: #4f46e5;">Ir al inicio de sesión</a></p>
+                  <p><a href="{{UrlVerificacion}}" style="color: #4f46e5;">Verificar mi cuenta</a></p>
+                  <p>Después de verificar, podés <a href="{{UrlLogin}}" style="color: #4f46e5;">iniciar sesión</a>.</p>
                   <p style="font-size: 0.875rem; color: #666;">Si no solicitaste este registro, ignorá este mensaje.</p>
                 </body>
                 </html>
@@ -48,6 +49,25 @@ public static class CatalogoPlantillasCorreo
                   <p>Recibimos una solicitud para cambiar la contraseña de tu cuenta Norvia.</p>
                   <p><a href="{{UrlCambio}}" style="color: #4f46e5;">Establecer nueva contraseña</a></p>
                   <p style="font-size: 0.875rem; color: #666;">Si no fuiste vos, ignorá este mensaje.</p>
+                </body>
+                </html>
+                """),
+        new(
+            Id: 3,
+            Codigo: "reenvio_verificacion",
+            Nombre: "Reenvío de verificación de cuenta",
+            Descripcion: "Recordatorio para verificar la cuenta; no incluye la temporal (solo el hash está en BD).",
+            Asunto: "Norvia — verificá tu cuenta",
+            CuerpoHtml: """
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="utf-8" /><title>Verificar cuenta</title></head>
+                <body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #1a1a1a; max-width: 520px;">
+                  <p>Hola,</p>
+                  <p>Recibimos una solicitud para reenviar las instrucciones de verificación de <strong>{{Email}}</strong>.</p>
+                  <p>Usá la contraseña temporal del correo de bienvenida original y elegí tu contraseña nueva en el formulario.</p>
+                  <p><a href="{{UrlVerificacion}}" style="color: #4f46e5;">Verificar mi cuenta</a></p>
+                  <p style="font-size: 0.875rem; color: #666;">Si no solicitaste este mensaje, ignorálo.</p>
                 </body>
                 </html>
                 """)

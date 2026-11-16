@@ -23,7 +23,7 @@ public static class CatalogoPermisos
         Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
 
         // HU-114: cambiar la contraseña propia (incluye el primer ingreso con contraseña temporal).
-        Empresa("auth.contrasena.establecer", "Cambiar mi contraseña", "POST", "api/auth/contrasena/establecer",
+        Empresa("auth.contrasena.reestablecer", "Cambiar mi contraseña", "POST", "api/auth/contrasena/reestablecer",
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
         // HU-020: agregar personas a la empresa.
@@ -37,6 +37,12 @@ public static class CatalogoPermisos
         Empresa("vinculo.listar", "Listar personas con acceso", "GET", "api/vinculos", "admin_empresa"),
         Empresa("vinculo.leer", "Ver el acceso de una persona", "GET", "api/vinculos/{id}", "admin_empresa"),
         Empresa("vinculo.actualizar", "Cambiar rol o estado de un acceso", "PATCH", "api/vinculos/{id}", "admin_empresa"),
+
+        // HU-026: perfil de la empresa de la sesión.
+        Empresa("empresa.perfil.leer", "Ver perfil de la empresa", "GET", "api/empresas/perfil",
+            "admin_empresa", "responsable_sst"),
+        Empresa("empresa.perfil.actualizar", "Actualizar perfil de la empresa", "PATCH", "api/empresas/perfil",
+            "admin_empresa"),
 
         // HU-029: elegir categorías de riesgo para una encuesta.
         Empresa("encuesta.categoria.listar", "Ver categorías de riesgo disponibles", "GET", "api/encuestas/categorias-disponibles",

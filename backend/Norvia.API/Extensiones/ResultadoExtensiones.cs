@@ -15,6 +15,12 @@ public static class ResultadoExtensiones
             ? controller.StatusCode(StatusCodes.Status201Created, resultado.Valor)
             : Problema(resultado.Error!, controller);
 
+    /// <summary>Como <see cref="AHttp{T}"/>, pero responde 202 Accepted (p. ej. reenvío de correo).</summary>
+    public static IActionResult AHttpAceptado<T>(this Resultado<T> resultado, ControllerBase controller) =>
+        resultado.EsExito
+            ? controller.Accepted(resultado.Valor)
+            : Problema(resultado.Error!, controller);
+
     public static IActionResult AHttp(this Resultado resultado, ControllerBase controller) =>
         resultado.EsExito ? controller.NoContent() : Problema(resultado.Error!, controller);
 

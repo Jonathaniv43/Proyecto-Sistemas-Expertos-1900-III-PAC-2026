@@ -1,9 +1,9 @@
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
-using Norvia.Application.Features.Auth.EstablecerContrasena.DTOs;
+using Norvia.Application.Features.Auth.ReestablecerContrasena.DTOs;
 
-namespace Norvia.Application.Features.Auth.EstablecerContrasena;
+namespace Norvia.Application.Features.Auth.ReestablecerContrasena;
 
 /// <summary>
 /// Cambia la contraseña del Acceso de la sesión, cumpliendo la política de HU-114. Sirve también para
@@ -11,13 +11,13 @@ namespace Norvia.Application.Features.Auth.EstablecerContrasena;
 /// El Acceso es único por correo (RN-65), así que la nueva contraseña vale en todas sus empresas;
 /// por eso se cierran todas sus sesiones y hay que volver a iniciar sesión.
 /// </summary>
-public sealed class EstablecerContrasenaServicio(
-    IEstablecerContrasenaRepositorio repositorio,
+public sealed class ReestablecerContrasenaServicio(
+    IReestablecerContrasenaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IHasherPassword hasher,
     ITenantActual sesion) : IServicioCasoDeUso
 {
-    public async Task<Resultado> EjecutarAsync(EstablecerContrasenaRequestDto request, CancellationToken cancellationToken)
+    public async Task<Resultado> EjecutarAsync(ReestablecerContrasenaRequestDto request, CancellationToken cancellationToken)
     {
         if (sesion.AccesoId is not Guid accesoId) return Errores.SesionInvalida;
 

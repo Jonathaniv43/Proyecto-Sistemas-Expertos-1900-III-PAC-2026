@@ -14,4 +14,7 @@ public static class Errores
 
     public static readonly Error ContrasenaActualIncorrecta =
         new("auth.contrasena_actual_incorrecta", "La contraseña actual no es correcta.", TipoError.Validacion);
+
+    public static readonly Error CuentaYaVerificada =
+        new("auth.cuenta_ya_verificada", "Esta cuenta ya está verificada.", TipoError.Conflicto);
 }

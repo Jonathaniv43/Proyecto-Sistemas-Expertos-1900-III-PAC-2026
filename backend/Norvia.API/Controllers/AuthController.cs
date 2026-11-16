@@ -4,14 +4,18 @@ using Norvia.API.Extensiones;
 using Norvia.Application.Features.Auth.CerrarSesion;
 using Norvia.Application.Features.Auth.CerrarSesion.DTOs;
 using Norvia.Application.Features.Auth.DTOs;
-using Norvia.Application.Features.Auth.EstablecerContrasena;
-using Norvia.Application.Features.Auth.EstablecerContrasena.DTOs;
+using Norvia.Application.Features.Auth.ReestablecerContrasena;
+using Norvia.Application.Features.Auth.ReestablecerContrasena.DTOs;
 using Norvia.Application.Features.Auth.LoginEmpresa;
 using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
 using Norvia.Application.Features.Auth.LoginPlataforma;
 using Norvia.Application.Features.Auth.LoginPlataforma.DTOs;
+using Norvia.Application.Features.Auth.ReenviarVerificacionCuenta;
+using Norvia.Application.Features.Auth.ReenviarVerificacionCuenta.DTOs;
 using Norvia.Application.Features.Auth.RefrescarSesion;
 using Norvia.Application.Features.Auth.RefrescarSesion.DTOs;
+using Norvia.Application.Features.Auth.VerificarCuenta;
+using Norvia.Application.Features.Auth.VerificarCuenta.DTOs;
 
 namespace Norvia.API.Controllers;
 
@@ -59,14 +63,41 @@ public sealed class AuthController : ControllerBase
     /// Cambia la contraseña de la sesión (HU-114; también el primer ingreso con contraseña temporal).
     /// Requiere sesión: no es anónima. Cierra todas las sesiones del Acceso.
     /// </summary>
-    [HttpPost("contrasena/establecer")]
+    [HttpPost("contrasena/reestablecer")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> EstablecerContrasena(
-        EstablecerContrasenaRequestDto request, [FromServices] EstablecerContrasenaServicio servicio,
+    public async Task<IActionResult> ReestablecerContrasena(
+        ReestablecerContrasenaRequestDto request, [FromServices] ReestablecerContrasenaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// Verifica la cuenta con correo + contraseña temporal del alta y fija la contraseña definitiva (HU-114).
+    /// Anónimo: no hay JWT hasta que <c>Acceso.Verificado</c> sea true (RN-67).
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("cuenta/verificar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> VerificarCuenta(
+        VerificarCuentaRequestDto request, [FromServices] VerificarCuentaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// Reenvía instrucciones de verificación. Respuesta siempre genérica (202).
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("cuenta/verificacion/reenvio")]
+    [ProducesResponseType(typeof(ReenviarVerificacionCuentaResponseDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ReenviarVerificacionCuenta(
+        ReenviarVerificacionCuentaRequestDto request, [FromServices] ReenviarVerificacionCuentaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttpAceptado(this);
 }
 
 //prueba hu-095

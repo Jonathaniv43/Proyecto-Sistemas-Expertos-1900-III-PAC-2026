@@ -19,4 +19,14 @@ public static class Errores
         "empresas.plantilla_correo_no_encontrada",
         "No está configurada la plantilla de correo de bienvenida.",
         TipoError.Servidor);
+
+    public static readonly Error EmpresaNoEncontrada = new(
+        "empresas.no_encontrada",
+        "No se encontró la empresa de la sesión.",
+        TipoError.NoEncontrado);
+
+    public static readonly Error EmpresaPorRtnNoEncontrada = new(
+        "empresas.rtn_no_encontrado",
+        "No se encontró una empresa activa con ese RTN.",
+        TipoError.NoEncontrado);
 }

@@ -67,10 +67,10 @@ public sealed class VinculosController : ControllerBase
 
     /// <summary>HU-115: alta de encuestados por lote; informa las filas con problemas y sigue con las demás.</summary>
     [HttpPost("encuestados/lote")]
-    [ProducesResponseType(typeof(CrearEncuestadosLoteResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CrearEncuestadosLoteResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CrearEncuestadosLote(
         CrearEncuestadosLoteRequestDto request, [FromServices] CrearEncuestadosLoteServicio servicio,
         CancellationToken cancellationToken) =>
-        Ok(await servicio.EjecutarAsync(request, cancellationToken));
+        StatusCode(StatusCodes.Status201Created, await servicio.EjecutarAsync(request, cancellationToken));
 }
