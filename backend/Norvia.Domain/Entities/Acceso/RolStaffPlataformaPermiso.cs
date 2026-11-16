@@ -4,7 +4,7 @@ namespace Norvia.Domain.Entities.Acceso;
 public class RolStaffPlataformaPermiso
 {
     public short RolStaffPlataformaId { get; set; }
-    public short PermisoId { get; set; }
+    public Guid PermisoId { get; set; }
 
     public RolStaffPlataforma RolStaffPlataforma { get; set; } = null!;
     public Permiso Permiso { get; set; } = null!;

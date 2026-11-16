@@ -5,6 +5,8 @@ using Norvia.Application.Common.Interfaces;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Infrastructure.Opciones;
 
+using Norvia.Infrastructure.Data;
+
 namespace Norvia.Infrastructure.Persistence.Seed;
 
 /// <summary>Crea el primer staff de plataforma con las credenciales del .env (StaffSeed__*).</summary>

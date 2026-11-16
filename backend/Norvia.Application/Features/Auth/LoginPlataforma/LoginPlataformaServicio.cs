@@ -2,6 +2,8 @@ using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Common.Seguridad;
+using Norvia.Application.Features.Auth.DTOs;
+using Norvia.Application.Features.Auth.LoginPlataforma.DTOs;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Auth.LoginPlataforma;
@@ -14,7 +16,7 @@ public sealed class LoginPlataformaServicio(
     IReloj reloj,
     EmisorSesion emisor) : IServicioCasoDeUso
 {
-    public async Task<Resultado<SesionResponse>> EjecutarAsync(LoginPlataformaRequest request, CancellationToken cancellationToken)
+    public async Task<Resultado<SesionResponseDto>> EjecutarAsync(LoginPlataformaRequestDto request, CancellationToken cancellationToken)
     {
         var acceso = await repo.BuscarAccesoAsync(request.Email.Trim().ToLowerInvariant(), cancellationToken);
         if (acceso is null || !acceso.Verificado || !hasher.Verificar(acceso, request.Password))

@@ -12,8 +12,6 @@ public class PermisoConfiguration : IEntityTypeConfiguration<Permiso>
 {
     public void Configure(EntityTypeBuilder<Permiso> b)
     {
-        b.HasKey(p => p.Id);
-        b.Property(p => p.Id).ValueGeneratedNever(); // IDs fijos, los pone el seed
         b.Property(p => p.Codigo).HasMaxLength(60).IsRequired();
         b.Property(p => p.Nombre).HasMaxLength(120).IsRequired();
         b.EnumComoTexto(p => p.Alcance, 10); // D24: solo 'empresa' o 'plataforma'
@@ -22,5 +20,7 @@ public class PermisoConfiguration : IEntityTypeConfiguration<Permiso>
         b.Property(p => p.RutaPatron).HasMaxLength(200).IsRequired();
         b.Property(p => p.Activo).PorDefectoTrue();
         b.HasIndex(p => p.Codigo).IsUnique();
+        b.HasIndex(p => p.Codigo).IsUnique();
+        b.HasIndex(p => new { p.MetodoHttp, p.RutaPatron }).IsUnique();
     }
 }

@@ -7,7 +7,7 @@ using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Riesgos;
 
-namespace Norvia.Infrastructure.Persistence;
+namespace Norvia.Infrastructure.Data;
 
 /// <summary>
 /// Contexto de EF Core de Norvia. Los DbSet van en singular porque EF usa su nombre

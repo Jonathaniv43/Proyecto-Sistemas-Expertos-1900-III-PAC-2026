@@ -1,5 +1,7 @@
 using Norvia.Application.Common.Interfaces;
 
+using Norvia.Infrastructure.Data;
+
 namespace Norvia.Infrastructure.Persistence;
 
 /// <summary>Un SaveChanges de EF Core es una sola transacción con todos los cambios pendientes.</summary>

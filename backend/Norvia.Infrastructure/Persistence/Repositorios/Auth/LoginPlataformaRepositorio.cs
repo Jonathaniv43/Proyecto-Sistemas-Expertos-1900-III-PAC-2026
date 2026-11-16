@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Norvia.Application.Features.Auth.LoginPlataforma;
 using Norvia.Domain.Entities.Acceso;
 
+using Norvia.Infrastructure.Data;
+
 namespace Norvia.Infrastructure.Persistence.Repositorios.Auth;
 
 public sealed class LoginPlataformaRepositorio(NorviaDbContext db) : ILoginPlataformaRepositorio

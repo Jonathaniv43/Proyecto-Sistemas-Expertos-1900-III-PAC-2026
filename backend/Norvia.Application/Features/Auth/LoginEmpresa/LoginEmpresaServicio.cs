@@ -2,6 +2,8 @@ using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Common.Seguridad;
+using Norvia.Application.Features.Auth.DTOs;
+using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Auth.LoginEmpresa;
@@ -15,7 +17,7 @@ public sealed class LoginEmpresaServicio(
     IReloj reloj,
     EmisorSesion emisor) : IServicioCasoDeUso
 {
-    public async Task<Resultado<SesionResponse>> EjecutarAsync(LoginEmpresaRequest request, CancellationToken cancellationToken)
+    public async Task<Resultado<SesionResponseDto>> EjecutarAsync(LoginEmpresaRequestDto request, CancellationToken cancellationToken)
     {
         if (!cifrador.TryDescifrar(request.IdEmpresa, out var empresaId))
             return Errores.CredencialesInvalidas;
