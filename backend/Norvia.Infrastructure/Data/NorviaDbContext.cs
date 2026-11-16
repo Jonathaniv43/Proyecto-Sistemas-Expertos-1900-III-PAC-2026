@@ -62,6 +62,10 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<EncuestaSeccion> EncuestaSeccion => Set<EncuestaSeccion>();
     public DbSet<EncuestaPregunta> EncuestaPregunta => Set<EncuestaPregunta>();
     public DbSet<EncuestaOpcion> EncuestaOpcion => Set<EncuestaOpcion>();
+    public DbSet<ParticipacionEncuesta> ParticipacionEncuesta => Set<ParticipacionEncuesta>();
+    public DbSet<RespuestaEncuesta> RespuestaEncuesta => Set<RespuestaEncuesta>();
+    public DbSet<DetalleRespuesta> DetalleRespuesta => Set<DetalleRespuesta>();
+    public DbSet<DetalleRespuestaOpcion> DetalleRespuestaOpcion => Set<DetalleRespuestaOpcion>();
 
     // Riesgos
     public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();

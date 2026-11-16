@@ -1009,6 +1009,58 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.DetalleRespuesta", b =>
+                {
+                    b.Property<Guid>("RespuestaEncuestaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EncuestaPreguntaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("EncuestaOpcionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TextoLibre")
+                        .HasColumnType("text");
+
+                    b.HasKey("RespuestaEncuestaId", "EncuestaPreguntaId");
+
+                    b.HasIndex("EmpresaId", "EncuestaPreguntaId");
+
+                    b.HasIndex("EncuestaPreguntaId", "EncuestaOpcionId");
+
+                    b.ToTable("DetalleRespuesta", t =>
+                        {
+                            t.HasCheckConstraint("CK_DetalleRespuesta_ValorUnico", "(\"EncuestaOpcionId\" IS NULL OR \"TextoLibre\" IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.DetalleRespuestaOpcion", b =>
+                {
+                    b.Property<Guid>("RespuestaEncuestaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EncuestaPreguntaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EncuestaOpcionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RespuestaEncuestaId", "EncuestaPreguntaId", "EncuestaOpcionId");
+
+                    b.HasIndex("EncuestaPreguntaId", "EncuestaOpcionId");
+
+                    b.HasIndex("EmpresaId", "RespuestaEncuestaId", "EncuestaPreguntaId");
+
+                    b.ToTable("DetalleRespuestaOpcion");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.Encuesta", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1101,8 +1153,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasAlternateKey("EmpresaId", "Id");
-
-                    b.HasAlternateKey("EncuestaPreguntaId", "Id");
 
                     b.HasIndex("EmpresaId", "EncuestaPreguntaId");
 
@@ -1267,6 +1317,55 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_EncuestaVersion_PublicadaEn", "\"Estado\" = 'borrador' OR \"PublicadaEn\" IS NOT NULL");
                         });
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.ParticipacionEncuesta", b =>
+                {
+                    b.Property<Guid>("EncuestaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VinculoEmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ParticipoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("EncuestaId", "VinculoEmpresaId");
+
+                    b.HasIndex("EmpresaId", "EncuestaId");
+
+                    b.HasIndex("EmpresaId", "VinculoEmpresaId");
+
+                    b.ToTable("ParticipacionEncuesta");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.RespuestaEncuesta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EncuestaVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("FechaRespuesta")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EncuestaVersionId", "Id");
+
+                    b.HasIndex("EmpresaId", "EncuestaVersionId");
+
+                    b.ToTable("RespuestaEncuesta");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Riesgos.Control", b =>
@@ -1675,6 +1774,72 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("RegistradoPor");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.DetalleRespuesta", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaPregunta", "EncuestaPregunta")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "EncuestaPreguntaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.RespuestaEncuesta", "RespuestaEncuesta")
+                        .WithMany("Detalles")
+                        .HasForeignKey("EmpresaId", "RespuestaEncuestaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaOpcion", "EncuestaOpcion")
+                        .WithMany()
+                        .HasForeignKey("EncuestaPreguntaId", "EncuestaOpcionId")
+                        .HasPrincipalKey("EncuestaPreguntaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("EncuestaOpcion");
+
+                    b.Navigation("EncuestaPregunta");
+
+                    b.Navigation("RespuestaEncuesta");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.DetalleRespuestaOpcion", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaOpcion", "EncuestaOpcion")
+                        .WithMany()
+                        .HasForeignKey("EncuestaPreguntaId", "EncuestaOpcionId")
+                        .HasPrincipalKey("EncuestaPreguntaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.DetalleRespuesta", "DetalleRespuesta")
+                        .WithMany("Opciones")
+                        .HasForeignKey("EmpresaId", "RespuestaEncuestaId", "EncuestaPreguntaId")
+                        .HasPrincipalKey("EmpresaId", "RespuestaEncuestaId", "EncuestaPreguntaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DetalleRespuesta");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("EncuestaOpcion");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.Encuesta", b =>
                 {
                     b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
@@ -1848,6 +2013,55 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Encuesta");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.ParticipacionEncuesta", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.Encuesta", "Encuesta")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "EncuestaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "VinculoEmpresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "VinculoEmpresaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Encuesta");
+
+                    b.Navigation("VinculoEmpresa");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.RespuestaEncuesta", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Encuestas.EncuestaVersion", "EncuestaVersion")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "EncuestaVersionId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("EncuestaVersion");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Riesgos.Control", b =>
                 {
                     b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
@@ -1993,6 +2207,11 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Vinculos");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.DetalleRespuesta", b =>
+                {
+                    b.Navigation("Opciones");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.Encuesta", b =>
                 {
                     b.Navigation("Versiones");
@@ -2015,6 +2234,11 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Preguntas");
 
                     b.Navigation("Secciones");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Encuestas.RespuestaEncuesta", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Riesgos.RiesgoEmpresa", b =>

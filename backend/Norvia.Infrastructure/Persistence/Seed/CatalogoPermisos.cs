@@ -16,11 +16,19 @@ public static class CatalogoPermisos
 
     public static readonly PermisoDef[] Todos =
     [
-        // EJEMPLO de forma: reemplaza rutas y roles por los reales (ver 05-actores-roles.md).
-        // El encuestado solo debe aparecer en estos tres y en el cambio de contraseña (HU-114).
-        Empresa("encuesta.responder", "Responder encuesta", "POST", "api/encuestas/{id}/respuestas", "encuestado"),
+        // HU-031: responder (ampliado a todos los roles de empresa hasta convocatorias).
+        Empresa("encuesta.pendientes", "Ver encuestas pendientes", "GET", "api/encuestas/pendientes",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        Empresa("encuesta.responder", "Responder encuesta", "POST", "api/encuestas/{id}/respuestas",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+
+        // Acceso mínimo del encuestado (además de pendientes/responder).
         Empresa("notificacion.listar", "Ver notificaciones", "GET", "api/notificaciones", "encuestado"),
         Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
+
+        // HU-032: reporte anónimo.
+        Empresa("encuesta.reporte", "Ver reporte anónimo de encuesta", "GET", "api/encuestas/{id}/reporte",
+            "admin_empresa", "responsable_sst"),
 
         // HU-114: cambiar la contraseña propia (incluye el primer ingreso con contraseña temporal).
         Empresa("auth.contrasena.establecer", "Cambiar mi contraseña", "POST", "api/auth/contrasena/establecer",

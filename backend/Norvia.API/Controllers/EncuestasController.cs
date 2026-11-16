@@ -10,11 +10,17 @@ using Norvia.Application.Features.Encuestas.ListarCategoriasDisponibles;
 using Norvia.Application.Features.Encuestas.ListarCategoriasDisponibles.DTOs;
 using Norvia.Application.Features.Encuestas.ListarEncuestas;
 using Norvia.Application.Features.Encuestas.ListarEncuestas.DTOs;
+using Norvia.Application.Features.Encuestas.ListarEncuestasPendientes;
+using Norvia.Application.Features.Encuestas.ListarEncuestasPendientes.DTOs;
 using Norvia.Application.Features.Encuestas.ListarTiposRespuesta;
 using Norvia.Application.Features.Encuestas.ListarTiposRespuesta.DTOs;
 using Norvia.Application.Features.Encuestas.ObtenerEncuesta;
 using Norvia.Application.Features.Encuestas.ObtenerEncuesta.DTOs;
+using Norvia.Application.Features.Encuestas.ObtenerReporteEncuesta;
+using Norvia.Application.Features.Encuestas.ObtenerReporteEncuesta.DTOs;
 using Norvia.Application.Features.Encuestas.PublicarVersionEncuesta;
+using Norvia.Application.Features.Encuestas.ResponderEncuesta;
+using Norvia.Application.Features.Encuestas.ResponderEncuesta.DTOs;
 
 namespace Norvia.API.Controllers;
 
@@ -42,6 +48,13 @@ public sealed class EncuestasController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<TipoRespuestaPreguntaResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListarTiposRespuesta(
         [FromServices] ListarTiposRespuestaServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(cancellationToken));
+
+    /// <summary>HU-031: encuestas publicadas que el vínculo de la sesión aún no ha respondido.</summary>
+    [HttpGet("pendientes")]
+    [ProducesResponseType(typeof(IReadOnlyList<EncuestaPendienteResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListarPendientes(
+        [FromServices] ListarEncuestasPendientesServicio servicio, CancellationToken cancellationToken) =>
         Ok(await servicio.EjecutarAsync(cancellationToken));
 
     /// <summary>HU-030: listado de encuestas de la empresa.</summary>
@@ -99,5 +112,25 @@ public sealed class EncuestasController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Cerrar(
         Guid id, [FromServices] CerrarEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-031: envía la respuesta anónima a la versión publicada.</summary>
+    [HttpPost("{id:guid}/respuestas")]
+    [ProducesResponseType(typeof(ResponderEncuestaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Responder(
+        Guid id, ResponderEncuestaRequestDto request,
+        [FromServices] ResponderEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-032: reporte anónimo de la versión publicada vigente (RN-73).</summary>
+    [HttpGet("{id:guid}/reporte")]
+    [ProducesResponseType(typeof(ReporteEncuestaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ObtenerReporte(
+        Guid id, [FromServices] ObtenerReporteEncuestaServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }
