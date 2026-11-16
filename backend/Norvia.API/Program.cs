@@ -45,3 +45,6 @@ app.MapControllers();
 
 await app.Services.InicializarBaseDatosAsync();
 app.Run();
+
+/// <summary>Visible para las pruebas de integración (WebApplicationFactory, HU-098).</summary>
+public partial class Program;
