@@ -30,9 +30,9 @@ public sealed class CategoriasDisponiblesTests(NorviaApiFactory api)
 
         var preguntas = categoria.GetProperty("preguntasPreview").EnumerateArray().ToList();
         Assert.Equal(["¿Levantas cargas?", "Comentarios"], preguntas.Select(p => p.GetProperty("texto").GetString()));
-        Assert.Equal("seleccion_unica", preguntas[0].GetProperty("tipoRespuesta").GetString());
+        Assert.Equal("seleccion_unica", preguntas[0].GetProperty("tipoRespuestaCodigo").GetString());
         Assert.Equal(["Sí", "No"], preguntas[0].GetProperty("opciones").EnumerateArray().Select(o => o.GetProperty("texto").GetString()));
-        Assert.Equal("respuesta_breve", preguntas[1].GetProperty("tipoRespuesta").GetString());
+        Assert.Equal("respuesta_breve", preguntas[1].GetProperty("tipoRespuestaCodigo").GetString());
         Assert.False(preguntas[1].GetProperty("obligatoria").GetBoolean());
     }
 
@@ -100,18 +100,53 @@ public sealed class CategoriasDisponiblesTests(NorviaApiFactory api)
     private async Task<(Guid Activa, Guid Inactiva)> CrearCatalogoAsync(short rubroId)
     {
         await using var db = api.NuevoContexto(empresaId: null);
+        var tipos = await db.TipoRespuestaPregunta.ToDictionaryAsync(t => t.Codigo, t => t.Id);
+        if (tipos.Count == 0)
+        {
+            var filas = new[]
+            {
+                new TipoRespuestaPreguntaCatalogo
+                {
+                    Id = Guid.CreateVersion7(),
+                    Codigo = TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve,
+                    Nombre = "Respuesta breve",
+                    InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve)
+                },
+                new TipoRespuestaPreguntaCatalogo
+                {
+                    Id = Guid.CreateVersion7(),
+                    Codigo = TipoRespuestaPreguntaCatalogo.CodigoSeleccionUnica,
+                    Nombre = "Selección única",
+                    InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoSeleccionUnica),
+                    RequiereOpciones = true
+                },
+                new TipoRespuestaPreguntaCatalogo
+                {
+                    Id = Guid.CreateVersion7(),
+                    Codigo = TipoRespuestaPreguntaCatalogo.CodigoSeleccionMultiple,
+                    Nombre = "Selección múltiple",
+                    InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoSeleccionMultiple),
+                    RequiereOpciones = true
+                }
+            };
+            db.TipoRespuestaPregunta.AddRange(filas);
+            await db.SaveChangesAsync();
+            tipos = filas.ToDictionary(t => t.Codigo, t => t.Id);
+        }
+
         var activa = new CategoriaRiesgo { RubroId = rubroId, Nombre = "Ergonomía" };
         var inactiva = new CategoriaRiesgo { RubroId = rubroId, Nombre = "Desactivada", Activa = false };
         var conOpciones = new PreguntaExploratoria
         {
-            CategoriaRiesgo = activa, Texto = "¿Levantas cargas?", TipoRespuesta = TipoRespuestaPregunta.SeleccionUnica, Orden = 1
+            CategoriaRiesgo = activa, Texto = "¿Levantas cargas?",
+            TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoSeleccionUnica], Orden = 1
         };
         conOpciones.Opciones.Add(new OpcionPregunta { Texto = "No", Orden = 2 });
         conOpciones.Opciones.Add(new OpcionPregunta { Texto = "Sí", Orden = 1 });
         db.AddRange(activa, inactiva, conOpciones,
-            new PreguntaExploratoria { CategoriaRiesgo = activa, Texto = "Comentarios", TipoRespuesta = TipoRespuestaPregunta.RespuestaBreve, Obligatoria = false, Orden = 3 },
-            new PreguntaExploratoria { CategoriaRiesgo = activa, Texto = "Retirada", TipoRespuesta = TipoRespuestaPregunta.RespuestaBreve, Orden = 2, Activa = false },
-            new PreguntaExploratoria { CategoriaRiesgo = inactiva, Texto = "No debe verse", TipoRespuesta = TipoRespuestaPregunta.RespuestaBreve, Orden = 1 });
+            new PreguntaExploratoria { CategoriaRiesgo = activa, Texto = "Comentarios", TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve], Obligatoria = false, Orden = 3 },
+            new PreguntaExploratoria { CategoriaRiesgo = activa, Texto = "Retirada", TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve], Orden = 2, Activa = false },
+            new PreguntaExploratoria { CategoriaRiesgo = inactiva, Texto = "No debe verse", TipoRespuestaPreguntaId = tipos[TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve], Orden = 1 });
         await db.SaveChangesAsync();
         return (activa.Id, inactiva.Id);
     }

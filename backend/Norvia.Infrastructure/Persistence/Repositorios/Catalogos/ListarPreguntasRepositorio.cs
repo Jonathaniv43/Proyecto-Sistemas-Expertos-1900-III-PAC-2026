@@ -11,6 +11,7 @@ public sealed class ListarPreguntasRepositorio(NorviaDbContext db) : IListarPreg
     public Task<List<PreguntaExploratoria>> ListarAsync(Guid? categoriaRiesgoId, CancellationToken ct) =>
         db.PreguntaExploratoria.AsNoTracking()
             .Include(p => p.Opciones)
+            .Include(p => p.TipoRespuestaPregunta)
             .Where(p => categoriaRiesgoId == null || p.CategoriaRiesgoId == categoriaRiesgoId)
             .OrderBy(p => p.CategoriaRiesgoId).ThenBy(p => p.Orden)
             .AsSplitQuery()

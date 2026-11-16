@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Catalogos;
+using Norvia.Domain.Entities.Encuestas;
 using Norvia.Domain.Enums;
 using Norvia.Tests.Infraestructura;
 using Npgsql;
@@ -87,6 +88,24 @@ public sealed class AislamientoBaseDatosTests(NorviaApiFactory api)
             MotivoCodigo = MotivoEstadoVinculo.Otro,
             MotivoDetalle = "intento de mezclar empresas",
             RegistradoPorId = a.AdminVinculoId
+        });
+
+        var error = await Assert.ThrowsAsync<DbUpdateException>(() => dbA.SaveChangesAsync());
+        var pg = Assert.IsType<PostgresException>(error.InnerException);
+        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, pg.SqlState);
+    }
+
+    [Fact]
+    public async Task La_base_rechaza_una_encuesta_con_creador_de_otra_empresa()
+    {
+        var a = await _escenario.CrearEmpresaAsync("A");
+        var b = await _escenario.CrearEmpresaAsync("B");
+
+        await using var dbA = api.NuevoContexto(a.EmpresaId);
+        dbA.Encuesta.Add(new Encuesta
+        {
+            Titulo = "Cruce ilegal",
+            CreadaPorId = b.AdminVinculoId
         });
 
         var error = await Assert.ThrowsAsync<DbUpdateException>(() => dbA.SaveChangesAsync());

@@ -164,4 +164,65 @@ public sealed class AislamientoApiTests(NorviaApiFactory api)
 
         Assert.Equal(HttpStatusCode.Forbidden, (await staff.GetAsync("/api/vinculos")).StatusCode);
     }
+
+    [Fact]
+    public async Task Una_empresa_no_puede_ver_editar_publicar_ni_cerrar_encuestas_de_otra()
+    {
+        short rubroId;
+        Guid categoriaId;
+        await using (var db = api.NuevoContexto(empresaId: null))
+        {
+            var tipoBreve = await db.TipoRespuestaPregunta
+                .Where(t => t.Codigo == TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve)
+                .Select(t => (Guid?)t.Id)
+                .FirstOrDefaultAsync();
+            if (tipoBreve is null)
+            {
+                var fila = new TipoRespuestaPreguntaCatalogo
+                {
+                    Id = Guid.CreateVersion7(),
+                    Codigo = TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve,
+                    Nombre = "Respuesta breve",
+                    InstruccionUi = TipoRespuestaPreguntaCatalogo.InstruccionUiPorDefecto(TipoRespuestaPreguntaCatalogo.CodigoRespuestaBreve)
+                };
+                db.TipoRespuestaPregunta.Add(fila);
+                await db.SaveChangesAsync();
+                tipoBreve = fila.Id;
+            }
+
+            rubroId = (short)(await db.Rubro.MaxAsync(r => r.Id) + 1);
+            var rubro = new Rubro { Id = rubroId, Codigo = $"r_{Guid.NewGuid():N}"[..20], Nombre = $"Rubro {Guid.NewGuid():N}" };
+            var cat = new CategoriaRiesgo { Rubro = rubro, Nombre = $"Cat {Guid.NewGuid():N}"[..20] };
+            db.AddRange(rubro, cat,
+                new PreguntaExploratoria { CategoriaRiesgo = cat, Texto = "¿Hay ruido?", TipoRespuestaPreguntaId = tipoBreve.Value, Orden = 1 });
+            await db.SaveChangesAsync();
+            categoriaId = cat.Id;
+        }
+
+        var a = await _escenario.CrearEmpresaAsync("EncIsoA", rubroId);
+        var b = await _escenario.CrearEmpresaAsync("EncIsoB", rubroId);
+        var sstA = await _escenario.ClienteConRolAsync(a, "responsable_sst");
+        var sstB = await _escenario.ClienteConRolAsync(b, "responsable_sst");
+
+        var creada = await Escenario.Json(await sstA.PostAsJsonAsync("/api/encuestas", new
+        {
+            titulo = "Encuesta privada A",
+            categoriaRiesgoIds = new[] { categoriaId }
+        }));
+        var encuestaAId = creada.GetProperty("id").GetGuid();
+        var versionAId = creada.GetProperty("versionBorradorId").GetGuid();
+
+        Assert.Empty((await Escenario.Json(await sstB.GetAsync("/api/encuestas"))).EnumerateArray());
+        Assert.Equal(HttpStatusCode.NotFound, (await sstB.GetAsync($"/api/encuestas/{encuestaAId}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await sstB.PutAsJsonAsync($"/api/encuestas/{encuestaAId}/borrador", new
+        {
+            secciones = Array.Empty<object>(),
+            preguntas = new object[]
+            {
+                new { texto = "Intento", tipoRespuestaCodigo = "respuesta_breve", obligatoria = true, orden = 1, opciones = Array.Empty<object>() }
+            }
+        })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await sstB.PostAsync($"/api/encuestas/{encuestaAId}/versiones/{versionAId}/publicacion", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await sstB.PostAsync($"/api/encuestas/{encuestaAId}/cierre", null)).StatusCode);
+    }
 }

@@ -1,5 +1,5 @@
 using FluentValidation;
-using Norvia.Domain.Enums;
+using Norvia.Domain.Entities.Catalogos;
 
 namespace Norvia.Application.Features.Catalogos;
 
@@ -12,19 +12,17 @@ public sealed record OpcionPreguntaRequestDto
 }
 
 /// <summary>
-/// Bloque de respuesta de una pregunta: tipo, peligro y opciones. Se valida y se guarda junto porque
-/// cada parte depende de las otras (D26, RN-68).
+/// Bloque de respuesta de una pregunta: tipo (código de catálogo), peligro y opciones (D26, RN-68).
 /// </summary>
 public interface IRespuestaPregunta
 {
-    TipoRespuestaPregunta? TipoRespuesta { get; }
+    string? TipoRespuestaCodigo { get; }
     Guid? PeligroId { get; }
     IReadOnlyList<OpcionPreguntaRequestDto>? Opciones { get; }
 }
 
 /// <summary>
 /// Reglas del bloque de respuesta (D26, RN-68), compartidas por CrearPregunta y ActualizarPregunta.
-/// Es interna para que no se registre sola; cada validador del slice la incluye.
 /// </summary>
 internal sealed class ReglasPregunta : AbstractValidator<IRespuestaPregunta>
 {
@@ -32,19 +30,22 @@ internal sealed class ReglasPregunta : AbstractValidator<IRespuestaPregunta>
 
     public ReglasPregunta()
     {
-        RuleFor(x => x.TipoRespuesta).NotNull().IsInEnum();
+        RuleFor(x => x.TipoRespuestaCodigo)
+            .NotEmpty()
+            .Must(TipoRespuestaPreguntaCatalogo.EsCodigoConocido)
+            .WithMessage("El tipo de respuesta no es válido.");
         RuleFor(x => x.Opciones).NotNull()
             .WithMessage("Envíe las opciones (lista vacía en una pregunta de respuesta breve).");
         RuleForEach(x => x.Opciones).NotNull();
 
-        // Las reglas de opciones suponen tipo y lista sin nulos; si no, ya fallaron las de arriba.
-        When(x => x.TipoRespuesta is not null && x.Opciones is not null && x.Opciones.All(o => o is not null),
+        When(x => TipoRespuestaPreguntaCatalogo.EsCodigoConocido(x.TipoRespuestaCodigo)
+                  && x.Opciones is not null && x.Opciones.All(o => o is not null),
             ReglasSegunTipo);
     }
 
     private void ReglasSegunTipo()
     {
-        When(x => x.TipoRespuesta == TipoRespuestaPregunta.RespuestaBreve, () =>
+        When(x => TipoRespuestaPreguntaCatalogo.EsCodigoRespuestaBreve(x.TipoRespuestaCodigo), () =>
         {
             RuleFor(x => x.Opciones).Empty()
                 .WithMessage("Una pregunta de respuesta breve no lleva opciones.");
@@ -66,7 +67,6 @@ internal sealed class ReglasPregunta : AbstractValidator<IRespuestaPregunta>
                 .Must(os => os!.Select(o => o.Texto.Trim().ToLowerInvariant()).Distinct().Count() == os!.Count)
                 .WithMessage("Dos opciones no pueden tener el mismo texto.");
 
-            // La opción de exposición solo tiene sentido si la pregunta detecta un peligro (D7).
             RuleFor(x => x.Opciones)
                 .Must(os => os!.Any(o => o.IndicaExposicion))
                 .When(x => x.PeligroId is not null)

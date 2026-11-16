@@ -46,7 +46,20 @@ public static class CatalogoPermisos
 
         // HU-029: elegir categorías de riesgo para una encuesta.
         Empresa("encuesta.categoria.listar", "Ver categorías de riesgo disponibles", "GET", "api/encuestas/categorias-disponibles",
-            "responsable_sst"),
+            "admin_empresa", "responsable_sst"),
+
+        // Tipos de respuesta (instrucción UI para el editor / encuestado).
+        Empresa("encuesta.tipo.listar", "Ver tipos de respuesta de pregunta", "GET", "api/encuestas/tipos-respuesta",
+            "admin_empresa", "responsable_sst"),
+
+        // HU-030: crear, editar, publicar, cerrar y consultar encuestas.
+        Empresa("encuesta.listar", "Listar encuestas", "GET", "api/encuestas", "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.crear", "Crear encuesta", "POST", "api/encuestas", "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.leer", "Ver detalle de encuesta", "GET", "api/encuestas/{id}", "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.editar", "Editar borrador de encuesta", "PUT", "api/encuestas/{id}/borrador", "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.publicar", "Publicar versión de encuesta", "POST", "api/encuestas/{id}/versiones/{versionId}/publicacion",
+            "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.cerrar", "Cerrar encuesta", "POST", "api/encuestas/{id}/cierre", "admin_empresa", "responsable_sst"),
 
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),

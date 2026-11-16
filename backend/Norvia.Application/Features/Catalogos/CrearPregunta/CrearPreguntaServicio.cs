@@ -1,8 +1,8 @@
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
-using Norvia.Application.Features.Catalogos.DTOs;
 using Norvia.Application.Features.Catalogos.CrearPregunta.DTOs;
+using Norvia.Application.Features.Catalogos.DTOs;
 using Norvia.Domain.Entities.Catalogos;
 
 namespace Norvia.Application.Features.Catalogos.CrearPregunta;
@@ -17,11 +17,15 @@ public sealed class CrearPreguntaServicio(ICrearPreguntaRepositorio repositorio,
         if (request.PeligroId is Guid peligroId && !await repositorio.PeligroActivoExisteAsync(peligroId, ct))
             return Errores.PeligroInvalido;
 
+        var codigo = TipoRespuestaPreguntaCatalogo.NormalizarCodigo(request.TipoRespuestaCodigo);
+        var tipoId = await repositorio.BuscarTipoIdPorCodigoAsync(codigo, ct);
+        if (tipoId is null) return Errores.TipoRespuestaInvalido;
+
         var pregunta = new PreguntaExploratoria
         {
             CategoriaRiesgoId = request.CategoriaRiesgoId,
             Texto = request.Texto.Trim(),
-            TipoRespuesta = request.TipoRespuesta!.Value, // el validador exige el tipo
+            TipoRespuestaPreguntaId = tipoId.Value,
             Obligatoria = request.Obligatoria,
             Orden = (short)(await repositorio.UltimoOrdenAsync(request.CategoriaRiesgoId, ct) + 1),
             PeligroId = request.PeligroId,
@@ -38,7 +42,6 @@ public sealed class CrearPreguntaServicio(ICrearPreguntaRepositorio repositorio,
 
         repositorio.Agregar(pregunta);
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
-
         return PreguntaResponseDto.De(pregunta);
     }
 }

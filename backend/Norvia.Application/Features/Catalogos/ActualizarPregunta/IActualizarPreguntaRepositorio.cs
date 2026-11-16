@@ -10,6 +10,7 @@ public interface IActualizarPreguntaRepositorio
     Task<bool> PeligroActivoExisteAsync(Guid peligroId, CancellationToken ct);
     Task<short> UltimoOrdenAsync(Guid categoriaRiesgoId, CancellationToken ct);
     Task<bool> OrdenOcupadoAsync(Guid categoriaRiesgoId, short orden, Guid excepto, CancellationToken ct);
+    Task<Guid?> BuscarTipoIdPorCodigoAsync(string codigo, CancellationToken ct);
 
     /// <summary>
     /// Sustituye las opciones. Nada fuera del catálogo apunta a OpcionPregunta (las encuestas copian el texto

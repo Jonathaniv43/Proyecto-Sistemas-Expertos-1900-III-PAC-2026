@@ -1,5 +1,3 @@
-using Norvia.Domain.Enums;
-
 namespace Norvia.Application.Features.Catalogos.CrearPregunta.DTOs;
 
 /// <summary>La pregunta se agrega al final de su categoría.</summary>
@@ -7,7 +5,7 @@ public sealed record CrearPreguntaRequestDto : IRespuestaPregunta
 {
     public Guid CategoriaRiesgoId { get; init; }
     public string Texto { get; init; } = string.Empty;
-    public TipoRespuestaPregunta? TipoRespuesta { get; init; }
+    public string? TipoRespuestaCodigo { get; init; }
     public bool Obligatoria { get; init; } = true;
 
     /// <summary>Peligro que detecta; solo en preguntas de selección.</summary>
