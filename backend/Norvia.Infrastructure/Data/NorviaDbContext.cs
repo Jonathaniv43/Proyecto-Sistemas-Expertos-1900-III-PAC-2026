@@ -5,6 +5,7 @@ using Norvia.Domain.Common;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
+using Norvia.Domain.Entities.Encuestas;
 using Norvia.Domain.Entities.Riesgos;
 
 namespace Norvia.Infrastructure.Data;
@@ -52,6 +53,13 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<PlantillaDocumento> PlantillaDocumento => Set<PlantillaDocumento>();
     public DbSet<PlantillaCorreo> PlantillaCorreo => Set<PlantillaCorreo>();
     public DbSet<TipoDocumentoIdentidadCatalogo> TipoDocumentoIdentidad => Set<TipoDocumentoIdentidadCatalogo>();
+
+    // Encuestas
+    public DbSet<Encuesta> Encuesta => Set<Encuesta>();
+    public DbSet<EncuestaVersion> EncuestaVersion => Set<EncuestaVersion>();
+    public DbSet<EncuestaCategoria> EncuestaCategoria => Set<EncuestaCategoria>();
+    public DbSet<EncuestaPregunta> EncuestaPregunta => Set<EncuestaPregunta>();
+    public DbSet<EncuestaOpcion> EncuestaOpcion => Set<EncuestaOpcion>();
 
     // Riesgos
     public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();

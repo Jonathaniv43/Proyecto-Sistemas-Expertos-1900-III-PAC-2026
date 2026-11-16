@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
+using Norvia.Domain.Entities.Encuestas;
 using Norvia.Domain.Entities.Riesgos;
 using Norvia.Domain.Enums;
 
@@ -29,7 +30,10 @@ public class RiesgoEmpresaConfiguration : IEntityTypeConfiguration<RiesgoEmpresa
             .HasForeignKey(r => new { r.EmpresaId, r.RevisadoPorId })
             .HasPrincipalKey(v => new { v.EmpresaId, v.Id });
 
-        // EncuestaId queda sin FK hasta que exista Encuesta (M3).
+        b.HasOne<Encuesta>()
+            .WithMany()
+            .HasForeignKey(r => new { r.EmpresaId, r.EncuestaId })
+            .HasPrincipalKey(e => new { e.EmpresaId, e.Id });
 
         b.Check("PeligroODescripcion", "\"PeligroId\" IS NOT NULL OR \"DescripcionPeligro\" IS NOT NULL");
         b.Check("SugeridoConOrigen",

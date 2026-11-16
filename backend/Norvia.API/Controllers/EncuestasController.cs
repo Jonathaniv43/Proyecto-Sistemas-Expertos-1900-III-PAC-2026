@@ -1,7 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
+using Norvia.Application.Features.Encuestas.ActualizarBorradorEncuesta;
+using Norvia.Application.Features.Encuestas.ActualizarBorradorEncuesta.DTOs;
+using Norvia.Application.Features.Encuestas.CerrarEncuesta;
+using Norvia.Application.Features.Encuestas.CrearEncuesta;
+using Norvia.Application.Features.Encuestas.CrearEncuesta.DTOs;
+using Norvia.Application.Features.Encuestas.DTOs;
 using Norvia.Application.Features.Encuestas.ListarCategoriasDisponibles;
 using Norvia.Application.Features.Encuestas.ListarCategoriasDisponibles.DTOs;
+using Norvia.Application.Features.Encuestas.ListarEncuestas;
+using Norvia.Application.Features.Encuestas.ListarEncuestas.DTOs;
+using Norvia.Application.Features.Encuestas.ObtenerEncuesta;
+using Norvia.Application.Features.Encuestas.ObtenerEncuesta.DTOs;
+using Norvia.Application.Features.Encuestas.PublicarVersionEncuesta;
 
 namespace Norvia.API.Controllers;
 
@@ -17,4 +28,61 @@ public sealed class EncuestasController : ControllerBase
     public async Task<IActionResult> ListarCategoriasDisponibles(
         [FromServices] ListarCategoriasDisponiblesServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(cancellationToken)).AHttp(this);
+
+    /// <summary>HU-030: listado de encuestas de la empresa.</summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<EncuestaResumenResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Listar(
+        [FromServices] ListarEncuestasServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(cancellationToken));
+
+    /// <summary>HU-030: detalle de una encuesta con su versión publicada y su borrador.</summary>
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(EncuestaDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Obtener(
+        Guid id, [FromServices] ObtenerEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-030: crea una encuesta en borrador copiando las preguntas activas de las categorías elegidas.</summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(CrearEncuestaResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Crear(
+        CrearEncuestaRequestDto request, [FromServices] CrearEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-030: edita el borrador de la encuesta o crea una nueva versión borrador si ya está publicada.</summary>
+    [HttpPut("{id:guid}/borrador")]
+    [ProducesResponseType(typeof(EncuestaVersionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ActualizarBorrador(
+        Guid id, ActualizarEncuestaBorradorRequestDto request,
+        [FromServices] ActualizarBorradorEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-030: publica la versión en borrador y marca la publicada anterior como reemplazada.</summary>
+    [HttpPost("{id:guid}/versiones/{versionId:guid}/publicacion")]
+    [ProducesResponseType(typeof(EncuestaVersionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> PublicarVersion(
+        Guid id, Guid versionId,
+        [FromServices] PublicarVersionEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, versionId, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-030: cierra la encuesta para impedir nuevas ediciones o respuestas.</summary>
+    [HttpPost("{id:guid}/cierre")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Cerrar(
+        Guid id, [FromServices] CerrarEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }
