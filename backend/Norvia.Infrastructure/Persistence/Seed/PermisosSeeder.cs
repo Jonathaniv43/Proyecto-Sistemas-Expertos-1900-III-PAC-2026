@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Norvia.Application.Common.Seguridad;
+using Norvia.Application.Features.AccesoRecurso;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Enums;
+
+using Norvia.Infrastructure.Data;
 
 namespace Norvia.Infrastructure.Persistence.Seed;
 

@@ -1,10 +1,15 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Auth.CerrarSesion;
+using Norvia.Application.Features.Auth.CerrarSesion.DTOs;
+using Norvia.Application.Features.Auth.DTOs;
 using Norvia.Application.Features.Auth.LoginEmpresa;
+using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
 using Norvia.Application.Features.Auth.LoginPlataforma;
+using Norvia.Application.Features.Auth.LoginPlataforma.DTOs;
 using Norvia.Application.Features.Auth.RefrescarSesion;
+using Norvia.Application.Features.Auth.RefrescarSesion.DTOs;
 
 namespace Norvia.API.Controllers;
 
@@ -15,23 +20,34 @@ namespace Norvia.API.Controllers;
 public sealed class AuthController : ControllerBase
 {
     [HttpPost("login/empresa")]
+    [ProducesResponseType(typeof(SesionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginEmpresa(
-        LoginEmpresaRequest request, [FromServices] LoginEmpresaServicio servicio, CancellationToken cancellationToken) =>
+        LoginEmpresaRequestDto request, [FromServices] LoginEmpresaServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [HttpPost("login/plataforma")]
+    [ProducesResponseType(typeof(SesionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginPlataforma(
-        LoginPlataformaRequest request, [FromServices] LoginPlataformaServicio servicio, CancellationToken cancellationToken) =>
+        LoginPlataformaRequestDto request, [FromServices] LoginPlataformaServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [HttpPost("refresh")]
+    [ProducesResponseType(typeof(SesionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Refrescar(
-        RefrescarSesionRequest request, [FromServices] RefrescarSesionServicio servicio, CancellationToken cancellationToken) =>
+        RefrescarSesionRequestDto request, [FromServices] RefrescarSesionServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CerrarSesion(
-        CerrarSesionRequest request, [FromServices] CerrarSesionServicio servicio, CancellationToken cancellationToken) =>
+        CerrarSesionRequestDto request, [FromServices] CerrarSesionServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 }
 

@@ -1,10 +1,10 @@
 using Norvia.Domain.Enums;
 
-namespace Norvia.Application.Common.Interfaces;
+namespace Norvia.Application.Features.AccesoRecurso.PermitirAccesoRecurso;
 
 public sealed record PermisoRegistrado(Guid Id, AlcancePermiso Alcance);
 
-public interface IAutorizadorPermisos
+public interface IPermitirAccesoRecursoRepositorio
 {
     Task<PermisoRegistrado?> BuscarPermisoAsync(string metodo, string ruta, CancellationToken ct);
     Task<bool> VinculoTienePermisoAsync(Guid vinculoId, Guid permisoId, CancellationToken ct);

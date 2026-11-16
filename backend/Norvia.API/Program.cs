@@ -34,7 +34,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseMiddleware<AutorizacionPermisosMiddleware>(); //este debe ir antes del middleware (app.UseCors()), para que las preflight OPTIONS no caigan aquí.
+app.UseMiddleware<AutorizacionPermisosMiddleware>(); //este debe ir antes del middleware (app.UseCors()), para que las preflight OPTIONS no caigan aquÃ­.
 app.UseAuthorization();
 app.MapControllers();
 

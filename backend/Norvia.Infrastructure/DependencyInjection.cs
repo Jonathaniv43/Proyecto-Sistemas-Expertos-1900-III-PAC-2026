@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.Interfaces;
+using Norvia.Infrastructure.Data;
 using Norvia.Infrastructure.Opciones;
 using Norvia.Infrastructure.Persistence;
 using Norvia.Infrastructure.Persistence.Interceptores;
@@ -57,7 +58,6 @@ public static class DependencyInjection
 
         services.AddScoped<StaffSeeder>();
         services.AddScoped<PermisosSeeder>();
-        services.AddScoped<IAutorizadorPermisos, AutorizadorPermisos>();
 
         return services;
     }

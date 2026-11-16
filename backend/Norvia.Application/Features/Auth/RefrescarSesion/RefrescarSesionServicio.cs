@@ -5,6 +5,9 @@ using Norvia.Application.Common.Seguridad;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Enums;
 
+using Norvia.Application.Features.Auth.DTOs;
+using Norvia.Application.Features.Auth.RefrescarSesion.DTOs;
+
 namespace Norvia.Application.Features.Auth.RefrescarSesion;
 
 /// <summary>
@@ -18,7 +21,7 @@ public sealed class RefrescarSesionServicio(
     IReloj reloj,
     EmisorSesion emisor) : IServicioCasoDeUso
 {
-    public async Task<Resultado<SesionResponse>> EjecutarAsync(RefrescarSesionRequest request, CancellationToken cancellationToken)
+    public async Task<Resultado<SesionResponseDto>> EjecutarAsync(RefrescarSesionRequestDto request, CancellationToken cancellationToken)
     {
         var fila = await repo.BuscarRefreshAsync(tokens.HashRefresh(request.RefreshToken), cancellationToken);
         if (fila is null)

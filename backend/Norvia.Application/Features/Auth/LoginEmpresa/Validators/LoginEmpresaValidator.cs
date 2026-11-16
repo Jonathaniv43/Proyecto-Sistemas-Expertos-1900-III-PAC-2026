@@ -1,8 +1,9 @@
 using FluentValidation;
+using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
 
-namespace Norvia.Application.Features.Auth.LoginEmpresa;
+namespace Norvia.Application.Features.Auth.LoginEmpresa.Validators;
 
-public sealed class LoginEmpresaValidator : AbstractValidator<LoginEmpresaRequest>
+public sealed class LoginEmpresaValidator : AbstractValidator<LoginEmpresaRequestDto>
 {
     public LoginEmpresaValidator()
     {

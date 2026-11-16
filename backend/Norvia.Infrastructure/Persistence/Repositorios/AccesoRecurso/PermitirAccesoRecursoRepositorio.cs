@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Norvia.Application.Common.Interfaces;
+using Norvia.Application.Features.AccesoRecurso.PermitirAccesoRecurso;
 using Norvia.Domain.Enums;
-using Norvia.Infrastructure.Persistence;
+using Norvia.Infrastructure.Data;
 
-namespace Norvia.Infrastructure.Seguridad;
+namespace Norvia.Infrastructure.Persistence.Repositorios.AccesoRecurso;
 
-public sealed class AutorizadorPermisos(NorviaDbContext db) : IAutorizadorPermisos
+public sealed class PermitirAccesoRecursoRepositorio(NorviaDbContext db) : IPermitirAccesoRecursoRepositorio
 {
     public Task<PermisoRegistrado?> BuscarPermisoAsync(string metodo, string ruta, CancellationToken ct) =>
         db.Permiso.AsNoTracking()
@@ -17,7 +17,7 @@ public sealed class AutorizadorPermisos(NorviaDbContext db) : IAutorizadorPermis
         db.VinculoEmpresa // el filtro global de tenant ya limita a la empresa de la sesión
             .Where(v => v.Id == vinculoId
                      && v.Estado == EstadoVinculo.Activo
-                     && v.Empresa.Estado == EstadoEmpresa.Activa) // quita esta línea si una empresa suspendida debe poder entrar
+                     && v.Empresa.Estado == EstadoEmpresa.Activa)
             .AnyAsync(v => v.Rol.Permisos.Any(rp => rp.PermisoId == permisoId), ct);
 
     public Task<bool> StaffTienePermisoAsync(Guid accesoId, Guid permisoId, CancellationToken ct) =>

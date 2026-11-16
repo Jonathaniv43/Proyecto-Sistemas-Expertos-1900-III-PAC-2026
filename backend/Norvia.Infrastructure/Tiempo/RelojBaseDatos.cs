@@ -1,7 +1,7 @@
-using System.Data;
+﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Norvia.Application.Common.Interfaces;
-using Norvia.Infrastructure.Persistence;
+using Norvia.Infrastructure.Data;
 
 namespace Norvia.Infrastructure.Tiempo;
 
