@@ -26,6 +26,10 @@ public static class CatalogoPermisos
         Empresa("notificacion.listar", "Ver notificaciones", "GET", "api/notificaciones", "encuestado"),
         Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
 
+        // HU-033: peligros sugeridos por las respuestas.
+        Empresa("encuesta.peligros_sugeridos", "Ver peligros sugeridos por la encuesta", "GET", "api/encuestas/{id}/peligros-sugeridos",
+            "admin_empresa", "responsable_sst"),
+
         // HU-032: reporte anónimo.
         Empresa("encuesta.reporte", "Ver reporte anónimo de encuesta", "GET", "api/encuestas/{id}/reporte",
             "admin_empresa", "responsable_sst"),
