@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
+using Norvia.Application.Features.Encuestas.ObtenerPeligrosSugeridos;
+using Norvia.Application.Features.Encuestas.ObtenerPeligrosSugeridos.DTOs;
 using Norvia.Application.Features.Encuestas.ActualizarBorradorEncuesta;
 using Norvia.Application.Features.Encuestas.ActualizarBorradorEncuesta.DTOs;
 using Norvia.Application.Features.Encuestas.CerrarEncuesta;
@@ -132,5 +134,13 @@ public sealed class EncuestasController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ObtenerReporte(
         Guid id, [FromServices] ObtenerReporteEncuestaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-033: peligros sugeridos por las respuestas (registra los nuevos como riesgos sugeridos).</summary>
+    [HttpGet("{id:guid}/peligros-sugeridos")]
+    [ProducesResponseType(typeof(PeligrosSugeridosResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerPeligrosSugeridos(
+        Guid id, [FromServices] ObtenerPeligrosSugeridosServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }

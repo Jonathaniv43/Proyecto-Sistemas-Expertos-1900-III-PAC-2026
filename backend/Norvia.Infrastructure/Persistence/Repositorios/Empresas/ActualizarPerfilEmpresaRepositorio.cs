@@ -20,6 +20,7 @@ public sealed class ActualizarPerfilEmpresaRepositorio(NorviaDbContext db) : IAc
             .Select(r => (short?)r.Id)
             .FirstOrDefaultAsync(ct);
 
+    // Con seguimiento: se asigna a empresa.Rubro, y sin seguimiento EF lo tomaría como un rubro nuevo e intentaría insertarlo.
     public Task<Rubro?> BuscarRubroAsync(short rubroId, CancellationToken ct) =>
-        db.Rubro.AsNoTracking().FirstOrDefaultAsync(r => r.Id == rubroId, ct);
+        db.Rubro.FirstOrDefaultAsync(r => r.Id == rubroId, ct);
 }
