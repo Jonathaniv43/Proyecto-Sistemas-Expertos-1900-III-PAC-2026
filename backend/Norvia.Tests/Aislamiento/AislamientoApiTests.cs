@@ -225,4 +225,42 @@ public sealed class AislamientoApiTests(NorviaApiFactory api)
         Assert.Equal(HttpStatusCode.NotFound, (await sstB.PostAsync($"/api/encuestas/{encuestaAId}/versiones/{versionAId}/publicacion", null)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await sstB.PostAsync($"/api/encuestas/{encuestaAId}/cierre", null)).StatusCode);
     }
+
+    // ---------- Eventos M6 (HU-047) ----------
+
+    [Fact]
+    public async Task Eventos_estan_aislados_entre_empresas_y_post_ignora_empresa_ajena()
+    {
+        var a = await _escenario.CrearEmpresaAsync("EvtIsoA");
+        var b = await _escenario.CrearEmpresaAsync("EvtIsoB");
+        var encuestadoA = await _escenario.ClienteConRolAsync(a, "encuestado");
+        var sstB = await _escenario.ClienteConRolAsync(b, "responsable_sst");
+
+        var creadoA = await Escenario.Json(await encuestadoA.PostAsJsonAsync("/api/eventos", new
+        {
+            tipo = "accidente",
+            esGrave = true,
+            fechaHoraEvento = DateTime.UtcNow.AddMinutes(-10),
+            descripcion = "Evento privado de A"
+        }));
+        var eventoAId = creadoA.GetProperty("id").GetGuid();
+
+        Assert.Empty((await Escenario.Json(await sstB.GetAsync("/api/eventos"))).EnumerateArray());
+        Assert.Equal(HttpStatusCode.NotFound, (await sstB.GetAsync($"/api/eventos/{eventoAId}")).StatusCode);
+
+        // Si B intenta enviar empresaId en el cuerpo, se ignora y se guarda en B (RN-06).
+        var creadoB = await Escenario.Json(await sstB.PostAsJsonAsync("/api/eventos", new
+        {
+            tipo = "condicion_insegura",
+            fechaHoraEvento = DateTime.UtcNow.AddMinutes(-5),
+            descripcion = "Intento con empresaId ajeno",
+            empresaId = a.EmpresaId
+        }));
+        var eventoBId = creadoB.GetProperty("id").GetGuid();
+
+        await using var db = api.NuevoContexto(empresaId: null);
+        var empresaGuardada = await db.Accidente.IgnoreQueryFilters()
+            .Where(x => x.Id == eventoBId).Select(x => x.EmpresaId).SingleAsync();
+        Assert.Equal(b.EmpresaId, empresaGuardada);
+    }
 }

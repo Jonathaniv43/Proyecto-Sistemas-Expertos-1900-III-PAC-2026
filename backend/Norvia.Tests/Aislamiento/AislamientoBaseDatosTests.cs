@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Entities.Accidentes;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Encuestas;
 using Norvia.Domain.Enums;
@@ -109,6 +110,51 @@ public sealed class AislamientoBaseDatosTests(NorviaApiFactory api)
         });
 
         var error = await Assert.ThrowsAsync<DbUpdateException>(() => dbA.SaveChangesAsync());
+        var pg = Assert.IsType<PostgresException>(error.InnerException);
+        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, pg.SqlState);
+    }
+
+    [Fact]
+    public async Task El_filtro_global_y_fk_compuesta_protegen_accidente_entre_empresas()
+    {
+        var a = await _escenario.CrearEmpresaAsync("AccA");
+        var b = await _escenario.CrearEmpresaAsync("AccB");
+
+        Guid eventoAId;
+        await using (var dbA = api.NuevoContexto(a.EmpresaId))
+        {
+            var evento = new Accidente
+            {
+                EmpresaId = b.EmpresaId, // interceptor debe sobrescribir con a.EmpresaId
+                Tipo = TipoAccidente.CondicionInsegura,
+                FechaHoraEvento = DateTime.UtcNow.AddMinutes(-5),
+                Descripcion = "Prueba aislamiento BD"
+            };
+            dbA.Accidente.Add(evento);
+            await dbA.SaveChangesAsync();
+            Assert.Equal(a.EmpresaId, evento.EmpresaId);
+            eventoAId = evento.Id;
+        }
+
+        await using (var dbB = api.NuevoContexto(b.EmpresaId))
+            Assert.Null(await dbB.Accidente.FirstOrDefaultAsync(x => x.Id == eventoAId));
+
+        await using (var dbSinSesion = api.NuevoContexto(empresaId: null))
+            Assert.Equal(0, await dbSinSesion.Accidente.CountAsync());
+
+        // FK compuesta (EmpresaId, DescartadoPorId) rechaza un vínculo de otra empresa (HU-049 / D15).
+        await using var dbCruce = api.NuevoContexto(a.EmpresaId);
+        dbCruce.Accidente.Add(new Accidente
+        {
+            Tipo = TipoAccidente.Incidente,
+            FechaHoraEvento = DateTime.UtcNow.AddMinutes(-5),
+            Descripcion = "Cruce ilegal de descartador",
+            Estado = EstadoAccidente.Descartado,
+            DescartadoPorId = b.AdminVinculoId,
+            DescartadoEn = DateTime.UtcNow
+        });
+
+        var error = await Assert.ThrowsAsync<DbUpdateException>(() => dbCruce.SaveChangesAsync());
         var pg = Assert.IsType<PostgresException>(error.InnerException);
         Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, pg.SqlState);
     }

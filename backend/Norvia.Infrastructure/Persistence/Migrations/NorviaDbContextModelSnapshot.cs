@@ -496,6 +496,88 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Accidentes.Accidente", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CerradoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DescartadoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DescartadoPorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("EsGrave")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("EstadoEnfermedad")
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
+                    b.Property<DateTime>("FechaHoraEvento")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Lugar")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("MotivoDescarte")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RegistradoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EmpresaId", "Id");
+
+                    b.HasIndex("EmpresaId", "DescartadoPorId");
+
+                    b.HasIndex("EmpresaId", "FechaHoraEvento");
+
+                    b.ToTable("Accidente", t =>
+                        {
+                            t.HasCheckConstraint("CK_Accidente_CerradoEn", "(\"CerradoEn\" IS NOT NULL) = (\"Estado\" = 'cerrado')");
+
+                            t.HasCheckConstraint("CK_Accidente_Descarte", "(\"DescartadoPorId\" IS NOT NULL AND \"DescartadoEn\" IS NOT NULL) = (\"Estado\" = 'descartado')");
+
+                            t.HasCheckConstraint("CK_Accidente_Estado", "\"Estado\" IN ('abierto', 'en_investigacion', 'cerrado', 'descartado')");
+
+                            t.HasCheckConstraint("CK_Accidente_EstadoEnfermedad", "\"EstadoEnfermedad\" IN ('sospechosa', 'diagnosticada')");
+
+                            t.HasCheckConstraint("CK_Accidente_EstadoEnfermedadSegunTipo", "(\"EstadoEnfermedad\" IS NOT NULL) = (\"Tipo\" = 'enfermedad_profesional')");
+
+                            t.HasCheckConstraint("CK_Accidente_MotivoDescarte", "\"MotivoDescarte\" IS NULL OR \"Estado\" = 'descartado'");
+
+                            t.HasCheckConstraint("CK_Accidente_Tipo", "\"Tipo\" IN ('accidente', 'incidente', 'enfermedad_profesional', 'condicion_insegura')");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1676,6 +1758,25 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Persona");
 
                     b.Navigation("Rol");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Accidentes.Accidente", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "DescartadoPor")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "DescartadoPorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DescartadoPor");
+
+                    b.Navigation("Empresa");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>

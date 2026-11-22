@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Domain.Common;
 using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Entities.Accidentes;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Encuestas;
@@ -71,6 +72,9 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();
     public DbSet<EvaluacionRiesgo> EvaluacionRiesgo => Set<EvaluacionRiesgo>();
     public DbSet<Control> Control => Set<Control>();
+
+    // Accidentes / Eventos (M6; pendiente HU-049: InvestigacionAccidente)
+    public DbSet<Accidente> Accidente => Set<Accidente>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
