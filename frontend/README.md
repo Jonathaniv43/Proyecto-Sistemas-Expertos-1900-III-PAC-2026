@@ -26,7 +26,7 @@ src/
 ├── shared/
 │   ├── api/        cliente Axios, sesión (tokens) y extractor de errores
 │   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, CampoSelect,
-│   │               GrupoRadio, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
+│   │               GrupoRadio, AreaTexto, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
 │   ├── forms/      useFormulario (React Hook Form + Zod)
 │   ├── hooks/      usePeticion, useCargaVisible
 │   ├── sesion/     estado de la sesión para React: useSesion, SiRol, ROLES, cerrarSesion
@@ -199,3 +199,18 @@ useFormulario(esquema, {
   - El front genera la contraseña temporal con `generarContrasenaTemporal()`, que cumple la política de HU-114 y no usa caracteres confusos.
   - La confirmación la muestra una sola vez, con un botón para copiarla. El administrador se la entrega a la persona, que debe cambiarla en el primer ingreso.
 - **Acceso duplicado:** se avisa junto al correo, sin borrar lo demás.
+
+## Agregar encuestados (HU-115)
+
+- **`/personas/encuestados`:** solo para `admin_empresa`. Permite agregar de a una persona o varias a la vez.
+- **Una persona:** el backend genera la contraseña temporal si la cuenta es nueva, y la confirmación la muestra una vez.
+- **Varias a la vez:**
+  - **Entrada:** se pega una lista desde Excel (tabuladores) o desde un CSV (`;` o `,`), o se carga un archivo.
+  - **Columnas:** 3 (correo, primer nombre, primer apellido) o 5 (correo, primer nombre, segundo nombre, primer apellido, segundo apellido). Se omiten un encabezado y las líneas vacías.
+  - **Vista previa en vivo** (`lote/leerLista.ts`): valida cada fila con las reglas de `FilaEncuestadoValidator` y marca los correos repetidos dentro de la lista. Las filas con error no se envían.
+  - **Límite:** hasta 500 por envío.
+- **Resultado:**
+  - quiénes recibieron acceso, con la contraseña temporal de las cuentas nuevas o "ya tenía cuenta";
+  - "Descargar contraseñas (CSV)", con BOM y `;` para que Excel lo abra bien;
+  - las filas por corregir, con el número de línea original. "Corregir las filas con error" las devuelve al cuadro de texto.
+- **Tablas:** se usan las clases `.tabla-contenedor` y `.tabla` de `index.css` (design system § Tabla). En pantallas chicas la tabla se desplaza dentro de su caja.

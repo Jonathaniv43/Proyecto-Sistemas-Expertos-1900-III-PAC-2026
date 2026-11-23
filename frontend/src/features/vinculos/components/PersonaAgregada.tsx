@@ -11,10 +11,17 @@ interface PersonaAgregadaProps {
   contrasenaTemporal: string
   empresa: { razonSocial: string; rtn: string } | null
   onAgregarOtra: () => void
+  textoAgregarOtra?: string
 }
 
 /** Confirmación del alta: la persona ya tiene acceso a la empresa con el rol elegido. */
-export function PersonaAgregada({ persona, contrasenaTemporal, empresa, onAgregarOtra }: PersonaAgregadaProps) {
+export function PersonaAgregada({
+  persona,
+  contrasenaTemporal,
+  empresa,
+  onAgregarOtra,
+  textoAgregarOtra = 'Agregar otra persona',
+}: PersonaAgregadaProps) {
   const [copiada, setCopiada] = useState(false)
   const rol = etiquetaRol(persona.rolCodigo)
   const lugar = empresa?.razonSocial ?? 'la empresa'
@@ -79,7 +86,7 @@ export function PersonaAgregada({ persona, contrasenaTemporal, empresa, onAgrega
 
       <div>
         <Boton variante="secundario" onClick={onAgregarOtra}>
-          Agregar otra persona
+          {textoAgregarOtra}
         </Boton>
       </div>
     </section>

@@ -21,3 +21,44 @@ export interface CrearVinculoResponse {
   /** true: se creó la cuenta con la contraseña temporal; false: se reutilizó una cuenta existente. */
   cuentaNueva: boolean
 }
+
+/** POST /api/vinculos/encuestados (HU-115). Sin contraseña: el backend la genera si la cuenta es nueva. */
+export interface CrearEncuestadoRequest {
+  email: string
+  primerNombre: string
+  segundoNombre?: string
+  primerApellido: string
+  segundoApellido?: string
+}
+
+export interface CrearEncuestadoResponse extends Omit<CrearVinculoResponse, 'rolCodigo'> {
+  rolCodigo: 'encuestado'
+  /** Solo en cuentas nuevas: la contraseña generada, visible una única vez. */
+  passwordTemporal: string | null
+}
+
+/** POST /api/vinculos/encuestados/lote: hasta 500 filas; cada una se procesa aunque otras fallen. */
+export type FilaEncuestado = CrearEncuestadoRequest
+
+export interface EncuestadoCreado {
+  /** Posición en la lista enviada, desde 1. */
+  fila: number
+  vinculoId: string
+  email: string
+  nombreCompleto: string
+  cuentaNueva: boolean
+  passwordTemporal: string | null
+}
+
+export interface ErrorFila {
+  fila: number
+  email: string
+  codigo: string
+  mensaje: string
+}
+
+export interface CrearEncuestadosLoteResponse {
+  creados: number
+  cuentas: EncuestadoCreado[]
+  errores: ErrorFila[]
+}
