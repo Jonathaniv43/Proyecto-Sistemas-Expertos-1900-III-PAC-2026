@@ -64,6 +64,36 @@ public sealed class RespuestasEncuestaTests(NorviaApiFactory api)
     }
 
     [Fact]
+    public async Task Listado_cuenta_las_participaciones_de_cada_encuesta()
+    {
+        var (empresa, sst, encuestaId, versionId, preguntas) = await PublicarEncuestaAsync();
+        async Task<int> Participaciones() =>
+            (await Escenario.Json(await sst.GetAsync("/api/encuestas"))).EnumerateArray()
+                .Single(e => e.GetProperty("id").GetGuid() == encuestaId).GetProperty("participaciones").GetInt32();
+
+        Assert.Equal(0, await Participaciones());
+
+        var unica = preguntas.Single(p => p.Tipo == "seleccion_unica");
+        var breve = preguntas.Single(p => p.Tipo == "respuesta_breve");
+        for (var i = 0; i < 2; i++)
+        {
+            var encuestado = await _escenario.ClienteConRolAsync(empresa, "encuestado");
+            var r = await encuestado.PostAsJsonAsync($"/api/encuestas/{encuestaId}/respuestas", new
+            {
+                versionId,
+                respuestas = new object[]
+                {
+                    new { preguntaId = unica.Id, opcionId = unica.OpcionIds[0] },
+                    new { preguntaId = breve.Id, textoLibre = $"Respuesta {i}" }
+                }
+            });
+            Assert.Equal(HttpStatusCode.OK, r.StatusCode);
+        }
+
+        Assert.Equal(2, await Participaciones());
+    }
+
+    [Fact]
     public async Task Responder_rechaza_version_obsoleta_y_obligatoria_faltante()
     {
         var (empresa, _, encuestaId, versionId, preguntas) = await PublicarEncuestaAsync();

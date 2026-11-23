@@ -20,6 +20,8 @@ public sealed class ListarEncuestasRepositorio(NorviaDbContext db) : IListarEncu
                     .Where(v => v.Estado == EstadoVersionEncuesta.Publicada)
                     .Select(v => (int?)v.NumeroVersion)
                     .FirstOrDefault(),
-                0))
+                // Cuántas personas respondieron (todas las versiones). Solo cuenta participaciones:
+                // ParticipacionEncuesta no se relaciona con lo respondido (anonimato, RN-72).
+                db.ParticipacionEncuesta.Count(p => p.EncuestaId == e.Id)))
             .ToListAsync(ct);
 }
