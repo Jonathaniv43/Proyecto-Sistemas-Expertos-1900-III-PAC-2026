@@ -24,6 +24,7 @@ builder.Services.AddControllers(o => o.Filters.Add<ValidacionFiltro>())
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutenticacionJwt();
+builder.Services.AddCorsFrontend();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantActual, TenantActual>();
 
@@ -38,8 +39,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// CORS antes de la autenticación y de los permisos: responde las preflight OPTIONS sin que lleguen
+// a AutorizacionPermisosMiddleware, y agrega los encabezados CORS también a los 401/403.
+app.UseCors();
 app.UseAuthentication();
-app.UseMiddleware<AutorizacionPermisosMiddleware>(); //este debe ir antes del middleware (app.UseCors()), para que las preflight OPTIONS no caigan aquÃ­.
+app.UseMiddleware<AutorizacionPermisosMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 

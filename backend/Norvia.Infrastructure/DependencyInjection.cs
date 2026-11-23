@@ -39,6 +39,11 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(CifradoOpciones.Seccion))
             .Validate(o => !string.IsNullOrWhiteSpace(o.Key), "Falta EmpresaId__Key en el entorno.")
             .ValidateOnStart();
+        services.AddOptions<CorsOpciones>()
+            .Bind(configuration.GetSection(CorsOpciones.Seccion))
+            .Validate(o => o.SonValidos(),
+                "Cors__Origenes debe tener al menos un origen (https://dominio, sin barra final), separados por coma.")
+            .ValidateOnStart();
         services.AddOptions<StaffSeedOpciones>()
             .Bind(configuration.GetSection(StaffSeedOpciones.Seccion));
 
