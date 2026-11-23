@@ -17,6 +17,7 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
 {
     public const string StaffEmail = "staff@pruebas.norvia";
     public const string StaffPassword = "Staff#Pruebas2026";
+    public const string OrigenFrontend = "http://localhost:5173";
 
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:16-alpine").Build();
 
@@ -47,6 +48,7 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting("Jwt:AccessMinutos", "15");
         builder.UseSetting("Jwt:RefreshDias", "1");
         builder.UseSetting("EmpresaId:Key", Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
+        builder.UseSetting("Cors:Origenes", OrigenFrontend);
         builder.UseSetting("StaffSeed:Email", StaffEmail);
         builder.UseSetting("StaffSeed:Password", StaffPassword);
     }
