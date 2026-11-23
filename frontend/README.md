@@ -26,7 +26,7 @@ src/
 ├── shared/
 │   ├── api/        cliente Axios, sesión (tokens) y extractor de errores
 │   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, CampoSelect,
-│   │               GrupoRadio, AreaTexto, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
+│   │               GrupoRadio, GrupoCasillas, AreaTexto, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
 │   ├── forms/      useFormulario (React Hook Form + Zod)
 │   ├── hooks/      usePeticion, useCargaVisible
 │   ├── sesion/     estado de la sesión para React: useSesion, SiRol, ROLES, cerrarSesion
@@ -214,3 +214,16 @@ useFormulario(esquema, {
   - "Descargar contraseñas (CSV)", con BOM y `;` para que Excel lo abra bien;
   - las filas por corregir, con el número de línea original. "Corregir las filas con error" las devuelve al cuadro de texto.
 - **Tablas:** se usan las clases `.tabla-contenedor` y `.tabla` de `index.css` (design system § Tabla). En pantallas chicas la tabla se desplaza dentro de su caja.
+
+## Nueva encuesta: elegir categorías (HU-029)
+
+- **`/encuestas/nueva`:** para `admin_empresa` y `responsable_sst` (`ROLES_GESTION`). Se llega desde el inicio.
+- **Categorías:** salen de `GET /encuestas/categorias-disponibles`, que trae solo las del rubro de la empresa, cada una con sus preguntas.
+- **Vista previa:** al marcar categorías se ven, en vivo, las preguntas que tendrá la encuesta, numeradas y agrupadas por categoría.
+- **Crear:** con el título, "Crear borrador" llama a `POST /encuestas`. La encuesta queda como borrador y HU-030 sigue con la edición y la publicación.
+- **Estados de pantalla:** cargando (skeleton), error al cargar ("Reintentar"), rubro sin categorías y empresa sin rubro.
+- **`PreguntaEncuesta`** (`features/encuestas/components`):
+  - Sigue el bloque "Pregunta de encuesta" del design system: enunciado numerado, `*` si es obligatoria y la indicación como ayuda.
+  - El control depende del tipo: `respuesta_breve` es área de texto, `seleccion_unica` son radios y `seleccion_multiple` son casillas.
+  - Hoy se usa en modo de solo lectura. HU-030 (vista del encuestado) y HU-031 (responder) la reutilizan.
+- **Catálogo:** no hay categorías ni preguntas sembradas. Las carga el staff con `POST /categorias-riesgo` y `POST /preguntas` (HU-023, todavía sin pantalla).
