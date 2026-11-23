@@ -24,3 +24,27 @@
     outline-offset: var(--focus-ring-offset);
   }
 }
+
+/* Spinner de botón (design-system.css § Botón): solo dentro de botones. */
+@layer components {
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-full);
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: girar 0.7s linear infinite;
+  }
+
+  @keyframes girar {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2s;
+    }
+  }
+}
