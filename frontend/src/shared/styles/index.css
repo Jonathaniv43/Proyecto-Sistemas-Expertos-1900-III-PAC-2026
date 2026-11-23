@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg-canvas font-sans text-sm font-regular text-text-primary antialiased;
+  }
+
+  a {
+    @apply text-text-link hover:text-text-link-hover;
+  }
+
+  /* El anillo de foco nunca se elimina (design-system.md § Bordes). */
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
