@@ -76,24 +76,86 @@
     border-color: var(--color-border-input-hover);
   }
 
-  .radio input:checked + .radio-circulo {
+  /* Con :has el círculo puede ir envuelto (opciones con descripción), no solo justo después del input. */
+  .radio:has(input:checked) .radio-circulo {
     border-color: var(--color-action-primary);
     background: var(--color-action-primary);
   }
 
-  .radio input:checked + .radio-circulo::after {
+  .radio:has(input:checked) .radio-circulo::after {
     opacity: 1;
   }
 
-  .radio:hover input:checked + .radio-circulo {
+  .radio:hover:has(input:checked) .radio-circulo {
     border-color: var(--color-action-primary-hover);
     background: var(--color-action-primary-hover);
   }
 
-  .radio input:focus-visible + .radio-circulo {
+  .radio:has(input:focus-visible) .radio-circulo {
     box-shadow:
       0 0 0 var(--focus-ring-offset) var(--color-bg-surface),
       0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
+  }
+
+  /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
+  .area-texto {
+    display: block;
+    width: 100%;
+    min-height: 80px;
+    max-height: 184px;
+    padding: var(--space-3);
+    resize: none;
+    field-sizing: content;
+    overflow-y: auto;
+  }
+
+  /* Tabla (design-system.css § Tabla): contenedor con borde y desplazamiento horizontal en pantallas chicas. */
+  .tabla-contenedor {
+    overflow-x: auto;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-surface);
+  }
+
+  .tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--color-bg-surface);
+  }
+
+  .tabla th {
+    height: 40px;
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .tabla td {
+    height: var(--table-row-height);
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    white-space: nowrap;
+  }
+
+  .tabla td.envolver {
+    min-width: 200px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    white-space: normal;
+  }
+
+  .tabla tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .tabla tbody tr:hover {
+    background: var(--color-bg-subtle);
   }
 
   @keyframes girar {

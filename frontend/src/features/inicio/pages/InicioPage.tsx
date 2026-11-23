@@ -1,4 +1,4 @@
-import { UserPlus } from 'lucide-react'
+import { UserPlus, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { etiquetaRol, ROLES, SiRol, useSesion } from '@/shared/sesion'
@@ -20,10 +20,14 @@ export function InicioPage() {
         </p>
       </div>
       <SiRol roles={[ROLES.adminEmpresa]}>
-        <div>
-          <Link to="/personas/nueva" className={clasesBoton('primario')}>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link to="/personas/nueva" className={clasesBoton('secundario')}>
             <UserPlus aria-hidden size={16} strokeWidth={1.5} />
             Agregar una persona
+          </Link>
+          <Link to="/personas/encuestados" className={clasesBoton('secundario')}>
+            <Users aria-hidden size={16} strokeWidth={1.5} />
+            Agregar encuestados
           </Link>
         </div>
       </SiRol>

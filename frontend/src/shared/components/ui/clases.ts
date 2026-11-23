@@ -16,10 +16,14 @@ export const clasesBoton = (variante: VarianteBoton = 'primario') =>
     VARIANTES[variante],
   ].join(' ')
 
-/** Clases del control de texto (input y select): estados del design system. */
-export const clasesControl = (conError: boolean) =>
+/**
+ * Clases del control de texto (input, select y área de texto): estados del design system.
+ * `altoFijo: false` para el área de texto, que crece con el contenido.
+ */
+export const clasesControl = (conError: boolean, { altoFijo = true } = {}) =>
   [
-    'h-control-touch w-full rounded-md border bg-bg-surface px-3 text-md text-text-primary transition-[border-color,box-shadow] sm:h-control sm:text-sm',
+    altoFijo ? 'h-control-touch sm:h-control' : '',
+    'w-full rounded-md border bg-bg-surface px-3 text-md text-text-primary transition-[border-color,box-shadow] sm:text-sm',
     'placeholder:text-text-tertiary focus-visible:outline-none focus:ring-3',
     'disabled:cursor-not-allowed disabled:border-border-default disabled:bg-bg-disabled disabled:text-text-disabled',
     conError

@@ -6,6 +6,7 @@ import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
+import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
 import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage'
 import { AppLayout } from '@/shared/components/AppLayout'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
@@ -44,7 +45,10 @@ export const router = createBrowserRouter([
           { path: 'cambiar-contrasena', element: <CambiarContrasenaPage /> },
           {
             element: <RequiereRol roles={[ROLES.adminEmpresa]} />,
-            children: [{ path: 'personas/nueva', element: <AgregarPersonaPage /> }],
+            children: [
+              { path: 'personas/nueva', element: <AgregarPersonaPage /> },
+              { path: 'personas/encuestados', element: <AgregarEncuestadosPage /> },
+            ],
           },
         ],
       },
