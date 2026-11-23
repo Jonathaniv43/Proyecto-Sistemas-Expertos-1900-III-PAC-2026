@@ -40,16 +40,17 @@ api.interceptors.request.use((config) => {
  * - `renovada`: hay access token nuevo.
  * - `rechazada`: el backend no aceptó el refresh (vencido, revocado o no hay): la sesión terminó.
  * - `sin_conexion`: no se pudo hablar con el backend (red, caída, 5xx): la sesión NO se cierra.
+ * - `reemplazada`: el refresh guardado es de otra sesión (otra pestaña entró a otra empresa); esta
+ *   sesión ya terminó con ese motivo.
  */
-export type ResultadoRenovacion = 'renovada' | 'rechazada' | 'sin_conexion'
+export type ResultadoRenovacion = 'renovada' | 'rechazada' | 'sin_conexion' | 'reemplazada'
 
 let renovacionEnCurso: Promise<ResultadoRenovacion> | null = null
 
 async function pedirRefresh(refreshToken: string): Promise<ResultadoRenovacion> {
   try {
     const { data } = await clienteRefresh.post<SesionResponse>('/auth/refresh', { refreshToken })
-    sesion.guardar(data)
-    return 'renovada'
+    return sesion.renovar(data) ? 'renovada' : 'reemplazada'
   } catch (error) {
     const status = axios.isAxiosError(error) ? error.response?.status : undefined
     return status !== undefined && status < 500 ? 'rechazada' : 'sin_conexion'

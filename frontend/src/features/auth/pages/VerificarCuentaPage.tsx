@@ -13,7 +13,7 @@ import { verificarCuentaEsquema } from '../schemas/verificarCuenta'
 /**
  * Activa la cuenta creada en el registro (HU-017) o por un administrador: con el correo y la
  * contraseña temporal recibidos, la persona elige su contraseña definitiva (HU-114).
- * El enlace del correo apunta aquí; ?correo= rellena el correo.
+ * El enlace del correo apunta aquí; ?correo= rellena el correo y ?rtn= se pasa al login.
  */
 export function VerificarCuentaPage() {
   const [parametros] = useSearchParams()
@@ -51,7 +51,10 @@ export function VerificarCuentaPage() {
         <Aviso tipo="exito" titulo="Tu contraseña quedó guardada">
           Ya puedes iniciar sesión con tu correo y tu contraseña nueva.
         </Aviso>
-        <Link to="/login" className={`${clasesBoton('primario')} justify-self-start`}>
+        <Link
+          to={parametros.get('rtn') ? `/login?${new URLSearchParams({ rtn: parametros.get('rtn')! })}` : '/login'}
+          className={`${clasesBoton('primario')} justify-self-start`}
+        >
           Iniciar sesión
         </Link>
       </div>

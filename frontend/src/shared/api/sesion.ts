@@ -7,6 +7,10 @@
  *
  * Los datos de la persona (tipo de sesión, rol, vínculo) se leen del access token. Solo sirven para
  * decidir qué mostrar: quien autoriza de verdad es el backend.
+ *
+ * Una empresa por navegador (HU-019): todas las pestañas comparten el refresh. Si en otra pestaña se
+ * inicia sesión en otra empresa (o con otra persona), esta pestaña cierra la suya con motivo
+ * `reemplazada`, para que nunca se mezclen datos de dos empresas.
  */
 
 /** Respuesta de login y refresh (SesionResponseDto del backend). */
@@ -19,7 +23,19 @@ export interface SesionResponse {
   debeCambiarPassword: boolean
 }
 
-export type MotivoFinSesion = 'cerrada' | 'expirada'
+/**
+ * - `cerrada`: la persona cerró sesión (aquí o en otra pestaña).
+ * - `expirada`: el backend ya no acepta la sesión.
+ * - `reemplazada`: se inició sesión en otra empresa en este navegador.
+ * - `contrasena_cambiada`: cambió su contraseña; el backend cerró todas sus sesiones (HU-114).
+ */
+export type MotivoFinSesion = 'cerrada' | 'expirada' | 'reemplazada' | 'contrasena_cambiada'
+
+/** Empresa de la sesión, para mostrarla (viene de la consulta por RTN al iniciar sesión). */
+export interface EmpresaSesion {
+  razonSocial: string
+  rtn: string
+}
 
 export type TipoSesion = 'empresa' | 'plataforma'
 
@@ -31,9 +47,14 @@ export interface UsuarioSesion {
   /** VinculoEmpresa de la sesión; solo en sesiones de empresa. */
   vinculoId: string | null
   debeCambiarPassword: boolean
+  /** Solo en sesiones de empresa iniciadas desde este navegador. */
+  empresa: EmpresaSesion | null
 }
 
 const CLAVE_REFRESH = 'norvia.refreshToken'
+/** Identifica cada inicio de sesión: cambia al iniciar sesión, no al renovar. */
+const CLAVE_SESION_ID = 'norvia.sesionId'
+const CLAVE_EMPRESA = 'norvia.empresa'
 const CLAIM_ROL_LARGO = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
 
 let accessToken: string | null = null
@@ -51,14 +72,36 @@ function leerRefresh(): string | null {
   }
 }
 
-function escribirRefresh(valor: string | null) {
+function escribir(clave: string, valor: string | null) {
   try {
-    if (valor) localStorage.setItem(CLAVE_REFRESH, valor)
-    else localStorage.removeItem(CLAVE_REFRESH)
+    if (valor) localStorage.setItem(clave, valor)
+    else localStorage.removeItem(clave)
   } catch {
     // sin almacenamiento persistente
   }
 }
+
+const escribirRefresh = (valor: string | null) => escribir(CLAVE_REFRESH, valor)
+
+function leer(clave: string): string | null {
+  try {
+    return localStorage.getItem(clave)
+  } catch {
+    return null
+  }
+}
+
+function leerEmpresa(): EmpresaSesion | null {
+  try {
+    const valor = JSON.parse(leer(CLAVE_EMPRESA) ?? 'null') as EmpresaSesion | null
+    return valor && typeof valor.razonSocial === 'string' && typeof valor.rtn === 'string' ? valor : null
+  } catch {
+    return null
+  }
+}
+
+/** Id de este inicio de sesión en esta pestaña, para notar si otra pestaña inicia otro. */
+let sesionIdPropio: string | null = leer(CLAVE_SESION_ID)
 
 /** Lee el payload del JWT (sin verificar la firma: eso lo hace el backend). */
 function leerClaims(token: string): Record<string, unknown> | null {
@@ -80,6 +123,7 @@ function usuarioDe(token: string, debeCambiarPassword: boolean): UsuarioSesion |
     rol: texto(claims.role) ?? texto(claims[CLAIM_ROL_LARGO]),
     vinculoId: texto(claims.vinculo_id),
     debeCambiarPassword,
+    empresa: claims.tipo_sesion === 'plataforma' ? null : leerEmpresa(),
   }
 }
 
@@ -92,12 +136,36 @@ export const sesion = {
   /** Persona de la sesión actual, o null si no hay access token. Mismo objeto hasta que cambie. */
   obtenerUsuario: () => usuario,
 
-  /** Guarda los tokens recibidos en el login o en el refresh. */
-  guardar(respuesta: SesionResponse) {
+  /** Inicio de sesión: guarda los tokens y marca un inicio nuevo (las demás pestañas lo notan). */
+  iniciar(respuesta: SesionResponse, empresa: EmpresaSesion | null) {
+    sesionIdPropio = crypto.randomUUID()
+    escribir(CLAVE_SESION_ID, sesionIdPropio)
+    escribir(CLAVE_EMPRESA, empresa ? JSON.stringify(empresa) : null)
     accessToken = respuesta.accessToken
     usuario = usuarioDe(respuesta.accessToken, respuesta.debeCambiarPassword)
     escribirRefresh(respuesta.refreshToken)
     avisarCambio()
+  },
+
+  /**
+   * Renovación: guarda los tokens nuevos. Si el refresh guardado ya era de otra sesión (otra pestaña
+   * inició sesión en otra empresa), no los usa: termina esta sesión y devuelve false.
+   */
+  renovar(respuesta: SesionResponse): boolean {
+    const nuevo = usuarioDe(respuesta.accessToken, respuesta.debeCambiarPassword)
+    const otraSesion = usuario !== null && (nuevo?.vinculoId !== usuario.vinculoId || nuevo?.tipo !== usuario.tipo)
+    if (otraSesion) {
+      // El refresh nuevo pertenece a la otra pestaña: se conserva para ella.
+      escribirRefresh(respuesta.refreshToken)
+      this.terminar('reemplazada', { conservarAlmacenamiento: true })
+      return false
+    }
+    sesionIdPropio = leer(CLAVE_SESION_ID)
+    accessToken = respuesta.accessToken
+    usuario = nuevo
+    escribirRefresh(respuesta.refreshToken)
+    avisarCambio()
+    return true
   },
 
   /** Marca que ya se cambió la contraseña temporal (HU-114). */
@@ -108,11 +176,19 @@ export const sesion = {
     }
   },
 
-  /** Borra la sesión local y avisa a quien escuche (p. ej. el router, para ir al login). */
-  terminar(motivo: MotivoFinSesion) {
+  /**
+   * Borra la sesión de esta pestaña y avisa a quien escuche (p. ej. el router, para ir al login).
+   * Con `conservarAlmacenamiento` no toca lo guardado: es de la sesión de otra pestaña.
+   */
+  terminar(motivo: MotivoFinSesion, { conservarAlmacenamiento = false } = {}) {
     accessToken = null
     usuario = null
-    escribirRefresh(null)
+    if (!conservarAlmacenamiento) {
+      escribirRefresh(null)
+      escribir(CLAVE_SESION_ID, null)
+      escribir(CLAVE_EMPRESA, null)
+      sesionIdPropio = null
+    }
     oyentesFin.forEach((oyente) => oyente(motivo))
     avisarCambio()
   },
@@ -134,12 +210,19 @@ export const sesion = {
   },
 }
 
-// Otra pestaña cerró sesión (borró el refresh): esta pestaña también la cierra.
+// Lo que hacen otras pestañas:
+// - cierran sesión (borran el refresh): esta pestaña también la cierra;
+// - inician sesión (cambia el id de sesión): esta pestaña cierra la suya sin borrar la nueva.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (evento) => {
+    if (accessToken === null) return
     const borrado = evento.key === null || (evento.key === CLAVE_REFRESH && evento.newValue === null)
-    if (borrado && accessToken !== null) {
-      sesion.terminar('cerrada')
+    if (borrado) {
+      sesion.terminar('cerrada', { conservarAlmacenamiento: true })
+      return
+    }
+    if (evento.key === CLAVE_SESION_ID && evento.newValue !== null && evento.newValue !== sesionIdPropio) {
+      sesion.terminar('reemplazada', { conservarAlmacenamiento: true })
     }
   })
 }

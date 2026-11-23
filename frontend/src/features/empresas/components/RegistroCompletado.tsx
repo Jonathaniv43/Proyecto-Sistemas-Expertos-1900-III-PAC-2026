@@ -5,7 +5,7 @@ import type { RegistrarEmpresaResponse } from '../types/registro'
 
 /** Confirmación del registro: la empresa existe y quien la registró es su administrador. */
 export function RegistroCompletado({ registro }: { registro: RegistrarEmpresaResponse }) {
-  const verificar = `/verificar-cuenta?correo=${encodeURIComponent(registro.email)}`
+  const verificar = `/verificar-cuenta?${new URLSearchParams({ correo: registro.email, rtn: registro.rtn })}`
 
   return (
     <section className="grid gap-6" aria-labelledby="titulo-registro-completado">

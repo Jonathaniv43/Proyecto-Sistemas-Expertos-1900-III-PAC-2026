@@ -158,7 +158,7 @@ useFormulario(esquema, {
 |---|---|
 | `RutaPrivada` | Exige sesión. Sin sesión, o si vence, lleva a `/login` y recuerda a dónde volver. Al recargar, recupera la sesión con el refresh guardado. Si el backend no responde, muestra "No se pudo conectar" con "Reintentar" y no cierra la sesión. |
 | `RequiereRol roles={[...]}` | Va dentro de `RutaPrivada`. Sin el rol se ve igual que una ruta inexistente, para no confirmar que existe. |
-| `SoloSinSesion` | Para `/login`. Con sesión activa, vuelve a la ruta pedida o a `/inicio`. Solo acepta rutas internas. |
+| `SoloSinSesion` | Para `/login`, `/plataforma`, `/registro` y `/verificar-cuenta`. Con sesión activa, vuelve a la ruta pedida o a `/inicio`. Solo acepta rutas internas. |
 
 ```tsx
 { element: <RutaPrivada />, children: [
@@ -175,3 +175,17 @@ useFormulario(esquema, {
 - `cerrarSesion()` avisa al backend y vuelve al login. Si hay varias pestañas abiertas, todas cierran sesión.
 
 **El rol sale del JWT y solo decide qué se muestra.** Quien autoriza de verdad es el backend, en cada petición: si responde 403, se muestra el error.
+
+## Inicio de sesión (HU-018)
+
+- **`/login` (empresas):**
+  - Pide RTN, correo y contraseña. El RTN se convierte en el identificador de empresa con `GET /empresas/por-rtn`.
+  - Cualquier dato incorrecto da el mismo mensaje, sin decir cuál falló. También pasa con una cuenta desactivada, un vínculo suspendido o una empresa suspendida.
+  - Recuerda en este navegador el RTN del último ingreso.
+- **`/plataforma` (equipo de Norvia):** pide correo y contraseña. Está separado del login de empresa.
+- **Contraseña temporal:** con `debeCambiarPassword`, `RutaPrivada` solo deja usar `/cambiar-contrasena`. Al cambiarla, el backend cierra todas las sesiones y se vuelve al login con un aviso.
+- **Una empresa por navegador:**
+  - Todas las pestañas comparten la sesión, así que no se mezclan datos de dos empresas.
+  - Mientras hay una sesión abierta, `/login` lleva a ella. Para entrar a otra empresa hay que cerrar sesión, o usar otro navegador o una ventana privada.
+  - Si dos pestañas inician sesión en empresas distintas, la primera se cierra y lo explica.
+- **Encabezado del área privada:** muestra la empresa, el rol y el botón para cerrar sesión. El menú de cada módulo se agrega con su HU.
