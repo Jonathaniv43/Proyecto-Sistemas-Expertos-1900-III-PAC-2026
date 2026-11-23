@@ -2,6 +2,8 @@
 export type TipoRespuesta = 'respuesta_breve' | 'seleccion_unica' | 'seleccion_multiple'
 
 export interface OpcionPreview {
+  /** Solo al responder (HU-031): el id que se envía como respuesta. */
+  id?: string
   texto: string
   orden: number
 }
@@ -128,4 +130,28 @@ export interface TipoRespuestaCatalogo {
   instruccionUi: string
   requiereOpciones: boolean
   maxCaracteresRespuesta: number | null
+}
+
+/** GET /api/encuestas/pendientes: encuestas publicadas que la persona de la sesión aún no respondió. */
+export interface EncuestaPendiente {
+  encuestaId: string
+  titulo: string
+  /** Versión vigente: la respuesta se registra contra ella. */
+  versionId: string
+  instrucciones: string | null
+  preguntas: {
+    id: string
+    texto: string
+    tipoRespuesta: TipoRespuesta | string
+    instruccionUi: string
+    obligatoria: boolean
+    maxCaracteres: number | null
+    opciones: { id: string; texto: string }[]
+  }[]
+}
+
+/** POST /api/encuestas/{id}/respuestas: cada respuesta lleva exactamente uno de opcionId, textoLibre u opcionIds. */
+export interface ResponderEncuestaRequest {
+  versionId: string
+  respuestas: { preguntaId: string; opcionId?: string; textoLibre?: string; opcionIds?: string[] }[]
 }

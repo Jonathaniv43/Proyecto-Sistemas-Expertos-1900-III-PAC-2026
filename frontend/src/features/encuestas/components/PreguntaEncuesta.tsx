@@ -1,27 +1,47 @@
 import { Check } from 'lucide-react'
 import { useId } from 'react'
+import type { UseFormRegisterReturn } from 'react-hook-form'
+import { MensajeCampo } from '@/shared/components/ui/MensajeCampo'
 import type { PreguntaPreview } from '../types/encuestas'
+
+/** Controles para responder (HU-031). Sin ellos, la pregunta es de solo lectura (vista previa). */
+export interface RespuestaControlada {
+  /** respuesta_breve y seleccion_unica: `register(...)` de React Hook Form. */
+  registro?: UseFormRegisterReturn
+  /** seleccion_multiple: ids marcados y cambio (con `useController`). */
+  marcadas?: readonly string[]
+  onMarcadas?: (ids: string[]) => void
+  /** respuesta_breve: texto actual, para el contador. */
+  texto?: string
+  maxCaracteres?: number | null
+  error?: string
+}
 
 interface PreguntaEncuestaProps {
   numero: number
   pregunta: PreguntaPreview
+  respuesta?: RespuestaControlada
 }
 
 /**
  * Bloque de una pregunta (design-system.md § Pregunta de encuesta): enunciado numerado, * si es
  * obligatoria, la indicación como ayuda y el control según el tipo (respuesta_breve → área de texto,
- * seleccion_unica → radios, seleccion_multiple → casillas).
+ * seleccion_unica → radios, seleccion_multiple → casillas). El error va una vez, debajo del grupo.
  *
- * Por ahora es de solo lectura (vista previa: los controles están deshabilitados). Responder la
- * encuesta (HU-031) reutiliza esta misma estructura con los controles habilitados.
+ * Sin `respuesta` es la vista previa (HU-029/HU-030): controles deshabilitados.
+ * Con `respuesta` se responde (HU-031).
  */
-export function PreguntaEncuesta({ numero, pregunta }: PreguntaEncuestaProps) {
+export function PreguntaEncuesta({ numero, pregunta, respuesta }: PreguntaEncuestaProps) {
   const id = useId()
   const idAyuda = `${id}-ayuda`
+  const idMensaje = `${id}-mensaje`
+  const soloLectura = !respuesta
   const opciones = [...pregunta.opciones].sort((a, b) => a.orden - b.orden)
+  const error = respuesta?.error
+  const describe = [pregunta.instruccionUi ? idAyuda : null, error ? idMensaje : null].filter(Boolean).join(' ') || undefined
 
   return (
-    <fieldset className="grid gap-3" aria-describedby={pregunta.instruccionUi ? idAyuda : undefined}>
+    <fieldset className="grid gap-3" aria-describedby={describe} aria-invalid={error ? true : undefined}>
       <legend className="contents">
         <span className="text-md font-semibold text-text-primary">
           {numero}. {pregunta.texto}
@@ -42,33 +62,82 @@ export function PreguntaEncuesta({ numero, pregunta }: PreguntaEncuestaProps) {
       )}
 
       {pregunta.tipoRespuestaCodigo === 'respuesta_breve' ? (
-        <textarea
-          disabled
-          aria-label={`Respuesta a la pregunta ${numero}`}
-          placeholder="Aquí escribirá su respuesta"
-          className="area-texto w-full rounded-md border border-border-default bg-bg-disabled text-md text-text-disabled sm:text-sm"
-        />
+        <AreaRespuesta numero={numero} soloLectura={soloLectura} respuesta={respuesta} />
       ) : (
         <div className="grid justify-items-start sm:gap-3">
-          {opciones.map((opcion) =>
-            pregunta.tipoRespuestaCodigo === 'seleccion_multiple' ? (
-              <label key={opcion.orden} className="casilla min-h-control-touch text-text-secondary sm:min-h-auto">
-                <input type="checkbox" disabled />
-                <span aria-hidden className="casilla-caja">
-                  <Check strokeWidth={2.5} />
-                </span>
-                {opcion.texto}
-              </label>
-            ) : (
-              <label key={opcion.orden} className="radio min-h-control-touch text-text-secondary sm:min-h-auto">
-                <input type="radio" name={id} disabled />
+          {opciones.map((opcion) => {
+            const valor = opcion.id ?? String(opcion.orden)
+            if (pregunta.tipoRespuestaCodigo === 'seleccion_multiple') {
+              const marcadas = respuesta?.marcadas ?? []
+              return (
+                <label
+                  key={valor}
+                  className={`casilla min-h-control-touch sm:min-h-auto ${soloLectura ? 'text-text-secondary' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    disabled={soloLectura}
+                    value={valor}
+                    checked={soloLectura ? false : marcadas.includes(valor)}
+                    onChange={(e) =>
+                      respuesta?.onMarcadas?.(e.target.checked ? [...marcadas, valor] : marcadas.filter((m) => m !== valor))
+                    }
+                  />
+                  <span aria-hidden className="casilla-caja">
+                    <Check strokeWidth={2.5} />
+                  </span>
+                  {opcion.texto}
+                </label>
+              )
+            }
+            return (
+              <label key={valor} className={`radio min-h-control-touch sm:min-h-auto ${soloLectura ? 'text-text-secondary' : ''}`}>
+                {soloLectura ? <input type="radio" name={id} disabled /> : <input type="radio" value={valor} {...respuesta?.registro} />}
                 <span aria-hidden className="radio-circulo" />
                 {opcion.texto}
               </label>
-            ),
-          )}
+            )
+          })}
         </div>
       )}
+      <MensajeCampo id={idMensaje} error={error} />
     </fieldset>
+  )
+}
+
+function AreaRespuesta({ numero, soloLectura, respuesta }: { numero: number; soloLectura: boolean; respuesta?: RespuestaControlada }) {
+  if (soloLectura) {
+    return (
+      <textarea
+        disabled
+        aria-label={`Respuesta a la pregunta ${numero}`}
+        placeholder="Aquí escribirá su respuesta"
+        className="area-texto w-full rounded-md border border-border-default bg-bg-disabled text-md text-text-disabled sm:text-sm"
+      />
+    )
+  }
+  const largo = respuesta?.texto?.length ?? 0
+  const maximo = respuesta?.maxCaracteres ?? null
+  const pasado = maximo !== null && largo > maximo
+  return (
+    <div className="grid gap-1">
+      <textarea
+        aria-label={`Respuesta a la pregunta ${numero}`}
+        className={[
+          'area-texto w-full rounded-md border bg-bg-surface text-md text-text-primary transition-[border-color,box-shadow] sm:text-sm',
+          'focus-visible:outline-none focus:ring-3',
+          respuesta?.error
+            ? 'border-error-icon focus:ring-error-bg'
+            : 'border-border-input hover:border-border-input-hover focus:border-focus-ring focus:ring-focus-halo',
+        ].join(' ')}
+        {...respuesta?.registro}
+      />
+      {maximo !== null && (
+        // Contador del área de texto (DS): Caption terciario; al pasarse, en rojo.
+        <span className={`justify-self-end text-xs tabular-nums ${pasado ? 'text-error-text' : 'text-text-tertiary'}`}>
+          {largo} / {maximo}
+        </span>
+      )}
+    </div>
   )
 }

@@ -1,7 +1,7 @@
-import { ClipboardList, UserPlus, Users } from 'lucide-react'
+import { ClipboardCheck, ClipboardList, UserPlus, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { clasesBoton } from '@/shared/components/ui/clases'
-import { etiquetaRol, ROLES, ROLES_GESTION, SiRol, useSesion } from '@/shared/sesion'
+import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, SiRol, useSesion } from '@/shared/sesion'
 
 /** Primera pantalla después de iniciar sesión. Las funciones de cada módulo se agregan con su HU. */
 export function InicioPage() {
@@ -19,6 +19,14 @@ export function InicioPage() {
             : `Entraste${usuario.empresa ? ` a ${usuario.empresa.razonSocial}` : ''} como ${etiquetaRol(usuario.rol)}.`}
         </p>
       </div>
+      <SiRol roles={ROLES_EMPRESA}>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link to="/mis-encuestas" className={clasesBoton('secundario')}>
+            <ClipboardCheck aria-hidden size={16} strokeWidth={1.5} />
+            Mis encuestas
+          </Link>
+        </div>
+      </SiRol>
       <SiRol roles={ROLES_GESTION}>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link to="/encuestas" className={clasesBoton('secundario')}>
