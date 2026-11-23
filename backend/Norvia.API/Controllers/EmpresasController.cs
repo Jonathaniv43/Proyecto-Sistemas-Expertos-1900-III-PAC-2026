@@ -4,6 +4,8 @@ using Norvia.API.Extensiones;
 using Norvia.Application.Features.Empresas.ActualizarPerfilEmpresa;
 using Norvia.Application.Features.Empresas.ActualizarPerfilEmpresa.DTOs;
 using Norvia.Application.Features.Empresas.DTOs;
+using Norvia.Application.Features.Empresas.ListarRubrosRegistro;
+using Norvia.Application.Features.Empresas.ListarRubrosRegistro.DTOs;
 using Norvia.Application.Features.Empresas.ObtenerPerfilEmpresa;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa.DTOs;
@@ -25,6 +27,15 @@ public sealed class EmpresasController : ControllerBase
         [FromServices] RegistrarEmpresaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-017: rubros activos para el formulario de registro. Anónimo (aún no hay sesión).</summary>
+    [HttpGet("rubros-registro")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<RubroRegistroResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListarRubrosRegistro(
+        [FromServices] ListarRubrosRegistroServicio servicio,
+        CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(cancellationToken));
 
     /// <summary>
     /// Landing → login: resuelve <c>idEmpresa</c> cifrado por RTN (14 dígitos). Anónimo; solo empresas activas.

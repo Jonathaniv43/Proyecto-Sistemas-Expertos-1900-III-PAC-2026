@@ -22,12 +22,14 @@ En desarrollo, las peticiones a `/api` pasan por el proxy de Vite hacia `http://
 
 ```text
 src/
-├── app/            router, providers y (con HU-102) rutas protegidas
+├── app/            router, providers y rutas/ (RutaPrivada, RequiereRol, SoloSinSesion)
 ├── shared/
 │   ├── api/        cliente Axios, sesión (tokens) y extractor de errores
-│   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, Aviso)
+│   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, CampoSelect,
+│   │               GrupoRadio, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
 │   ├── forms/      useFormulario (React Hook Form + Zod)
 │   ├── hooks/      usePeticion, useCargaVisible
+│   ├── sesion/     estado de la sesión para React: useSesion, SiRol, ROLES, cerrarSesion
 │   ├── validacion/ configuración de Zod y reglas reutilizables (espejo de FluentValidation)
 │   └── styles/     index.css (entrada) y theme.css (tokens del design system)
 └── features/
@@ -84,7 +86,8 @@ export const obtenerPerfil = (signal: AbortSignal) =>
 - El access token vive solo en memoria y el refresh token en `localStorage`.
 - El login (HU-018) llama a `sesion.guardar(respuesta)`, y el cierre de sesión a `sesion.terminar('cerrada')`.
 - Ante un 401, el cliente renueva la sesión una sola vez, aunque fallen varias peticiones a la vez, y repite la petición.
-- Si no puede renovarla, borra la sesión y avisa a quien se haya suscrito con `sesion.alTerminar(...)`. El router lo usa para volver al login (HU-102).
+- Si el backend rechaza el refresh, borra la sesión y avisa a quien se haya suscrito con `sesion.alTerminar(...)`. El router lo usa para volver al login.
+- Si no hay conexión, conserva la sesión: la petición falla con su error y la pantalla ofrece reintentar.
 - Un 401 del login no intenta renovar: significa credenciales inválidas.
 
 **Errores:** `extraerError(error)` devuelve `{ mensaje, campos, status, codigo, cancelada }`.
@@ -131,7 +134,44 @@ const { register, formState: { errors, isSubmitting }, enviar, errorGeneral } =
 </form>
 ```
 
+**Errores de negocio en su campo:** `erroresPorCodigo` lleva un `codigo` del backend a un campo, con un mensaje propio opcional. Por ejemplo, el RTN repetido se muestra junto al RTN sin borrar lo demás:
+
+```ts
+useFormulario(esquema, {
+  defaultValues,
+  erroresPorCodigo: { 'empresas.rtn_duplicado': { campo: 'rtn' } },
+})
+```
+
+**Controles de selección:**
+- Con 5 opciones o menos se usa `GrupoRadio`; con más, `CampoSelect` (design system § Select).
+- Un enlace que se ve como botón usa `clasesBoton('primario')` de `ui/clases.ts`.
+
 **Mensajes:**
 - Dicen qué corregir ("Ingresa un correo válido, por ejemplo nombre@empresa.com.") y usan el tono del design system (tú).
 - Los casos genéricos (obligatorio, mínimo, máximo, formato) ya están traducidos en `shared/validacion/zod.ts`. Solo se escribe un mensaje propio cuando hace falta ser más específico.
 - **`noValidate` en el `<form>`:** desactiva la validación nativa del navegador, para que solo valide Zod.
+
+## Rutas protegidas (`app/rutas` y `@/shared/sesion`)
+
+| Envoltorio | Para qué |
+|---|---|
+| `RutaPrivada` | Exige sesión. Sin sesión, o si vence, lleva a `/login` y recuerda a dónde volver. Al recargar, recupera la sesión con el refresh guardado. Si el backend no responde, muestra "No se pudo conectar" con "Reintentar" y no cierra la sesión. |
+| `RequiereRol roles={[...]}` | Va dentro de `RutaPrivada`. Sin el rol se ve igual que una ruta inexistente, para no confirmar que existe. |
+| `SoloSinSesion` | Para `/login`. Con sesión activa, vuelve a la ruta pedida o a `/inicio`. Solo acepta rutas internas. |
+
+```tsx
+{ element: <RutaPrivada />, children: [
+  { path: 'inicio', element: <InicioPage /> },
+  { element: <RequiereRol roles={ROLES_GESTION} />, children: [
+    { path: 'personas', element: <PersonasPage /> },
+  ] },
+] }
+```
+
+**Dentro de una pantalla:**
+- `useSesion()` devuelve `{ estado: 'activa', usuario: { tipo, rol, vinculoId, debeCambiarPassword } }`, o `verificando`, `sin_conexion` o `sin_sesion`.
+- `<SiRol roles={ROLES_GESTION}>` oculta botones y menús a los demás roles.
+- `cerrarSesion()` avisa al backend y vuelve al login. Si hay varias pestañas abiertas, todas cierran sesión.
+
+**El rol sale del JWT y solo decide qué se muestra.** Quien autoriza de verdad es el backend, en cada petición: si responde 403, se muestra el error.

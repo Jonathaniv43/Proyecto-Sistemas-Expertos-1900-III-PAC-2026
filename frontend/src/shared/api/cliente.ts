@@ -7,7 +7,8 @@ import { sesion, type SesionResponse } from './sesion'
  * - Adjunta el access token como `Authorization: Bearer`.
  * - Ante un 401 renueva la sesión con el refresh token (una sola renovación aunque fallen
  *   varias peticiones a la vez) y repite la petición una vez.
- * - Si no se puede renovar, termina la sesión local con motivo `expirada`.
+ * - Si el backend rechaza el refresh, termina la sesión local con motivo `expirada`; si no hay
+ *   conexión, la conserva y la petición falla con su error.
  *
  * Los errores se convierten a mensajes con `extraerError` (./errores).
  */
@@ -35,31 +36,40 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-let renovacionEnCurso: Promise<boolean> | null = null
+/**
+ * - `renovada`: hay access token nuevo.
+ * - `rechazada`: el backend no aceptó el refresh (vencido, revocado o no hay): la sesión terminó.
+ * - `sin_conexion`: no se pudo hablar con el backend (red, caída, 5xx): la sesión NO se cierra.
+ */
+export type ResultadoRenovacion = 'renovada' | 'rechazada' | 'sin_conexion'
 
-async function pedirRefresh(refreshToken: string): Promise<boolean> {
+let renovacionEnCurso: Promise<ResultadoRenovacion> | null = null
+
+async function pedirRefresh(refreshToken: string): Promise<ResultadoRenovacion> {
   try {
     const { data } = await clienteRefresh.post<SesionResponse>('/auth/refresh', { refreshToken })
     sesion.guardar(data)
-    return true
-  } catch {
-    return false
+    return 'renovada'
+  } catch (error) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined
+    return status !== undefined && status < 500 ? 'rechazada' : 'sin_conexion'
   }
 }
 
-async function renovar(): Promise<boolean> {
+async function renovar(): Promise<ResultadoRenovacion> {
   const usado = sesion.obtenerRefreshToken()
-  if (!usado) return false
+  if (!usado) return 'rechazada'
 
-  if (await pedirRefresh(usado)) return true
+  const resultado = await pedirRefresh(usado)
+  if (resultado !== 'rechazada') return resultado
 
   // Otra pestaña pudo rotar el refresh mientras tanto: si cambió, se intenta con el nuevo.
   const actual = sesion.obtenerRefreshToken()
-  return actual !== null && actual !== usado && (await pedirRefresh(actual))
+  return actual !== null && actual !== usado ? pedirRefresh(actual) : 'rechazada'
 }
 
 /** Renueva la sesión una sola vez aunque la pidan varias peticiones a la vez. */
-export function renovarSesion(): Promise<boolean> {
+export function renovarSesion(): Promise<ResultadoRenovacion> {
   renovacionEnCurso ??= renovar().finally(() => {
     renovacionEnCurso = null
   })
@@ -77,11 +87,13 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   // Sin refresh guardado no hay nada que renovar (p. ej. nunca inició sesión).
   if (!sesion.hayRefresh()) throw error
 
-  if (await renovarSesion()) {
+  const resultado = await renovarSesion()
+  if (resultado === 'renovada') {
     config._reintentada = true
     return api(config)
   }
 
-  sesion.terminar('expirada')
+  // Sin conexión se conserva la sesión: la petición falla y la pantalla ofrece reintentar.
+  if (resultado === 'rechazada') sesion.terminar('expirada')
   throw error
 })

@@ -1,6 +1,7 @@
-import { CircleAlert } from 'lucide-react'
 import { useId, type InputHTMLAttributes, type ReactNode } from 'react'
 import type { FieldError, UseFormRegisterReturn } from 'react-hook-form'
+import { clasesControl } from './clases'
+import { Etiqueta, MensajeCampo } from './MensajeCampo'
 
 interface CampoTextoProps extends Omit<InputHTMLAttributes<HTMLInputElement>, keyof UseFormRegisterReturn> {
   etiqueta: string
@@ -25,45 +26,20 @@ export function CampoTexto({ etiqueta, registro, error, ayuda, required, childre
   const mensaje = error?.message
 
   return (
-    <div className={`grid gap-2 ${className}`}>
-      <label htmlFor={id} className="text-sm font-medium text-text-primary">
+    <div className={`grid content-start gap-2 ${className}`}>
+      <Etiqueta htmlFor={id} required={required}>
         {etiqueta}
-        {required && (
-          <span aria-hidden className="text-error-text">
-            {' *'}
-          </span>
-        )}
-      </label>
+      </Etiqueta>
       <input
         id={id}
         aria-invalid={mensaje ? true : undefined}
         aria-describedby={mensaje || ayuda ? idMensaje : undefined}
         aria-required={required || undefined}
-        className={[
-          'h-control-touch w-full rounded-md border bg-bg-surface px-3 text-md text-text-primary transition-[border-color,box-shadow] sm:h-control sm:text-sm',
-          'placeholder:text-text-tertiary focus-visible:outline-none focus:ring-3',
-          'disabled:cursor-not-allowed disabled:border-border-default disabled:bg-bg-disabled disabled:text-text-disabled',
-          mensaje
-            ? 'border-error-icon focus:ring-error-bg'
-            : 'border-border-input hover:border-border-input-hover focus:border-focus-ring focus:ring-focus-halo',
-        ].join(' ')}
+        className={clasesControl(Boolean(mensaje))}
         {...registro}
         {...props}
       />
-      {mensaje ? (
-        <p id={idMensaje} className="flex items-start gap-1 text-xs text-error-text">
-          <span aria-hidden className="flex h-lh shrink-0 items-center text-error-icon">
-            <CircleAlert size={14} strokeWidth={1.5} />
-          </span>
-          {mensaje}
-        </p>
-      ) : (
-        ayuda && (
-          <p id={idMensaje} className="text-xs text-text-secondary">
-            {ayuda}
-          </p>
-        )
-      )}
+      <MensajeCampo id={idMensaje} error={mensaje} ayuda={ayuda} />
       {children}
     </div>
   )
