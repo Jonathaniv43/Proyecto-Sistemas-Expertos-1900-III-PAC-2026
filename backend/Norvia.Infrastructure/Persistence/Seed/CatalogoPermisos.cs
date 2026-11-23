@@ -73,6 +73,14 @@ public static class CatalogoPermisos
             "admin_empresa", "responsable_sst"),
         Empresa("encuesta.cerrar", "Cerrar encuesta", "POST", "api/encuestas/{id}/cierre", "admin_empresa", "responsable_sst"),
 
+        // HU-047: reporte anónimo (RN-27, RN-74) y consulta básica de eventos (M6).
+        // Pendiente HU-100: evento.evidencias (POST api/eventos/{id}/evidencias).
+        // Pendiente HU-049/050/052: investigación, descarte, medidas correctivas y estadísticas.
+        Empresa("evento.reportar", "Reportar evento de forma anónima", "POST", "api/eventos",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        Empresa("evento.listar", "Listar eventos reportados", "GET", "api/eventos", "admin_empresa", "responsable_sst"),
+        Empresa("evento.ver", "Ver detalle de evento", "GET", "api/eventos/{id}", "admin_empresa", "responsable_sst"),
+
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),
         Plataforma("catalogo.rubro.crear", "Crear rubro", "POST", "api/rubros", "admin_plataforma"),
