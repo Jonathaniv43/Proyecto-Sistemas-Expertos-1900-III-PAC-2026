@@ -246,3 +246,14 @@ useFormulario(esquema, {
 - **Vista del encuestado** (`VistaEncuestado`): muestra los cambios aún sin guardar y reutiliza `PreguntaEncuesta`.
 - **Cambios sin guardar:** el navegador pregunta antes de salir de la página.
 - **Errores inesperados:** el router tiene un `errorElement` (`ErrorInesperado`) para que nunca se vea la pantalla técnica.
+
+## Responder encuestas (HU-031)
+
+- **Rutas:** `/mis-encuestas` (pendientes) y `/mis-encuestas/:id` (responder), para los 4 roles de empresa. El inicio tiene "Mis encuestas".
+- **Pendientes:** salen de `GET /encuestas/pendientes`, que trae las encuestas publicadas que la persona todavía no respondió, con su versión vigente y sus preguntas.
+- **Formulario** (`schemas/respuesta.ts`):
+  - Su esquema Zod se arma según el tipo de cada pregunta, como pide 16 §9, y sigue las reglas de `ResponderEncuestaServicio`: obligatorias, máximo de caracteres y una o varias opciones.
+  - Se pide al menos una respuesta. Las preguntas opcionales sin responder no se envían.
+  - El error de "al menos una respuesta" va en la ruta `sinRespuestas`, aparte de `respuestas`, porque si no tapa los errores de cada pregunta.
+- **`PreguntaEncuesta` en modo responder:** los controles están habilitados, el error va una vez debajo del grupo y las respuestas breves llevan el contador "N / máximo" del design system.
+- **Situaciones que se explican:** ya respondida, encuesta cerrada, o cambio de versión mientras se respondía ("Abrir la versión actual"). Al terminar se confirma que la respuesta es anónima.

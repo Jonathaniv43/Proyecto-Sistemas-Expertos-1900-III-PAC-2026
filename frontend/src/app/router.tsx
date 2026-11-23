@@ -7,6 +7,8 @@ import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPa
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
 import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
 import { EncuestasPage } from '@/features/encuestas/pages/EncuestasPage'
+import { MisEncuestasPage } from '@/features/encuestas/pages/MisEncuestasPage'
+import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncuestaPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
@@ -14,7 +16,7 @@ import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage
 import { AppLayout } from '@/shared/components/AppLayout'
 import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
-import { ROLES, ROLES_GESTION } from '@/shared/sesion'
+import { ROLES, ROLES_EMPRESA, ROLES_GESTION } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
 import { RutaPrivada } from './rutas/RutaPrivada'
 import { SoloSinSesion } from './rutas/SoloSinSesion'
@@ -53,6 +55,13 @@ export const router = createBrowserRouter([
             children: [
               { path: 'personas/nueva', element: <AgregarPersonaPage /> },
               { path: 'personas/encuestados', element: <AgregarEncuestadosPage /> },
+            ],
+          },
+          {
+            element: <RequiereRol roles={ROLES_EMPRESA} />,
+            children: [
+              { path: 'mis-encuestas', element: <MisEncuestasPage /> },
+              { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
             ],
           },
           {
