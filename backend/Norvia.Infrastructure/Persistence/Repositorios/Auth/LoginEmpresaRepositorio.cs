@@ -21,4 +21,7 @@ public sealed class LoginEmpresaRepositorio(NorviaDbContext db) : ILoginEmpresaR
             .FirstOrDefaultAsync(v => v.AccesoId == accesoId && v.EmpresaId == empresaId, cancellationToken);
 
     public void AgregarRefresh(RefreshToken refresh) => db.RefreshToken.Add(refresh);
+
+    public Task<bool> UsuarioActivoAsync(Guid personaId, CancellationToken cancellationToken) =>
+        db.Usuario.AnyAsync(u => u.PersonaId == personaId && u.Activo, cancellationToken);
 }

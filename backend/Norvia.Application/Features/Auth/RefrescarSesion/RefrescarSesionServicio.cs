@@ -32,6 +32,10 @@ public sealed class RefrescarSesionServicio(
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
         var sesion = fila.ExpiraEn > ahora && fila.Acceso.Verificado ? ResolverSesion(fila) : null;
+        // Una cuenta desactivada (Usuario.Activo = false) pierde la sesión de empresa al renovar.
+        if (sesion is { Tipo: TipoSesion.Empresa }
+            && !await repo.UsuarioActivoAsync(fila.VinculoEmpresa!.PersonaId, cancellationToken))
+            sesion = null;
         if (sesion is null)
         {
             await uow.GuardarCambiosAsync(cancellationToken);
