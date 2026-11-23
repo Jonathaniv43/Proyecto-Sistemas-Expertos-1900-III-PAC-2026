@@ -103,8 +103,12 @@ public sealed class ActualizarBorradorEncuestaServicio(
         IReadOnlyDictionary<string, TipoRespuestaPreguntaCatalogo> tipos,
         bool reemplazar)
     {
-        var secciones = ConstruirSecciones(version.EmpresaId, version.Id, request.Secciones);
-        var preguntas = ConstruirPreguntas(version.EmpresaId, version.Id, request.Preguntas, origenes, tipos);
+        // Al crear versión nueva no se reutilizan Ids de la publicada (chocan con PK).
+        // Al reemplazar el borrador actual sí se pueden reutilizar Ids del propio borrador.
+        var (secciones, mapaSecciones) = ConstruirSecciones(
+            version.EmpresaId, version.Id, request.Secciones, forzarIdsNuevos: !reemplazar);
+        var preguntas = ConstruirPreguntas(
+            version.EmpresaId, version.Id, request.Preguntas, origenes, tipos, mapaSecciones);
 
         if (reemplazar)
         {
@@ -118,22 +122,31 @@ public sealed class ActualizarBorradorEncuestaServicio(
         }
     }
 
-    private static List<EncuestaSeccion> ConstruirSecciones(
-        Guid empresaId, Guid versionId, IReadOnlyList<SeccionBorradorRequestDto> seccionesDto)
+    private static (List<EncuestaSeccion> Secciones, IReadOnlyDictionary<Guid, Guid> MapaIds)
+        ConstruirSecciones(
+            Guid empresaId,
+            Guid versionId,
+            IReadOnlyList<SeccionBorradorRequestDto> seccionesDto,
+            bool forzarIdsNuevos)
     {
         var lista = new List<EncuestaSeccion>(seccionesDto.Count);
+        var mapa = new Dictionary<Guid, Guid>();
         foreach (var s in seccionesDto.OrderBy(x => x.Orden))
         {
+            var nuevoId = forzarIdsNuevos || s.Id is null ? Guid.CreateVersion7() : s.Id.Value;
+            if (s.Id is Guid idAnterior)
+                mapa[idAnterior] = nuevoId;
+
             lista.Add(new EncuestaSeccion
             {
-                Id = s.Id ?? Guid.CreateVersion7(),
+                Id = nuevoId,
                 EmpresaId = empresaId,
                 EncuestaVersionId = versionId,
                 Titulo = s.Titulo.Trim(),
                 Orden = s.Orden
             });
         }
-        return lista;
+        return (lista, mapa);
     }
 
     private static List<EncuestaPregunta> ConstruirPreguntas(
@@ -141,7 +154,8 @@ public sealed class ActualizarBorradorEncuestaServicio(
         Guid versionId,
         IReadOnlyList<PreguntaBorradorRequestDto> preguntasDto,
         Dictionary<Guid, EncuestaPregunta> origenes,
-        IReadOnlyDictionary<string, TipoRespuestaPreguntaCatalogo> tipos)
+        IReadOnlyDictionary<string, TipoRespuestaPreguntaCatalogo> tipos,
+        IReadOnlyDictionary<Guid, Guid> mapaSecciones)
     {
         var lista = new List<EncuestaPregunta>(preguntasDto.Count);
         foreach (var q in preguntasDto.OrderBy(p => p.Orden))
@@ -155,11 +169,15 @@ public sealed class ActualizarBorradorEncuestaServicio(
             Guid? categoriaId = q.CategoriaRiesgoId
                 ?? (q.Id.HasValue && origenes.TryGetValue(q.Id.Value, out var o2) ? o2.CategoriaRiesgoId : null);
 
+            Guid? seccionId = q.SeccionId;
+            if (seccionId is Guid sid && mapaSecciones.TryGetValue(sid, out var seccionNueva))
+                seccionId = seccionNueva;
+
             var pregunta = new EncuestaPregunta
             {
                 EmpresaId = empresaId,
                 EncuestaVersionId = versionId,
-                EncuestaSeccionId = q.SeccionId,
+                EncuestaSeccionId = seccionId,
                 CategoriaRiesgoId = categoriaId,
                 PreguntaExploratoriaId = preguntaOrigenId,
                 Texto = q.Texto.Trim(),

@@ -17,26 +17,22 @@ namespace Norvia.Application.Features.Encuestas.ObtenerPeligrosSugeridos;
 /// las mismas respuestas dan las mismas sugerencias (RN-14) y las nuevas no las repiten. Uno ya confirmado o
 /// descartado (HU-035) no se toca.</item>
 /// <item>El respaldo (cuántas respuestas) se calcula al consultar; no se guarda (3FN).</item>
-/// <item>Con menos de 3 respuestas no se muestra ni registra nada (RN-73).</item>
+/// <item>Se muestran y registran con cualquier cantidad de respuestas.</item>
 /// </list>
 /// </summary>
 public sealed class ObtenerPeligrosSugeridosServicio(
     IObtenerPeligrosSugeridosRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo) : IServicioCasoDeUso
 {
-    public const int MinimoRespuestas = 3;
-
     public async Task<Resultado<PeligrosSugeridosResponseDto>> EjecutarAsync(Guid encuestaId, CancellationToken ct)
     {
         if (!await repositorio.ExisteEncuestaAsync(encuestaId, ct)) return Errores.EncuestaNoEncontrada;
 
         var total = await repositorio.ContarRespuestasAsync(encuestaId, ct);
-        if (total < MinimoRespuestas)
-            return new PeligrosSugeridosResponseDto(encuestaId, total, MinimoRespuestas, DetalleOculto: true, []);
 
         var exposiciones = await repositorio.ListarExposicionesAsync(encuestaId, ct);
         var porPeligro = exposiciones.GroupBy(e => e.PeligroId).ToList();
         if (porPeligro.Count == 0)
-            return new PeligrosSugeridosResponseDto(encuestaId, total, MinimoRespuestas, DetalleOculto: false, []);
+            return new PeligrosSugeridosResponseDto(encuestaId, total, 0, DetalleOculto: false, []);
 
         // Registrar las sugerencias que falten, sin duplicar ni tocar las ya revisadas.
         var riesgos = (await repositorio.ListarRiesgosDeEncuestaAsync(encuestaId, ct))
@@ -69,6 +65,6 @@ public sealed class ObtenerPeligrosSugeridosServicio(
             .OrderByDescending(s => s.RespuestasConExposicion).ThenBy(s => s.PeligroNombre)
             .ToList();
 
-        return new PeligrosSugeridosResponseDto(encuestaId, total, MinimoRespuestas, DetalleOculto: false, sugerencias);
+        return new PeligrosSugeridosResponseDto(encuestaId, total, 0, DetalleOculto: false, sugerencias);
     }
 }

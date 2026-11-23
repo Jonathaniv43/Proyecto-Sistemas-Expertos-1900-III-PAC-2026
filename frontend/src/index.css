@@ -1,0 +1,178 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+/*
+  Tokens del design system Norvia (design-system.md).
+  En @theme para Tailwind v4; se vacían paletas/radios/sombras por defecto.
+*/
+@theme {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --spacing-*: initial;
+
+  /* Marca */
+  --color-brand-50: #f5f3fb;
+  --color-brand-100: #ece8f7;
+  --color-brand-200: #d9d1f0;
+  --color-brand-300: #bdb0e4;
+  --color-brand-400: #9c88d4;
+  --color-brand-500: #7a60c2;
+  --color-brand-600: #5b3fa8;
+  --color-brand-700: #4a3389;
+  --color-brand-800: #3b296c;
+  --color-brand-900: #2d2052;
+  --color-brand-950: #1c1435;
+
+  /* Neutros */
+  --color-white: #ffffff;
+  --color-neutral-50: #f8f8fb;
+  --color-neutral-100: #f1f1f5;
+  --color-neutral-200: #e4e4ea;
+  --color-neutral-300: #d1d1da;
+  --color-neutral-400: #a9a9b6;
+  --color-neutral-500: #7e7e8c;
+  --color-neutral-600: #5f5f6e;
+  --color-neutral-700: #464655;
+  --color-neutral-800: #2f2f3b;
+  --color-neutral-900: #1d1d27;
+  --color-neutral-950: #121218;
+
+  /* Semánticas */
+  --color-bg-canvas: var(--color-neutral-50);
+  --color-bg-surface: var(--color-white);
+  --color-bg-elevated: var(--color-white);
+  --color-bg-subtle: var(--color-neutral-100);
+  --color-bg-pressed: var(--color-neutral-200);
+  --color-bg-selected: var(--color-brand-50);
+  --color-bg-disabled: var(--color-neutral-100);
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-disabled: var(--color-neutral-400);
+  --color-text-on-brand: var(--color-white);
+  --color-text-link: var(--color-brand-600);
+  --color-text-link-hover: var(--color-brand-700);
+  --color-text-selected: var(--color-brand-700);
+  --color-border-default: var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+  --color-border-input: var(--color-neutral-500);
+  --color-border-input-hover: var(--color-neutral-600);
+  --color-focus-ring: var(--color-brand-500);
+  --color-focus-halo: var(--color-brand-100);
+  --color-action-primary: var(--color-brand-600);
+  --color-action-primary-hover: var(--color-brand-700);
+  --color-action-primary-pressed: var(--color-brand-800);
+  --color-action-danger: #dc2626;
+  --color-action-danger-hover: #b91c1c;
+  --color-action-danger-pressed: #991b1b;
+  --color-overlay: rgb(18 18 24 / 0.45);
+
+  /* Avisos */
+  --color-info-bg: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1e40af;
+  --color-info-icon: #2563eb;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
+  --color-success-text: #166534;
+  --color-success-icon: #16a34a;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-warning-text: #92400e;
+  --color-warning-icon: #d97706;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #991b1b;
+  --color-error-icon: #dc2626;
+
+  /* Tipografía */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+
+  /* Espaciado (solo pasos del design system) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+
+  /* Radios */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Sombras */
+  --shadow-1: 0 1px 2px rgb(29 29 39 / 0.06);
+  --shadow-2: 0 4px 12px rgb(29 29 39 / 0.1);
+  --shadow-3: 0 2px 6px rgb(29 29 39 / 0.08), 0 16px 32px rgb(29 29 39 / 0.18);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg-canvas: var(--color-neutral-950);
+  --color-bg-surface: var(--color-neutral-900);
+  --color-bg-elevated: var(--color-neutral-800);
+  --color-bg-subtle: var(--color-neutral-800);
+  --color-bg-pressed: var(--color-neutral-700);
+  --color-bg-selected: var(--color-brand-900);
+  --color-bg-disabled: var(--color-neutral-800);
+  --color-text-primary: var(--color-neutral-50);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-disabled: var(--color-neutral-600);
+  --color-text-link: var(--color-brand-300);
+  --color-text-link-hover: var(--color-brand-200);
+  --color-text-selected: var(--color-brand-200);
+  --color-border-default: var(--color-neutral-800);
+  --color-border-strong: var(--color-neutral-700);
+  --color-border-input-hover: var(--color-neutral-400);
+  --color-focus-ring: var(--color-brand-400);
+  --color-focus-halo: var(--color-brand-900);
+  --color-overlay: rgb(0 0 0 / 0.6);
+
+  --color-info-bg: #172554;
+  --color-info-border: #1e3a8a;
+  --color-info-text: #bfdbfe;
+  --color-info-icon: #60a5fa;
+  --color-success-bg: #052e16;
+  --color-success-border: #14532d;
+  --color-success-text: #bbf7d0;
+  --color-success-icon: #4ade80;
+  --color-warning-bg: #451a03;
+  --color-warning-border: #78350f;
+  --color-warning-text: #fde68a;
+  --color-warning-icon: #fbbf24;
+  --color-error-bg: #450a0a;
+  --color-error-border: #7f1d1d;
+  --color-error-text: #fecaca;
+  --color-error-icon: #f87171;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.4);
+  --shadow-3: 0 2px 6px rgb(0 0 0 / 0.3), 0 16px 32px rgb(0 0 0 / 0.55);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 20px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-canvas);
+  -webkit-font-smoothing: antialiased;
+}

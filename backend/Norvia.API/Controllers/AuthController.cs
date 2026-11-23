@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
+using Norvia.API.Seguridad;
 using Norvia.Application.Features.Auth.CerrarSesion;
 using Norvia.Application.Features.Auth.CerrarSesion.DTOs;
 using Norvia.Application.Features.Auth.DTOs;
@@ -30,8 +31,18 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginEmpresa(
-        LoginEmpresaRequestDto request, [FromServices] LoginEmpresaServicio servicio, CancellationToken cancellationToken) =>
-        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+        LoginEmpresaRequestDto request,
+        [FromServices] LoginEmpresaServicio servicio,
+        [FromServices] CookieSesion cookies,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await servicio.EjecutarAsync(request, cancellationToken);
+        if (!resultado.EsExito)
+            return resultado.AHttp(this);
+
+        cookies.Establecer(Response, resultado.Valor);
+        return Ok(resultado.Valor);
+    }
 
     [AllowAnonymous]
     [HttpPost("login/plataforma")]
@@ -39,8 +50,18 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginPlataforma(
-        LoginPlataformaRequestDto request, [FromServices] LoginPlataformaServicio servicio, CancellationToken cancellationToken) =>
-        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+        LoginPlataformaRequestDto request,
+        [FromServices] LoginPlataformaServicio servicio,
+        [FromServices] CookieSesion cookies,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await servicio.EjecutarAsync(request, cancellationToken);
+        if (!resultado.EsExito)
+            return resultado.AHttp(this);
+
+        cookies.Establecer(Response, resultado.Valor);
+        return Ok(resultado.Valor);
+    }
 
     [AllowAnonymous]
     [HttpPost("refresh")]
@@ -48,16 +69,46 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Refrescar(
-        RefrescarSesionRequestDto request, [FromServices] RefrescarSesionServicio servicio, CancellationToken cancellationToken) =>
-        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+        [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)]
+        RefrescarSesionRequestDto? request,
+        [FromServices] RefrescarSesionServicio servicio,
+        [FromServices] CookieSesion cookies,
+        CancellationToken cancellationToken)
+    {
+        var refresh = PrimeroNoVacio(request?.RefreshToken, cookies.LeerRefresh(Request));
+        var resultado = await servicio.EjecutarAsync(
+            new RefrescarSesionRequestDto { RefreshToken = refresh ?? string.Empty },
+            cancellationToken);
+
+        if (!resultado.EsExito)
+        {
+            cookies.Borrar(Response);
+            return resultado.AHttp(this);
+        }
+
+        cookies.Establecer(Response, resultado.Valor);
+        return Ok(resultado.Valor);
+    }
 
     [AllowAnonymous]
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CerrarSesion(
-        CerrarSesionRequestDto request, [FromServices] CerrarSesionServicio servicio, CancellationToken cancellationToken) =>
-        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+        [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)]
+        CerrarSesionRequestDto? request,
+        [FromServices] CerrarSesionServicio servicio,
+        [FromServices] CookieSesion cookies,
+        CancellationToken cancellationToken)
+    {
+        var refresh = PrimeroNoVacio(request?.RefreshToken, cookies.LeerRefresh(Request));
+        var resultado = await servicio.EjecutarAsync(
+            new CerrarSesionRequestDto { RefreshToken = refresh ?? string.Empty },
+            cancellationToken);
+
+        cookies.Borrar(Response);
+        return resultado.AHttp(this);
+    }
 
     /// <summary>
     /// Cambia la contraseña de la sesión (HU-114; también el primer ingreso con contraseña temporal).
@@ -98,6 +149,9 @@ public sealed class AuthController : ControllerBase
         ReenviarVerificacionCuentaRequestDto request, [FromServices] ReenviarVerificacionCuentaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttpAceptado(this);
+
+    private static string? PrimeroNoVacio(string? a, string? b) =>
+        !string.IsNullOrWhiteSpace(a) ? a : !string.IsNullOrWhiteSpace(b) ? b : null;
 }
 
 //prueba hu-095

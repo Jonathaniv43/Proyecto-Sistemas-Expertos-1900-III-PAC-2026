@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Enums;
@@ -119,10 +118,12 @@ public sealed class RespuestasEncuestaTests(NorviaApiFactory api)
         await ResponderComoAsync("colaborador");
 
         var conDos = await Escenario.Json(await sst.GetAsync($"/api/encuestas/{encuestaId}/reporte"));
-        Assert.True(conDos.GetProperty("detalleOculto").GetBoolean());
+        Assert.False(conDos.GetProperty("detalleOculto").GetBoolean());
         Assert.Equal(2, conDos.GetProperty("totalRespuestasAnonimas").GetInt32());
-        Assert.All(conDos.GetProperty("preguntas").EnumerateArray(),
-            p => Assert.Equal(JsonValueKind.Null, p.GetProperty("distribucion").ValueKind));
+        var distDos = conDos.GetProperty("preguntas").EnumerateArray()
+            .Single(p => p.GetProperty("tipoRespuesta").GetString() == "seleccion_unica")
+            .GetProperty("distribucion").EnumerateArray();
+        Assert.Contains(distDos, d => d.GetProperty("cantidad").GetInt32() == 2);
 
         // Tercera participación: otro encuestado (roles distintos, un vínculo cada uno).
         await ResponderComoAsync("encuestado");

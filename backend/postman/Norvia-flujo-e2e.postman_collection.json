@@ -1,0 +1,1058 @@
+{
+  "info": {
+    "_postman_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "name": "Norvia flujo E2E (2 empresas)",
+    "description": "Flujo de dos empresas: Construcciones Hernández (construcción) y Comercial Flores (comercio).\n\n1. Importa la colección y el environment Norvia local.\n2. Ajusta baseUrl si la API no está en el puerto 5167.\n3. Corre las carpetas en orden. Los rubros ya están en la base. El staff crea el peligro y la categoría de la obra.\n4. Después de registrar cada empresa, copia la contraseña del correo a passwordTemporalA o passwordTemporalB y sigue con Verificar cuenta.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth plataforma",
+      "item": [
+        {
+          "name": "Login plataforma",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('tokenStaff', j.accessToken);",
+                  "pm.environment.set('refreshStaff', j.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{staffEmail}}\",\n  \"password\": \"{{staffPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/plataforma"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Catálogo (staff)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{tokenStaff}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Listar rubros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const lista = pm.response.json();",
+                  "pm.test('Están construcción y comercio', () => {",
+                  "  pm.expect(lista.some(r => r.codigo === 'construccion' && r.activo)).to.eql(true);",
+                  "  pm.expect(lista.some(r => r.codigo === 'comercio' && r.activo)).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/rubros",
+            "description": "Los rubros ya están en la base: oficina, comercio, maquila_fabrica y construccion."
+          }
+        },
+        {
+          "name": "Crear peligro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('peligroId', pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"materiales_obra\",\n  \"nombre\": \"Levantamiento de materiales en obra\",\n  \"descripcion\": \"Cargar sacos, bloques o varillas en la construcción\",\n  \"clasificacion\": \"ergonomico\"\n}"
+            },
+            "url": "{{baseUrl}}/api/peligros"
+          }
+        },
+        {
+          "name": "Crear categoría de riesgo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('categoriaId', pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rubroId\": 4,\n  \"nombre\": \"Esfuerzo en obra\",\n  \"descripcion\": \"Preguntas sobre carga de materiales en construcción\"\n}"
+            },
+            "url": "{{baseUrl}}/api/categorias-riesgo"
+          }
+        },
+        {
+          "name": "Crear pregunta seleccion_unica",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('preguntaUnicaId', pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoriaRiesgoId\": \"{{categoriaId}}\",\n  \"texto\": \"En la obra, ¿con qué frecuencia cargas sacos o bloques de más de 15 kg sin ayuda?\",\n  \"tipoRespuestaCodigo\": \"seleccion_unica\",\n  \"obligatoria\": true,\n  \"peligroId\": \"{{peligroId}}\",\n  \"opciones\": [\n    { \"texto\": \"Varias veces por semana\", \"orden\": 1, \"indicaExposicion\": true },\n    { \"texto\": \"Casi nunca\", \"orden\": 2, \"indicaExposicion\": false }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/preguntas"
+          }
+        },
+        {
+          "name": "Crear pregunta respuesta_breve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoriaRiesgoId\": \"{{categoriaId}}\",\n  \"texto\": \"¿En qué parte de la obra se te complica más mover el material?\",\n  \"tipoRespuestaCodigo\": \"respuesta_breve\",\n  \"obligatoria\": true,\n  \"peligroId\": null,\n  \"opciones\": []\n}"
+            },
+            "url": "{{baseUrl}}/api/preguntas"
+          }
+        },
+        {
+          "name": "Crear pregunta seleccion_multiple",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoriaRiesgoId\": \"{{categoriaId}}\",\n  \"texto\": \"¿Qué usas para mover el material en la obra?\",\n  \"tipoRespuestaCodigo\": \"seleccion_multiple\",\n  \"obligatoria\": false,\n  \"peligroId\": \"{{peligroId}}\",\n  \"opciones\": [\n    { \"texto\": \"Carretilla\", \"orden\": 1, \"indicaExposicion\": false },\n    { \"texto\": \"Un compañero\", \"orden\": 2, \"indicaExposicion\": false },\n    { \"texto\": \"Solo las manos\", \"orden\": 3, \"indicaExposicion\": true }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/preguntas"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Empresa A — registro y acceso",
+      "item": [
+        {
+          "name": "Registrar empresa A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('idEmpresaA', j.idEmpresa);",
+                  "pm.environment.set('emailAdminA', j.email);",
+                  "console.log('Contraseña temporal de', j.email, '→ pégala en passwordTemporalA');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razonSocial\": \"Construcciones Hernández S. de R.L.\",\n  \"rtn\": \"08011988004521\",\n  \"rubroCodigo\": \"construccion\",\n  \"primerNombre\": \"María\",\n  \"segundoNombre\": \"José\",\n  \"primerApellido\": \"Hernández\",\n  \"segundoApellido\": \"López\",\n  \"tipoDocumento\": \"dni\",\n  \"numeroDocumento\": \"0801198800452\",\n  \"email\": \"maria.hernandez@construccioneshernandez.hn\"\n}"
+            },
+            "url": "{{baseUrl}}/api/empresas",
+            "description": "La contraseña llega por correo. Pégala en passwordTemporalA antes de verificar la cuenta."
+          }
+        },
+        {
+          "name": "Verificar cuenta admin A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria.hernandez@construccioneshernandez.hn\",\n  \"contrasenaTemporal\": \"{{passwordTemporalA}}\",\n  \"contrasenaNueva\": \"Admin#Norvia2026\",\n  \"contrasenaNuevaRepetida\": \"Admin#Norvia2026\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/cuenta/verificar"
+          }
+        },
+        {
+          "name": "Login empresa A (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('tokenAdminA', j.accessToken);",
+                  "pm.environment.set('refreshAdminA', j.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria.hernandez@construccioneshernandez.hn\",\n  \"password\": \"Admin#Norvia2026\",\n  \"idEmpresa\": \"{{idEmpresaA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/empresa"
+          }
+        },
+        {
+          "name": "GET perfil empresa A",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminA}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/empresas/perfil"
+          }
+        },
+        {
+          "name": "Crear SST A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan.mejia@construccioneshernandez.hn\",\n  \"primerNombre\": \"Juan\",\n  \"primerApellido\": \"Mejía\",\n  \"rolCodigo\": \"responsable_sst\",\n  \"passwordTemporal\": \"Sst#Norvia2026\"\n}"
+            },
+            "url": "{{baseUrl}}/api/vinculos"
+          }
+        },
+        {
+          "name": "Login SST A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('tokenSstA', pm.response.json().accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan.mejia@construccioneshernandez.hn\",\n  \"password\": \"Sst#Norvia2026\",\n  \"idEmpresa\": \"{{idEmpresaA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/empresa"
+          }
+        },
+        {
+          "name": "Crear encuestado A1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "if (j.passwordTemporal) pm.environment.set('passwordEncuestadoA1', j.passwordTemporal);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.rivera@construccioneshernandez.hn\",\n  \"primerNombre\": \"Ana\",\n  \"primerApellido\": \"Rivera\"\n}"
+            },
+            "url": "{{baseUrl}}/api/vinculos/encuestados"
+          }
+        },
+        {
+          "name": "Crear encuestado A2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "if (j.passwordTemporal) pm.environment.set('passwordEncuestadoA2', j.passwordTemporal);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pedro.castillo@construccioneshernandez.hn\",\n  \"primerNombre\": \"Pedro\",\n  \"primerApellido\": \"Castillo\"\n}"
+            },
+            "url": "{{baseUrl}}/api/vinculos/encuestados"
+          }
+        },
+        {
+          "name": "Crear colaborador A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"luis.gomez@construccioneshernandez.hn\",\n  \"primerNombre\": \"Luis\",\n  \"primerApellido\": \"Gómez\",\n  \"rolCodigo\": \"colaborador\",\n  \"passwordTemporal\": \"Colab#Norvia2026\"\n}"
+            },
+            "url": "{{baseUrl}}/api/vinculos"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Empresa A — encuesta",
+      "item": [
+        {
+          "name": "Categorías disponibles",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/categorias-disponibles"
+          }
+        },
+        {
+          "name": "Tipos de respuesta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/tipos-respuesta"
+          }
+        },
+        {
+          "name": "Crear encuesta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('encuestaIdA', j.id);",
+                  "pm.environment.set('versionBorradorIdA', j.versionBorradorId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Condiciones de trabajo en obra\",\n  \"instrucciones\": \"Responde con lo que vives en la obra. No hay respuestas correctas.\",\n  \"categoriaRiesgoIds\": [\"{{categoriaId}}\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/encuestas"
+          }
+        },
+        {
+          "name": "GET detalle encuesta (guardar secciones/preguntas)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const v = pm.response.json().versionBorrador;",
+                  "if (v.secciones && v.secciones.length) pm.environment.set('seccionIdA', v.secciones[0].id);",
+                  "const p = v.preguntas.find(x => x.tipoRespuestaCodigo === 'seleccion_unica') || v.preguntas[0];",
+                  "pm.environment.set('preguntaEncuestaIdA', p.id);",
+                  "if (p.opciones && p.opciones.length) pm.environment.set('opcionIdA', p.opciones[0].id);",
+                  "const b = v.preguntas.find(x => x.tipoRespuestaCodigo === 'respuesta_breve');",
+                  "if (b) pm.environment.set('preguntaBreveIdA', b.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}"
+          }
+        },
+        {
+          "name": "Publicar v1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('versionPublicadaIdA', pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}/versiones/{{versionBorradorIdA}}/publicacion"
+          }
+        },
+        {
+          "name": "Editar la encuesta ya publicada",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const token = pm.environment.get('tokenSstA');",
+                  "const base = pm.environment.get('baseUrl');",
+                  "const id = pm.environment.get('encuestaIdA');",
+                  "pm.sendRequest({",
+                  "  url: `${base}/api/encuestas/${id}`,",
+                  "  method: 'GET',",
+                  "  header: { Authorization: `Bearer ${token}` }",
+                  "}, (err, res) => {",
+                  "  const pub = res.json().versionPublicada;",
+                  "  pm.variables.set('bodyBorradorV2', JSON.stringify({",
+                  "    instrucciones: 'Revisa cómo mueves el material en la obra.',",
+                  "    secciones: pub.secciones.map(s => ({ id: s.id, titulo: s.titulo + ' (edit)', orden: s.orden })),",
+                  "    preguntas: pub.preguntas.map(p => ({",
+                  "      id: p.id,",
+                  "      seccionId: p.seccionId,",
+                  "      texto: p.texto,",
+                  "      tipoRespuestaCodigo: p.tipoRespuestaCodigo,",
+                  "      obligatoria: p.obligatoria,",
+                  "      peligroId: p.peligroId,",
+                  "      orden: p.orden,",
+                  "      opciones: (p.opciones || []).map(o => ({ texto: o.texto, orden: o.orden, indicaExposicion: o.indicaExposicion }))",
+                  "    }))",
+                  "  }));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('La edición queda guardada', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('Queda un borrador nuevo', () => {",
+                  "  pm.expect(j.estado).to.eql('borrador');",
+                  "  pm.expect(j.numeroVersion).to.be.above(1);",
+                  "});",
+                  "if (j.secciones && j.secciones.length) {",
+                  "  pm.test('La sección del borrador es distinta a la publicada', () => {",
+                  "    pm.expect(j.secciones[0].id).to.not.eql(pm.environment.get('seccionIdA'));",
+                  "  });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{{bodyBorradorV2}}"
+            },
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}/borrador",
+            "description": "Toma las secciones y preguntas de la versión publicada y las guarda como borrador nuevo."
+          }
+        },
+        {
+          "name": "Login encuestado A1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('tokenEncuestadoA1', pm.response.json().accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.rivera@construccioneshernandez.hn\",\n  \"password\": \"{{passwordEncuestadoA1}}\",\n  \"idEmpresa\": \"{{idEmpresaA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/empresa"
+          }
+        },
+        {
+          "name": "GET pendientes A1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const arr = pm.response.json();",
+                  "const item = arr.find(e => e.encuestaId === pm.environment.get('encuestaIdA'));",
+                  "pm.test('incluye encuesta publicada', () => pm.expect(item).to.be.ok);",
+                  "if (item) {",
+                  "  pm.environment.set('versionPublicadaIdA', item.versionId);",
+                  "  const p = item.preguntas.find(x => x.tipoRespuesta === 'seleccion_unica') || item.preguntas[0];",
+                  "  pm.environment.set('preguntaEncuestaIdA', p.id);",
+                  "  if (p.opciones && p.opciones.length) pm.environment.set('opcionIdA', p.opciones[0].id);",
+                  "  const b = item.preguntas.find(x => x.tipoRespuesta === 'respuesta_breve');",
+                  "  if (b) pm.environment.set('preguntaBreveIdA', b.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenEncuestadoA1}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/pendientes"
+          }
+        },
+        {
+          "name": "Responder A1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenEncuestadoA1}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versionId\": \"{{versionPublicadaIdA}}\",\n  \"respuestas\": [\n    { \"preguntaId\": \"{{preguntaEncuestaIdA}}\", \"opcionId\": \"{{opcionIdA}}\" },\n    { \"preguntaId\": \"{{preguntaBreveIdA}}\", \"textoLibre\": \"En el segundo nivel, al subir los bloques por la escalera.\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}/respuestas"
+          }
+        },
+        {
+          "name": "Login encuestado A2 y responder",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('login 200', () => pm.response.to.have.status(200));",
+                  "const token = pm.response.json().accessToken;",
+                  "pm.environment.set('tokenEncuestadoA2', token);",
+                  "const base = pm.environment.get('baseUrl');",
+                  "const encuestaId = pm.environment.get('encuestaIdA');",
+                  "pm.sendRequest({",
+                  "  url: `${base}/api/encuestas/${encuestaId}/respuestas`,",
+                  "  method: 'POST',",
+                  "  header: {",
+                  "    Authorization: `Bearer ${token}`,",
+                  "    'Content-Type': 'application/json'",
+                  "  },",
+                  "  body: {",
+                  "    mode: 'raw',",
+                  "    raw: JSON.stringify({",
+                  "      versionId: pm.environment.get('versionPublicadaIdA'),",
+                  "      respuestas: [",
+                  "        { preguntaId: pm.environment.get('preguntaEncuestaIdA'), opcionId: pm.environment.get('opcionIdA') },",
+                  "        { preguntaId: pm.environment.get('preguntaBreveIdA'), textoLibre: 'En la excavación, porque el terreno está irregular.' }",
+                  "      ]",
+                  "    })",
+                  "  }",
+                  "}, (e, r) => pm.test('responder A2 200', () => pm.expect(r).to.have.status(200)));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pedro.castillo@construccioneshernandez.hn\",\n  \"password\": \"{{passwordEncuestadoA2}}\",\n  \"idEmpresa\": \"{{idEmpresaA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/empresa"
+          }
+        },
+        {
+          "name": "Login colaborador A y responder (3ª)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('login 200', () => pm.response.to.have.status(200));",
+                  "const token = pm.response.json().accessToken;",
+                  "pm.environment.set('tokenColaboradorA', token);",
+                  "const base = pm.environment.get('baseUrl');",
+                  "const encuestaId = pm.environment.get('encuestaIdA');",
+                  "pm.sendRequest({",
+                  "  url: `${base}/api/encuestas/${encuestaId}/respuestas`,",
+                  "  method: 'POST',",
+                  "  header: {",
+                  "    Authorization: `Bearer ${token}`,",
+                  "    'Content-Type': 'application/json'",
+                  "  },",
+                  "  body: {",
+                  "    mode: 'raw',",
+                  "    raw: JSON.stringify({",
+                  "      versionId: pm.environment.get('versionPublicadaIdA'),",
+                  "      respuestas: [",
+                  "        { preguntaId: pm.environment.get('preguntaEncuestaIdA'), opcionId: pm.environment.get('opcionIdA') },",
+                  "        { preguntaId: pm.environment.get('preguntaBreveIdA'), textoLibre: 'En el patio de materiales, al pasar los sacos al andamio.' }",
+                  "      ]",
+                  "    })",
+                  "  }",
+                  "}, (e, r) => pm.test('responder colaborador 200', () => pm.expect(r).to.have.status(200)));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"luis.gomez@construccioneshernandez.hn\",\n  \"password\": \"Colab#Norvia2026\",\n  \"idEmpresa\": \"{{idEmpresaA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/empresa"
+          }
+        },
+        {
+          "name": "GET reporte (detalle visible con ≥3)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('Trae las respuestas recibidas', () => {",
+                  "  pm.expect(j.detalleOculto).to.eql(false);",
+                  "  pm.expect(j.totalRespuestasAnonimas).to.be.at.least(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}/reporte"
+          }
+        },
+        {
+          "name": "Ver peligros sugeridos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Responde el listado', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('Incluye las sugerencias', () => {",
+                  "  pm.expect(j.detalleOculto).to.eql(false);",
+                  "  pm.expect(j.sugerencias).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}/peligros-sugeridos",
+            "description": "El responsable SST consulta los peligros que salieron de las respuestas."
+          }
+        },
+        {
+          "name": "Cerrar encuesta A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenSstA}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}/cierre"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Empresa B — aislamiento",
+      "item": [
+        {
+          "name": "Registrar empresa B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('idEmpresaB', j.idEmpresa);",
+                  "pm.environment.set('emailAdminB', j.email);",
+                  "console.log('Contraseña temporal de', j.email, '→ pégala en passwordTemporalB');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razonSocial\": \"Comercial Flores S. de R.L.\",\n  \"rtn\": \"05011992007831\",\n  \"rubroCodigo\": \"comercio\",\n  \"primerNombre\": \"Carmen\",\n  \"segundoNombre\": \"Elena\",\n  \"primerApellido\": \"Flores\",\n  \"segundoApellido\": \"Díaz\",\n  \"tipoDocumento\": \"dni\",\n  \"numeroDocumento\": \"0501199200783\",\n  \"email\": \"carmen.flores@comercialflores.hn\"\n}"
+            },
+            "url": "{{baseUrl}}/api/empresas"
+          }
+        },
+        {
+          "name": "Verificar cuenta admin B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carmen.flores@comercialflores.hn\",\n  \"contrasenaTemporal\": \"{{passwordTemporalB}}\",\n  \"contrasenaNueva\": \"Admin#Norvia2026\",\n  \"contrasenaNuevaRepetida\": \"Admin#Norvia2026\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/cuenta/verificar"
+          }
+        },
+        {
+          "name": "Login empresa B (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('tokenAdminB', pm.response.json().accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carmen.flores@comercialflores.hn\",\n  \"password\": \"Admin#Norvia2026\",\n  \"idEmpresa\": \"{{idEmpresaB}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login/empresa"
+          }
+        },
+        {
+          "name": "Listar encuestas B (no ve A)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const arr = pm.response.json();",
+                  "pm.test('no incluye encuesta de A', () => {",
+                  "  pm.expect(arr.find(e => e.id === pm.environment.get('encuestaIdA'))).to.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminB}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas",
+            "description": "La empresa B no debe ver las encuestas de la empresa A."
+          }
+        },
+        {
+          "name": "GET encuesta A con token B → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('No encuentra la encuesta de la otra empresa', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{tokenAdminB}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/encuestas/{{encuestaIdA}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Auth auxiliar",
+      "item": [
+        {
+          "name": "Refresh admin A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('tokenAdminA', j.accessToken);",
+                  "pm.environment.set('refreshAdminA', j.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshAdminA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout admin A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshAdminA}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/logout"
+          }
+        }
+      ]
+    }
+  ]
+}

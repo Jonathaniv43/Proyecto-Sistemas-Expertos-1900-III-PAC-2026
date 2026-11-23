@@ -19,7 +19,7 @@ public sealed class PeligrosSugeridosTests(NorviaApiFactory api)
     private readonly Escenario _escenario = new(api);
 
     [Fact]
-    public async Task Con_menos_de_3_respuestas_no_muestra_ni_registra_sugerencias()
+    public async Task Con_menos_de_3_respuestas_igual_muestra_y_registra_sugerencias()
     {
         var (empresa, cliente) = await EmpresaConResponsableAsync();
         var e = await CrearEncuestaAsync(empresa.EmpresaId, empresa.AdminVinculoId);
@@ -28,10 +28,11 @@ public sealed class PeligrosSugeridosTests(NorviaApiFactory api)
 
         var r = await Escenario.Json(await cliente.GetAsync(Ruta(e.EncuestaId)));
 
-        Assert.True(r.GetProperty("detalleOculto").GetBoolean());
+        Assert.False(r.GetProperty("detalleOculto").GetBoolean());
         Assert.Equal(2, r.GetProperty("totalRespuestas").GetInt32());
-        Assert.Empty(r.GetProperty("sugerencias").EnumerateArray());
-        Assert.Equal(0, await ContarRiesgosAsync(empresa.EmpresaId, e.EncuestaId));
+        var s = Sugerencias(r);
+        Assert.Equal(2, s[e.PeligroX].GetProperty("respuestasConExposicion").GetInt32());
+        Assert.Equal(1, await ContarRiesgosAsync(empresa.EmpresaId, e.EncuestaId));
     }
 
     [Fact]

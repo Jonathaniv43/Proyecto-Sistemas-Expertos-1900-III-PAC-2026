@@ -19,6 +19,7 @@ public sealed class ListarEncuestasPendientesRepositorio(NorviaDbContext db) : I
             .Include(e => e.Versiones.Where(v => v.Estado == EstadoVersionEncuesta.Publicada))
                 .ThenInclude(v => v.Preguntas)
                     .ThenInclude(p => p.TipoRespuestaPregunta)
+            .AsSplitQuery()
             .OrderByDescending(e => e.CreadaEn)
             .ToListAsync(ct);
 }

@@ -7,13 +7,12 @@ using Norvia.Domain.Enums;
 namespace Norvia.Application.Features.Encuestas.ObtenerReporteEncuesta;
 
 /// <summary>
-/// HU-032: reporte anónimo de la versión publicada vigente (RN-72, RN-73).
+/// HU-032: reporte anónimo de la versión publicada vigente (RN-72).
+/// El detalle se muestra con cualquier cantidad de respuestas.
 /// </summary>
 public sealed class ObtenerReporteEncuestaServicio(
     IObtenerReporteEncuestaRepositorio repositorio) : IServicioCasoDeUso
 {
-    private const int MinimoParaDetalle = 3;
-
     public async Task<Resultado<ReporteEncuestaResponseDto>> EjecutarAsync(
         Guid encuestaId, CancellationToken ct)
     {
@@ -30,26 +29,6 @@ public sealed class ObtenerReporteEncuestaServicio(
         var totalRespuestas = respuestas.Count;
         var periodoDesde = respuestas.Count == 0 ? (DateOnly?)null : respuestas.Min(r => r.FechaRespuesta);
         var periodoHasta = respuestas.Count == 0 ? (DateOnly?)null : respuestas.Max(r => r.FechaRespuesta);
-
-        if (totalRespuestas < MinimoParaDetalle)
-        {
-            return new ReporteEncuestaResponseDto(
-                encuestaId,
-                totalParticipaciones,
-                totalRespuestas,
-                periodoDesde,
-                periodoHasta,
-                DetalleOculto: true,
-                Preguntas: version.Preguntas
-                    .OrderBy(p => p.Orden)
-                    .Select(p => new PreguntaReporteResponseDto(
-                        p.Id,
-                        p.Texto,
-                        p.TipoRespuestaPregunta?.Codigo ?? string.Empty,
-                        null,
-                        null))
-                    .ToList());
-        }
 
         var preguntas = version.Preguntas
             .OrderBy(p => p.Orden)

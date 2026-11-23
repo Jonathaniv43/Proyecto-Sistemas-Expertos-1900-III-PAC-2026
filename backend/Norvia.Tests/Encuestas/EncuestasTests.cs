@@ -201,6 +201,80 @@ public sealed class EncuestasTests(NorviaApiFactory api)
     }
 
     [Fact]
+    public async Task Editar_publicada_reenviando_ids_de_seccion_crea_borrador_con_ids_nuevos()
+    {
+        var rubro = await CrearRubroAsync();
+        var (categoriaId, _, _) = await CrearCatalogoAsync(rubro);
+        var empresa = await _escenario.CrearEmpresaAsync("SeccionesIds", rubro);
+        var sst = await _escenario.ClienteConRolAsync(empresa, "responsable_sst");
+
+        var creada = await Escenario.Json(await sst.PostAsJsonAsync("/api/encuestas", new
+        {
+            titulo = "Con secciones",
+            categoriaRiesgoIds = new[] { categoriaId }
+        }));
+        var encuestaId = creada.GetProperty("id").GetGuid();
+        var v1Id = creada.GetProperty("versionBorradorId").GetGuid();
+
+        var detalle = await Escenario.Json(await sst.GetAsync($"/api/encuestas/{encuestaId}"));
+        var borrador = detalle.GetProperty("versionBorrador");
+        var seccionPubId = borrador.GetProperty("secciones")[0].GetProperty("id").GetGuid();
+        var pregunta = borrador.GetProperty("preguntas")[0];
+        var preguntaId = pregunta.GetProperty("id").GetGuid();
+        var peligroId = pregunta.TryGetProperty("peligroId", out var pel) && pel.ValueKind != System.Text.Json.JsonValueKind.Null
+            ? pel.GetGuid()
+            : (Guid?)null;
+        var opciones = pregunta.GetProperty("opciones").EnumerateArray()
+            .Select(o => new
+            {
+                texto = o.GetProperty("texto").GetString(),
+                orden = o.GetProperty("orden").GetInt16(),
+                indicaExposicion = o.GetProperty("indicaExposicion").GetBoolean()
+            })
+            .ToArray();
+
+        Assert.Equal(HttpStatusCode.OK,
+            (await sst.PostAsync($"/api/encuestas/{encuestaId}/versiones/{v1Id}/publicacion", null)).StatusCode);
+
+        // El front reenvía los Ids de la publicada (antes provocaba 500 por PK duplicada).
+        var edicion = await sst.PutAsJsonAsync($"/api/encuestas/{encuestaId}/borrador", new
+        {
+            instrucciones = "Nueva versión con mismas secciones",
+            secciones = new object[]
+            {
+                new { id = seccionPubId, titulo = "Sección reenviada", orden = 1 }
+            },
+            preguntas = new object[]
+            {
+                new
+                {
+                    id = preguntaId,
+                    seccionId = seccionPubId,
+                    texto = "Pregunta editada en v2",
+                    tipoRespuestaCodigo = pregunta.GetProperty("tipoRespuestaCodigo").GetString(),
+                    obligatoria = true,
+                    peligroId,
+                    orden = 1,
+                    opciones
+                }
+            }
+        });
+        Assert.Equal(HttpStatusCode.OK, edicion.StatusCode);
+        var v2 = await Escenario.Json(edicion);
+        Assert.Equal(2, v2.GetProperty("numeroVersion").GetInt32());
+        Assert.Equal("borrador", v2.GetProperty("estado").GetString());
+
+        var seccionNuevaId = v2.GetProperty("secciones")[0].GetProperty("id").GetGuid();
+        Assert.NotEqual(seccionPubId, seccionNuevaId);
+        Assert.Equal(seccionNuevaId, v2.GetProperty("preguntas")[0].GetProperty("seccionId").GetGuid());
+        Assert.NotEqual(preguntaId, v2.GetProperty("preguntas")[0].GetProperty("id").GetGuid());
+
+        var vigente = await Escenario.Json(await sst.GetAsync($"/api/encuestas/{encuestaId}"));
+        Assert.Equal(seccionPubId,
+            vigente.GetProperty("versionPublicada").GetProperty("secciones")[0].GetProperty("id").GetGuid());
+    }
+
+    [Fact]
     public async Task Solo_quien_creo_la_encuesta_puede_editarla_publicarla_o_cerrarla()
     {
         var rubro = await CrearRubroAsync();

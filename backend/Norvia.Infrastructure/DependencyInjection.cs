@@ -35,6 +35,11 @@ public static class DependencyInjection
             .Validate(o => !string.IsNullOrWhiteSpace(o.Key), "Falta Jwt__Key.")
             .Validate(o => o.AccessMinutos > 0 && o.RefreshDias > 0, "Jwt__AccessMinutos y Jwt__RefreshDias deben ser > 0.")
             .ValidateOnStart();
+        services.AddOptions<CookiesOpciones>()
+            .Bind(configuration.GetSection(CookiesOpciones.Seccion))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.RefreshName), "Falta Cookies__RefreshName.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.AccessName), "Falta Cookies__AccessName.")
+            .ValidateOnStart();
         services.AddOptions<CifradoOpciones>()
             .Bind(configuration.GetSection(CifradoOpciones.Seccion))
             .Validate(o => !string.IsNullOrWhiteSpace(o.Key), "Falta EmpresaId__Key en el entorno.")

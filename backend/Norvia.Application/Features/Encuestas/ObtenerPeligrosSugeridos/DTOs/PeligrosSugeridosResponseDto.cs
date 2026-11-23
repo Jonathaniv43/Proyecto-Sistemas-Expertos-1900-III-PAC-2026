@@ -17,7 +17,7 @@ public sealed record PeligroSugeridoDto(
     int RespuestasConExposicion,
     IReadOnlyList<PreguntaOrigenDto> Preguntas);
 
-/// <param name="DetalleOculto">true si hay menos de <paramref name="MinimoRespuestas"/> respuestas (RN-73): no se muestran sugerencias.</param>
+/// <param name="DetalleOculto">Siempre false: el detalle se muestra con cualquier cantidad de respuestas.</param>
 public sealed record PeligrosSugeridosResponseDto(
     Guid EncuestaId,
     int TotalRespuestas,
