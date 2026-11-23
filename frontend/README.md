@@ -25,8 +25,10 @@ src/
 ├── app/            router, providers y (con HU-102) rutas protegidas
 ├── shared/
 │   ├── api/        cliente Axios, sesión (tokens) y extractor de errores
-│   ├── components/ componentes comunes (layout, páginas genéricas, UI base)
+│   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, Aviso)
+│   ├── forms/      useFormulario (React Hook Form + Zod)
 │   ├── hooks/      usePeticion, useCargaVisible
+│   ├── validacion/ configuración de Zod y reglas reutilizables (espejo de FluentValidation)
 │   └── styles/     index.css (entrada) y theme.css (tokens del design system)
 └── features/
     └── <modulo>/   landing, auth, empresas, vinculos, encuestas…
@@ -99,3 +101,37 @@ export const obtenerPerfil = (signal: AbortSignal) =>
 const { ejecutar, cargando, error } = usePeticion((signal, datos: Formulario) =>
   api.post('/vinculos', datos, { signal }))
 ```
+
+## Formularios (`@/shared/forms` y `@/shared/validacion`)
+
+Cada formulario sigue cuatro reglas:
+- **Un esquema Zod por formulario,** en `features/<modulo>/schemas/`. Es espejo del validador de FluentValidation del caso de uso: mismos campos, obligatorios y límites.
+- **Reglas comunes de `@/shared/validacion`:** `textoRequerido(max)`, `textoOpcional(max)`, `correo()`, `contrasenaIngresada()` (login) y `contrasenaNueva()` (política de HU-114, la misma de `PoliticaContrasena.cs`). Si cambia una regla en el backend, se cambia aquí.
+- **`useFormulario(esquema, { defaultValues })`** ya trae `zodResolver` y `mode: 'onChange'`: el error aparece mientras se escribe, antes de enviar. Hay que dar siempre `defaultValues` (`''` en los textos).
+- **`enviar(accion)`** valida, llama a la API y, si falla, reparte el error:
+  - los errores por campo del backend van a su campo, y el primero recibe el foco;
+  - si el error no tiene campo (409, sin conexión, etc.), o el campo no existe en el formulario, el mensaje queda en `errorGeneral`;
+  - mientras envía, `formState.isSubmitting` es `true`.
+
+```tsx
+// features/vinculos/schemas/crearEncuestado.ts
+export const crearEncuestadoEsquema = z.object({
+  correo: correo(),
+  primerNombre: textoRequerido(50),
+})
+
+// features/vinculos/components/FormularioEncuestado.tsx
+const { register, formState: { errors, isSubmitting }, enviar, errorGeneral } =
+  useFormulario(crearEncuestadoEsquema, { defaultValues: { correo: '', primerNombre: '' } })
+
+<form noValidate onSubmit={enviar((datos) => api.post('/vinculos/encuestados', datos))}>
+  {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}
+  <CampoTexto etiqueta="Correo" required type="email" registro={register('correo')} error={errors.correo} />
+  <Boton type="submit" cargando={isSubmitting} textoCargando="Guardando…">Guardar</Boton>
+</form>
+```
+
+**Mensajes:**
+- Dicen qué corregir ("Ingresa un correo válido, por ejemplo nombre@empresa.com.") y usan el tono del design system (tú).
+- Los casos genéricos (obligatorio, mínimo, máximo, formato) ya están traducidos en `shared/validacion/zod.ts`. Solo se escribe un mensaje propio cuando hace falta ser más específico.
+- **`noValidate` en el `<form>`:** desactiva la validación nativa del navegador, para que solo valide Zod.
