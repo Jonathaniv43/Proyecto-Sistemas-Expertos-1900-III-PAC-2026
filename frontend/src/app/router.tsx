@@ -5,11 +5,14 @@ import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
+import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
+import { EncuestasPage } from '@/features/encuestas/pages/EncuestasPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
 import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage'
 import { AppLayout } from '@/shared/components/AppLayout'
+import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { ROLES, ROLES_GESTION } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
@@ -28,6 +31,7 @@ import { SoloSinSesion } from './rutas/SoloSinSesion'
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <ErrorInesperado />,
     children: [
       { index: true, element: <LandingPage /> },
       {
@@ -53,7 +57,11 @@ export const router = createBrowserRouter([
           },
           {
             element: <RequiereRol roles={ROLES_GESTION} />,
-            children: [{ path: 'encuestas/nueva', element: <NuevaEncuestaPage /> }],
+            children: [
+              { path: 'encuestas', element: <EncuestasPage /> },
+              { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
+              { path: 'encuestas/:id', element: <EncuestaPage /> },
+            ],
           },
         ],
       },

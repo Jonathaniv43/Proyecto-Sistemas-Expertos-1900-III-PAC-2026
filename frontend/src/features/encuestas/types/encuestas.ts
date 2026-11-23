@@ -38,3 +38,94 @@ export interface CrearEncuestaResponse {
   versionBorradorId: string
   versionPublicadaId: string | null
 }
+
+export type EstadoEncuesta = 'borrador' | 'publicada' | 'cerrada'
+export type EstadoVersion = 'borrador' | 'publicada' | 'reemplazada'
+
+/** GET /api/encuestas */
+export interface EncuestaResumen {
+  id: string
+  titulo: string
+  estado: EstadoEncuesta
+  creadaEn: string
+  versionPublicadaNumero: number | null
+  participaciones: number
+}
+
+export interface OpcionEncuesta {
+  id: string
+  texto: string
+  orden: number
+  indicaExposicion: boolean
+}
+
+export interface PreguntaEncuestaVersion {
+  id: string
+  seccionId: string | null
+  categoriaRiesgoId: string | null
+  preguntaExploratoriaId: string | null
+  texto: string
+  tipoRespuestaCodigo: TipoRespuesta | string
+  instruccionUi: string
+  obligatoria: boolean
+  peligroId: string | null
+  orden: number
+  opciones: OpcionEncuesta[]
+}
+
+export interface SeccionEncuesta {
+  id: string
+  titulo: string
+  orden: number
+}
+
+export interface VersionEncuesta {
+  id: string
+  numeroVersion: number
+  estado: EstadoVersion
+  instrucciones: string | null
+  publicadaEn: string | null
+  secciones: SeccionEncuesta[]
+  preguntas: PreguntaEncuestaVersion[]
+}
+
+/** GET /api/encuestas/{id} */
+export interface EncuestaDetalle {
+  id: string
+  titulo: string
+  estado: EstadoEncuesta
+  /** VinculoEmpresa de quien la creó: solo esa persona puede editarla, publicarla o cerrarla. */
+  creadaPorId: string
+  creadaEn: string
+  cerradaEn: string | null
+  versionPublicada: VersionEncuesta | null
+  versionBorrador: VersionEncuesta | null
+}
+
+/** PUT /api/encuestas/{id}/borrador: el estado completo del borrador (secciones + preguntas). */
+export interface GuardarBorradorRequest {
+  titulo: string
+  instrucciones: string | null
+  secciones: { id: string; titulo: string; orden: number }[]
+  preguntas: {
+    id: string | null
+    seccionId: string | null
+    categoriaRiesgoId: string | null
+    texto: string
+    tipoRespuestaCodigo: TipoRespuesta
+    obligatoria: boolean
+    peligroId: string | null
+    orden: number
+    opciones: { id: string | null; texto: string; orden: number; indicaExposicion: boolean }[]
+  }[]
+}
+
+/** GET /api/encuestas/tipos-respuesta */
+export interface TipoRespuestaCatalogo {
+  id: string
+  codigo: TipoRespuesta | string
+  nombre: string
+  instruccionUi: string
+  requiereOpciones: boolean
+  maxCaracteresRespuesta: number | null
+}

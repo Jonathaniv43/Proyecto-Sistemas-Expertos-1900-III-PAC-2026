@@ -21,9 +21,9 @@ export function InicioPage() {
       </div>
       <SiRol roles={ROLES_GESTION}>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link to="/encuestas/nueva" className={clasesBoton('secundario')}>
+          <Link to="/encuestas" className={clasesBoton('secundario')}>
             <ClipboardList aria-hidden size={16} strokeWidth={1.5} />
-            Crear una encuesta
+            Encuestas
           </Link>
         </div>
       </SiRol>

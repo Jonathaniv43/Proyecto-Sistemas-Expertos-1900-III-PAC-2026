@@ -26,7 +26,8 @@ src/
 ├── shared/
 │   ├── api/        cliente Axios, sesión (tokens) y extractor de errores
 │   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, CampoSelect,
-│   │               GrupoRadio, GrupoCasillas, AreaTexto, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
+│   │               GrupoRadio, GrupoCasillas, AreaTexto, Aviso, Insignia, BotonIcono,
+│   │               DialogoConfirmacion, RequisitosContrasena; clases.ts con las clases compartidas)
 │   ├── forms/      useFormulario (React Hook Form + Zod)
 │   ├── hooks/      usePeticion, useCargaVisible
 │   ├── sesion/     estado de la sesión para React: useSesion, SiRol, ROLES, cerrarSesion
@@ -227,3 +228,21 @@ useFormulario(esquema, {
   - El control depende del tipo: `respuesta_breve` es área de texto, `seleccion_unica` son radios y `seleccion_multiple` son casillas.
   - Hoy se usa en modo de solo lectura. HU-030 (vista del encuestado) y HU-031 (responder) la reutilizan.
 - **Catálogo:** no hay categorías ni preguntas sembradas. Las carga el staff con `POST /categorias-riesgo` y `POST /preguntas` (HU-023, todavía sin pantalla).
+
+## Crear y editar encuestas (HU-030)
+
+- **Rutas:** `/encuestas` (lista) y `/encuestas/:id` (editor), para `ROLES_GESTION`. El inicio lleva a la lista, y la confirmación de HU-029 lleva al borrador.
+- **Qué se edita:** el borrador, o la versión publicada si no hay borrador.
+  - **Campos:** título, instrucciones y preguntas agrupadas por sección (una por categoría). Cada pregunta tiene texto, tipo, obligatoria y opciones (agregar o quitar), y se puede subir o bajar dentro de su sección, o eliminar.
+  - **Peligro asociado:** se conserva, y la casilla "Indica exposición al peligro" aparece solo en esas preguntas (HU-033 la usa).
+  - **Validación:** el esquema `schemas/borrador.ts` sigue las reglas de `ActualizarEncuestaBorradorValidator`.
+- **Versiones:**
+  - Editar una encuesta publicada sin borrador crea la versión siguiente al guardar; los encuestados siguen viendo la vigente hasta que se publique la nueva.
+  - En ese caso las secciones se envían con ids nuevos (`borrador/convertir.ts`), porque el backend responde 500 si recibe los de la versión publicada.
+- **Publicar y cerrar:**
+  - "Publicar" guarda primero lo pendiente y pide confirmación.
+  - "Cerrar encuesta…" usa el diálogo de peligro, con el foco inicial en "Cancelar". Una encuesta cerrada queda de solo lectura.
+- **Quién puede editar:** solo quien creó la encuesta (`creadaPorId` igual a `vinculoId`). Los demás la ven como encuestado, con una explicación.
+- **Vista del encuestado** (`VistaEncuestado`): muestra los cambios aún sin guardar y reutiliza `PreguntaEncuesta`.
+- **Cambios sin guardar:** el navegador pregunta antes de salir de la página.
+- **Errores inesperados:** el router tiene un `errorElement` (`ErrorInesperado`) para que nunca se vea la pantalla técnica.
