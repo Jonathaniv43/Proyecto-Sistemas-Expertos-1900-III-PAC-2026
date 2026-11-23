@@ -29,7 +29,8 @@ public sealed class LoginEmpresaServicio(
         var vinculo = await repo.BuscarVinculoAsync(acceso.Id, empresaId, cancellationToken);
         if (vinculo is null
             || vinculo.Estado != EstadoVinculo.Activo
-            || vinculo.Empresa.Estado != EstadoEmpresa.Activa)
+            || vinculo.Empresa.Estado != EstadoEmpresa.Activa
+            || !await repo.UsuarioActivoAsync(vinculo.PersonaId, cancellationToken))
             return Errores.CredencialesInvalidas;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);

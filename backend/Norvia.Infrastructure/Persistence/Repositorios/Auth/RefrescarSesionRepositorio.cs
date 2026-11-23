@@ -21,4 +21,7 @@ public sealed class RefrescarSesionRepositorio(NorviaDbContext db) : IRefrescarS
     public void EliminarRefresh(RefreshToken refresh) => db.RefreshToken.Remove(refresh);
 
     public void AgregarRefresh(RefreshToken refresh) => db.RefreshToken.Add(refresh);
+
+    public Task<bool> UsuarioActivoAsync(Guid personaId, CancellationToken cancellationToken) =>
+        db.Usuario.AnyAsync(u => u.PersonaId == personaId && u.Activo, cancellationToken);
 }
