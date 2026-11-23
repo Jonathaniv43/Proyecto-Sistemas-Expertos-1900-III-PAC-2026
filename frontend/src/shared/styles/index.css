@@ -167,6 +167,79 @@
     background: var(--color-bg-disabled);
   }
 
+  /* Insignia de estado (design-system.css § Badge): 22px de alto, Caption medium. */
+  .insignia {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 22px;
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  /* Botón de solo ícono (design-system.css § icon-btn): mismo alto que los controles. */
+  .boton-icono {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--control-height);
+    height: var(--control-height);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background-color 0.12s, color 0.12s;
+  }
+
+  .boton-icono:hover:not(:disabled) {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+  }
+
+  .boton-icono:disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 639px) {
+    .boton-icono {
+      width: var(--control-height-touch);
+      height: var(--control-height-touch);
+    }
+  }
+
+  /* Diálogo de confirmación (design-system.md § Modal y § Diálogo): <dialog> nativo, 400px;
+     en celular sale como hoja inferior. */
+  .dialogo {
+    width: min(400px, calc(100% - 2 * var(--space-4)));
+    margin: auto;
+    padding: var(--space-6);
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-3);
+  }
+
+  .dialogo::backdrop {
+    background: var(--color-overlay);
+  }
+
+  @media (max-width: 639px) {
+    .dialogo {
+      width: 100%;
+      max-width: 100%;
+      margin: auto 0 0;
+      border-radius: 16px 16px 0 0;
+    }
+  }
+
   /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
   .area-texto {
     display: block;

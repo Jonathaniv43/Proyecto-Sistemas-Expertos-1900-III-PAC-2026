@@ -68,6 +68,9 @@ export function NuevaEncuestaPage() {
           Incluye {plural(creada.preguntas, 'pregunta', 'preguntas')}. Mientras sea borrador, los encuestados no la ven.
         </Aviso>
         <div className="flex flex-col gap-3 sm:flex-row">
+          <Link to={`/encuestas/${creada.encuesta.id}`} className={clasesBoton('primario')}>
+            Editar el borrador
+          </Link>
           <Boton
             variante="secundario"
             onClick={() => {
@@ -77,8 +80,8 @@ export function NuevaEncuestaPage() {
           >
             Crear otra encuesta
           </Boton>
-          <Link to="/inicio" className={clasesBoton('secundario')}>
-            Volver al inicio
+          <Link to="/encuestas" className={clasesBoton('secundario')}>
+            Ver las encuestas
           </Link>
         </div>
       </div>
@@ -166,7 +169,7 @@ export function NuevaEncuestaPage() {
                 ayuda="Así la verán los encuestados. Por ejemplo: Condiciones de trabajo 2026."
               />
               <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <Link to="/inicio">Cancelar</Link>
+                <Link to="/encuestas">Cancelar</Link>
                 <Boton type="submit" cargando={isSubmitting} textoCargando="Creando…">
                   Crear borrador
                 </Boton>
