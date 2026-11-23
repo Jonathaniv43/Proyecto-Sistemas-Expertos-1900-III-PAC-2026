@@ -177,3 +177,26 @@ export interface ReporteEncuesta {
     textosBreves: string[] | null
   }[]
 }
+
+/** Estado del riesgo que registra cada sugerencia (RN-18). Se confirma o descarta en HU-035. */
+export type EstadoRiesgo = 'sugerido' | 'confirmado' | 'descartado'
+
+/** Peligros sugeridos por las respuestas (HU-033, RN-13). Se calculan con todas las versiones. */
+export interface PeligrosSugeridos {
+  encuestaId: string
+  /** Respuestas de todas las versiones: base del respaldo de cada sugerencia. */
+  totalRespuestas: number
+  minimoRespuestas: number
+  /** Con menos de `minimoRespuestas` no se sugiere nada, para no identificar a nadie (RN-73). */
+  detalleOculto: boolean
+  /** Ordenadas por respaldo, de más a menos. */
+  sugerencias: {
+    riesgoSugeridoId: string
+    peligroId: string
+    peligroNombre: string
+    estado: EstadoRiesgo
+    /** Respuestas que eligieron una opción de exposición; cada una cuenta una vez por peligro. */
+    respuestasConExposicion: number
+    preguntas: { preguntaId: string; texto: string; respuestasConExposicion: number }[]
+  }[]
+}

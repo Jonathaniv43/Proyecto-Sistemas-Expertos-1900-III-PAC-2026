@@ -271,3 +271,12 @@ useFormulario(esquema, {
   - En la selección múltiple se aclara que los porcentajes pueden sumar más de 100 %.
 - **Respuestas breves:** sin autor y en orden alfabético, no en el orden en que se guardaron, para que el orden no permita deducir quién escribió cada una.
 - **Colores de datos:** `--color-dato-serie` y `--color-dato-pista` (`theme.css`) vienen de la paleta de referencia de visualización (azul), no de la marca. Están validados contra `bg-surface` en claro y en oscuro.
+
+## Peligros sugeridos (HU-033)
+
+- **Dónde:** sección "Peligros sugeridos" de `/encuestas/:id/resultados`, entre los indicadores y el detalle por pregunta (`PeligrosSugeridos`).
+- **De dónde salen:** un peligro se sugiere cuando al menos una respuesta eligió una opción que indica exposición en una pregunta asociada a ese peligro (RN-13). Se calculan con las respuestas de **todas** las versiones, así que el total puede no coincidir con el indicador "Respuestas" (que es de la versión vigente).
+- **Cada sugerencia** muestra el peligro, cuántas respuestas lo respaldan (con barra y porcentaje sobre el total), las preguntas que lo originaron con su cifra y el estado del riesgo registrado: "Por revisar", "En la matriz" o "Descartado" (se confirma o descarta en HU-035). El orden es el del backend: por respaldo y después por nombre.
+- **Estados:** menos de 3 respuestas (no se sugiere nada, RN-73), sin sugerencias, error y carga. Tiene su propia petición: si falla, el resto de los resultados se sigue viendo y se puede reintentar.
+- **Ojo:** el `GET` registra las sugerencias nuevas como riesgos sugeridos (sin repetirlas), así que abrir la página no es solo lectura en el backend.
+
