@@ -1,3 +1,9 @@
-export { api, renovarSesion } from './cliente'
+export { api, renovarSesion, type ResultadoRenovacion } from './cliente'
 export { extraerError, rutaDeCampo, type ErrorApi } from './errores'
-export { sesion, type MotivoFinSesion, type SesionResponse } from './sesion'
+export {
+  sesion,
+  type MotivoFinSesion,
+  type SesionResponse,
+  type TipoSesion,
+  type UsuarioSesion,
+} from './sesion'
