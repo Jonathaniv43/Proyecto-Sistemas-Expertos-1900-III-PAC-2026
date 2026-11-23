@@ -7,6 +7,7 @@ import type {
   EncuestaPendiente,
   EncuestaResumen,
   GuardarBorradorRequest,
+  ReporteEncuesta,
   ResponderEncuestaRequest,
   TipoRespuestaCatalogo,
   VersionEncuesta,
@@ -46,3 +47,6 @@ export const listarPendientes = (signal: AbortSignal) =>
 /** Registra la respuesta anónima (HU-031): una sola vez por persona. */
 export const responderEncuesta = (id: string, datos: ResponderEncuestaRequest) =>
   api.post<{ mensaje: string }>(`/encuestas/${id}/respuestas`, datos).then((r) => r.data)
+
+export const obtenerReporte = (signal: AbortSignal, id: string) =>
+  api.get<ReporteEncuesta>(`/encuestas/${id}/reporte`, { signal }).then((r) => r.data)
