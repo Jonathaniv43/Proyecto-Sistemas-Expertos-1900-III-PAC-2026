@@ -25,7 +25,8 @@ src/
 ├── app/            router, providers y rutas/ (RutaPrivada, RequiereRol, SoloSinSesion)
 ├── shared/
 │   ├── api/        cliente Axios, sesión (tokens) y extractor de errores
-│   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, Aviso)
+│   ├── components/ componentes comunes (layout, páginas genéricas) y ui/ (Boton, CampoTexto, CampoSelect,
+│   │               GrupoRadio, Aviso, RequisitosContrasena; clases.ts con las clases compartidas)
 │   ├── forms/      useFormulario (React Hook Form + Zod)
 │   ├── hooks/      usePeticion, useCargaVisible
 │   ├── sesion/     estado de la sesión para React: useSesion, SiRol, ROLES, cerrarSesion
@@ -132,6 +133,19 @@ const { register, formState: { errors, isSubmitting }, enviar, errorGeneral } =
   <Boton type="submit" cargando={isSubmitting} textoCargando="Guardando…">Guardar</Boton>
 </form>
 ```
+
+**Errores de negocio en su campo:** `erroresPorCodigo` lleva un `codigo` del backend a un campo, con un mensaje propio opcional. Por ejemplo, el RTN repetido se muestra junto al RTN sin borrar lo demás:
+
+```ts
+useFormulario(esquema, {
+  defaultValues,
+  erroresPorCodigo: { 'empresas.rtn_duplicado': { campo: 'rtn' } },
+})
+```
+
+**Controles de selección:**
+- Con 5 opciones o menos se usa `GrupoRadio`; con más, `CampoSelect` (design system § Select).
+- Un enlace que se ve como botón usa `clasesBoton('primario')` de `ui/clases.ts`.
 
 **Mensajes:**
 - Dicen qué corregir ("Ingresa un correo válido, por ejemplo nombre@empresa.com.") y usan el tono del design system (tú).

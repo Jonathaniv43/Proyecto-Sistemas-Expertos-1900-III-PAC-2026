@@ -4,17 +4,28 @@ import { useForm, type FieldValues, type Path, type UseFormProps } from 'react-h
 import type { z } from 'zod'
 import { extraerError, type ErrorApi } from '@/shared/api/errores'
 
+/** Qué hacer con un error de negocio del backend según su `codigo` (p. ej. "empresas.rtn_duplicado"). */
+export type ErrorPorCodigo<TEntrada extends FieldValues> = {
+  /** Campo donde se muestra; sin campo, va al aviso general. */
+  campo?: Path<TEntrada>
+  /** Mensaje propio; si no, el `title` del backend. */
+  mensaje?: string
+}
+
 type Opciones<TEntrada extends FieldValues, TSalida extends FieldValues> = Omit<
   UseFormProps<TEntrada, unknown, TSalida>,
   'resolver' | 'mode'
->
+> & {
+  erroresPorCodigo?: Record<string, ErrorPorCodigo<TEntrada>>
+}
 
 /**
  * useForm con las convenciones de Norvia (16-arquitectura §9):
  * - el esquema Zod es la única fuente de reglas (espejo del validador del backend);
  * - `mode: 'onChange'`: el error aparece mientras se escribe, antes de enviar;
  * - `enviar(fn)` llama a la API con los datos ya validados y, si falla, reparte el error:
- *   los errores por campo del backend van a su campo y el resto queda en `errorGeneral`.
+ *   los errores por campo del backend van a su campo y el resto queda en `errorGeneral`;
+ * - `erroresPorCodigo` lleva un error de negocio (409, etc.) a su campo: "RTN repetido" junto al RTN.
  */
 export function useFormulario<TEsquema extends z.ZodType<FieldValues, FieldValues>>(
   esquema: TEsquema,
@@ -23,8 +34,9 @@ export function useFormulario<TEsquema extends z.ZodType<FieldValues, FieldValue
   type Entrada = z.input<TEsquema>
   type Salida = z.output<TEsquema>
 
+  const { erroresPorCodigo, ...opcionesForm } = opciones ?? {}
   const form = useForm<Entrada, unknown, Salida>({
-    ...opciones,
+    ...opcionesForm,
     mode: 'onChange',
     resolver: zodResolver(esquema),
   })
@@ -36,12 +48,25 @@ export function useFormulario<TEsquema extends z.ZodType<FieldValues, FieldValue
   const aplicarErrorApi = useCallback(
     (error: ErrorApi) => {
       if (error.cancelada) return false
+
+      const porCodigo = error.codigo ? erroresPorCodigo?.[error.codigo] : undefined
+      if (porCodigo) {
+        const mensaje = porCodigo.mensaje ?? error.mensaje
+        if (porCodigo.campo) {
+          setError(porCodigo.campo, { type: 'servidor', message: mensaje }, { shouldFocus: true })
+          setErrorGeneral(undefined)
+          return true
+        }
+        setErrorGeneral(mensaje)
+        return false
+      }
+
       const sinCampo: string[] = []
       let hayCampos = false
-
       for (const [ruta, mensajes] of Object.entries(error.campos)) {
-        // Solo se marca el campo si existe en el formulario; si no, se suma al mensaje general.
-        if (getValues(ruta as Path<Entrada>) === undefined) {
+        // Solo se marca el campo si existe en el formulario. Las reglas de FluentValidation sobre
+        // el objeto entero llegan con ruta vacía: van al mensaje general, igual que un campo desconocido.
+        if (!ruta || getValues(ruta as Path<Entrada>) === undefined) {
           sinCampo.push(...mensajes)
           continue
         }
@@ -54,7 +79,7 @@ export function useFormulario<TEsquema extends z.ZodType<FieldValues, FieldValue
       )
       return hayCampos
     },
-    [getValues, setError],
+    [erroresPorCodigo, getValues, setError],
   )
 
   /** handleSubmit + manejo de errores de la API. Mientras corre, formState.isSubmitting es true. */

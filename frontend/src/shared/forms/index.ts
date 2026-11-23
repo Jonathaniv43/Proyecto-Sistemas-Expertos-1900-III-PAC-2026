@@ -1,1 +1,1 @@
-export { useFormulario } from './useFormulario'
+export { useFormulario, type ErrorPorCodigo } from './useFormulario'

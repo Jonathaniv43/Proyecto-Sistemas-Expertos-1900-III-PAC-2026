@@ -36,6 +36,66 @@
     animation: girar 0.7s linear infinite;
   }
 
+  /* Radio (design-system.css § Radio): círculo de 16px y punto central de 6px. */
+  .radio {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  .radio input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .radio-circulo {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border: var(--border-width) solid var(--color-border-input);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-surface);
+    transition: background-color 0.12s, border-color 0.12s;
+  }
+
+  .radio-circulo::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-text-on-brand);
+    opacity: 0;
+  }
+
+  .radio:hover .radio-circulo {
+    border-color: var(--color-border-input-hover);
+  }
+
+  .radio input:checked + .radio-circulo {
+    border-color: var(--color-action-primary);
+    background: var(--color-action-primary);
+  }
+
+  .radio input:checked + .radio-circulo::after {
+    opacity: 1;
+  }
+
+  .radio:hover input:checked + .radio-circulo {
+    border-color: var(--color-action-primary-hover);
+    background: var(--color-action-primary-hover);
+  }
+
+  .radio input:focus-visible + .radio-circulo {
+    box-shadow:
+      0 0 0 var(--focus-ring-offset) var(--color-bg-surface),
+      0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
+  }
+
   @keyframes girar {
     to {
       transform: rotate(360deg);
