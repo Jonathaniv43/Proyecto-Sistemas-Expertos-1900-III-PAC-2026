@@ -14,7 +14,7 @@ export function EncabezadoSesion({ usuario }: { usuario: UsuarioSesion }) {
 
   return (
     <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-border-default pb-4">
-      <div className="grid min-w-0">
+      <div className="grid overflow-hidden">
         <span className="text-xs font-medium text-text-secondary">Norvia</span>
         <span className="truncate text-md font-semibold" title={lugar}>
           {lugar}
