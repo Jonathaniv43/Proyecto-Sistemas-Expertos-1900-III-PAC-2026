@@ -8,6 +8,7 @@ import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { obtenerEncuesta, obtenerReporte } from '../api/encuestas'
 import { DistribucionPregunta } from '../components/DistribucionPregunta'
+import { PeligrosSugeridos } from '../components/PeligrosSugeridos'
 import { RespuestasBreves } from '../components/RespuestasBreves'
 import type { EncuestaDetalle, ReporteEncuesta } from '../types/encuestas'
 
@@ -25,6 +26,8 @@ const fecha = (iso: string) => {
  * HU-032: resultados anónimos de la versión publicada vigente: participantes, respuestas, periodo,
  * distribución por pregunta y respuestas breves sin autor. Con menos de 3 respuestas solo se ven
  * los totales, para no identificar a nadie.
+ *
+ * HU-033: entre los indicadores y el detalle van los peligros sugeridos por las respuestas.
  */
 export function ResultadosEncuestaPage() {
   const { id = '' } = useParams()
@@ -124,6 +127,8 @@ function Resultados({ encuesta, reporte }: { encuesta: EncuestaDetalle; reporte:
         />
         <Indicador etiqueta="Periodo analizado" valor={<span className="text-md">{periodo ?? 'Sin respuestas'}</span>} detalle={periodo ? 'Primera y última respuesta' : undefined} />
       </dl>
+
+      <PeligrosSugeridos encuestaId={encuesta.id} />
 
       {reporte.detalleOculto ? (
         <Aviso tipo="info" titulo="Los resultados por pregunta aparecen con 3 respuestas">

@@ -7,6 +7,7 @@ import type {
   EncuestaPendiente,
   EncuestaResumen,
   GuardarBorradorRequest,
+  PeligrosSugeridos,
   ReporteEncuesta,
   ResponderEncuestaRequest,
   TipoRespuestaCatalogo,
@@ -50,3 +51,7 @@ export const responderEncuesta = (id: string, datos: ResponderEncuestaRequest) =
 
 export const obtenerReporte = (signal: AbortSignal, id: string) =>
   api.get<ReporteEncuesta>(`/encuestas/${id}/reporte`, { signal }).then((r) => r.data)
+
+/** Peligros sugeridos por las respuestas (HU-033). Registra las sugerencias nuevas como riesgos sugeridos. */
+export const obtenerPeligrosSugeridos = (signal: AbortSignal, id: string) =>
+  api.get<PeligrosSugeridos>(`/encuestas/${id}/peligros-sugeridos`, { signal }).then((r) => r.data)
