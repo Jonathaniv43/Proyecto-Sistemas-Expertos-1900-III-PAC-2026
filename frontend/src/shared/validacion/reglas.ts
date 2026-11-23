@@ -28,6 +28,18 @@ export const correo = () =>
     .max(254, 'El correo debe tener como máximo 254 caracteres.')
     .pipe(z.email('Ingresa un correo válido, por ejemplo nombre@empresa.com.'))
 
+/** Quita guiones y espacios: "0801-1999-123456" → "08011999123456". */
+export const soloDigitos = (valor: string) => valor.replace(/[\s-]/g, '')
+
+/** RTN de empresa: 14 dígitos (RegistrarEmpresaValidator). Acepta guiones o espacios y los quita. */
+export const rtn = () =>
+  z
+    .string()
+    .trim()
+    .min(1, 'Ingresa el RTN de la empresa.')
+    .transform(soloDigitos)
+    .pipe(z.string().regex(/^\d{14}$/, 'El RTN tiene 14 dígitos. Escríbelo sin letras.'))
+
 /** Contraseña para iniciar sesión: solo se compara con la guardada (LoginEmpresaValidator). */
 export const contrasenaIngresada = () =>
   z.string().min(1, 'Ingresa tu contraseña.').min(8, 'La contraseña tiene al menos 8 caracteres.')

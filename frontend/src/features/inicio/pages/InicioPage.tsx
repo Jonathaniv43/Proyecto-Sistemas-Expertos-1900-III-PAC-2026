@@ -1,25 +1,19 @@
-import { Boton } from '@/shared/components/ui/Boton'
-import { cerrarSesion } from '@/shared/sesion'
-import { useState } from 'react'
+import { etiquetaRol, useSesion } from '@/shared/sesion'
 
-/** Primera pantalla después de iniciar sesión. Provisional: el menú y el contenido llegan con cada módulo. */
+/** Primera pantalla después de iniciar sesión. Las funciones de cada módulo se agregan con su HU. */
 export function InicioPage() {
-  const [cerrando, setCerrando] = useState(false)
+  const sesion = useSesion()
+  if (sesion.estado !== 'activa') return null
+  const { usuario } = sesion
 
   return (
-    <section className="flex flex-col items-start gap-6">
+    <section className="grid gap-2">
       <h1 className="text-xl font-semibold">Inicio</h1>
-      <Boton
-        variante="secundario"
-        cargando={cerrando}
-        textoCargando="Cerrando sesión…"
-        onClick={async () => {
-          setCerrando(true)
-          await cerrarSesion()
-        }}
-      >
-        Cerrar sesión
-      </Boton>
+      <p className="text-text-secondary">
+        {usuario.tipo === 'plataforma'
+          ? `Entraste a la administración de Norvia como ${etiquetaRol(usuario.rol)}.`
+          : `Entraste${usuario.empresa ? ` a ${usuario.empresa.razonSocial}` : ''} como ${etiquetaRol(usuario.rol)}.`}
+      </p>
     </section>
   )
 }

@@ -1,10 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { type EstadoLogin, RUTA_LOGIN, rutaActual, useSesion } from '@/shared/sesion'
+import { EncabezadoSesion } from '@/shared/components/EncabezadoSesion'
+import { type EstadoLogin, RUTA_CAMBIAR_CONTRASENA, RUTA_LOGIN, rutaActual, useSesion } from '@/shared/sesion'
 import { SesionSinConexion, VerificandoSesion } from './PantallasSesion'
 
 /**
  * Rutas que requieren sesión. Sin sesión (o cuando vence) lleva al login recordando a dónde
- * volver; el login muestra por qué se pidió ingresar de nuevo.
+ * volver; el login muestra por qué se pidió ingresar de nuevo. Con contraseña temporal, solo deja
+ * usar la pantalla para cambiarla (HU-114).
  */
 export function RutaPrivada() {
   const sesion = useSesion()
@@ -19,7 +21,16 @@ export function RutaPrivada() {
       const estado: EstadoLogin = { desde: rutaActual(location), motivo: sesion.motivo }
       return <Navigate to={RUTA_LOGIN} replace state={estado} />
     }
-    case 'activa':
-      return <Outlet />
+    case 'activa': {
+      const enCambio = location.pathname === RUTA_CAMBIAR_CONTRASENA
+      if (sesion.usuario.debeCambiarPassword && !enCambio) return <Navigate to={RUTA_CAMBIAR_CONTRASENA} replace />
+      if (!sesion.usuario.debeCambiarPassword && enCambio) return <Navigate to="/inicio" replace />
+      return (
+        <>
+          <EncabezadoSesion usuario={sesion.usuario} />
+          <Outlet />
+        </>
+      )
+    }
   }
 }

@@ -1,22 +1,15 @@
-import { correo, textoOpcional, textoRequerido, z } from '@/shared/validacion'
+import { correo, rtn, soloDigitos, textoOpcional, textoRequerido, z } from '@/shared/validacion'
 
 /**
  * Espejo de RegistrarEmpresaValidator (backend). Los datos del perfil (HU-026) no se piden aquí.
  * RTN y DNI se aceptan con guiones o espacios y se envían solo con los dígitos.
  */
-const soloDigitos = (valor: string) => valor.replace(/[\s-]/g, '')
-
 const TIPOS_DOCUMENTO = ['dni', 'pasaporte'] as const
 
 export const registroEmpresaEsquema = z
   .object({
     razonSocial: textoRequerido(200),
-    rtn: z
-      .string()
-      .trim()
-      .min(1, 'Ingresa el RTN de la empresa.')
-      .transform(soloDigitos)
-      .pipe(z.string().regex(/^\d{14}$/, 'El RTN tiene 14 dígitos. Escríbelo sin letras.')),
+    rtn: rtn(),
     rubroCodigo: z.string().min(1, 'Elige el rubro de la empresa.').max(30),
     primerNombre: textoRequerido(80),
     segundoNombre: textoOpcional(80),

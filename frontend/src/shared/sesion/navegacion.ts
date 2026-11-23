@@ -9,6 +9,8 @@ export interface EstadoLogin {
 
 export const RUTA_LOGIN = '/login'
 export const RUTA_INICIO = '/inicio'
+/** Primer ingreso con contraseña temporal: se exige cambiarla antes de continuar. */
+export const RUTA_CAMBIAR_CONTRASENA = '/cambiar-contrasena'
 
 /** Solo rutas internas ("/algo"), para no redirigir fuera de Norvia. */
 export function destinoSeguro(estado: unknown): string {

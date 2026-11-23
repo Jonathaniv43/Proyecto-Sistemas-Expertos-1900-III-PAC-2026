@@ -1,5 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
+import { CambiarContrasenaPage } from '@/features/auth/pages/CambiarContrasenaPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
@@ -27,13 +29,17 @@ export const router = createBrowserRouter([
         element: <SoloSinSesion />,
         children: [
           { path: 'login', element: <LoginPage /> },
+          { path: 'plataforma', element: <LoginPlataformaPage /> },
           { path: 'registro', element: <RegistroEmpresaPage /> },
           { path: 'verificar-cuenta', element: <VerificarCuentaPage /> },
         ],
       },
       {
         element: <RutaPrivada />,
-        children: [{ path: 'inicio', element: <InicioPage /> }],
+        children: [
+          { path: 'inicio', element: <InicioPage /> },
+          { path: 'cambiar-contrasena', element: <CambiarContrasenaPage /> },
+        ],
       },
       { path: '*', element: <NotFoundPage /> },
     ],
