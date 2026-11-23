@@ -9,6 +9,7 @@ import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
 import { EncuestasPage } from '@/features/encuestas/pages/EncuestasPage'
 import { MisEncuestasPage } from '@/features/encuestas/pages/MisEncuestasPage'
 import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncuestaPage'
+import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },
+              { path: 'encuestas/:id/resultados', element: <ResultadosEncuestaPage /> },
             ],
           },
         ],

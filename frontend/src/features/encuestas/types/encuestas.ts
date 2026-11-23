@@ -155,3 +155,25 @@ export interface ResponderEncuestaRequest {
   versionId: string
   respuestas: { preguntaId: string; opcionId?: string; textoLibre?: string; opcionIds?: string[] }[]
 }
+
+/** GET /api/encuestas/{id}/reporte (HU-032): resultados anónimos de la versión publicada vigente. */
+export interface ReporteEncuesta {
+  encuestaId: string
+  /** Personas que respondieron la encuesta (todas sus versiones). */
+  totalParticipaciones: number
+  /** Respuestas registradas en la versión vigente. */
+  totalRespuestasAnonimas: number
+  periodoDesde: string | null
+  periodoHasta: string | null
+  /** Con menos de 3 respuestas no se muestra el detalle, para no identificar a nadie (RN-73). */
+  detalleOculto: boolean
+  preguntas: {
+    preguntaId: string
+    texto: string
+    tipoRespuesta: TipoRespuesta | string
+    /** Selección: cantidad y porcentaje sobre quienes respondieron esa pregunta. */
+    distribucion: { opcionId: string; etiqueta: string; cantidad: number; porcentaje: number }[] | null
+    /** Respuesta breve: los textos, sin autor. */
+    textosBreves: string[] | null
+  }[]
+}

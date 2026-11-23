@@ -63,6 +63,7 @@ Las subcarpetas de cada feature se crean cuando hacen falta, no vacías.
 | Tipografía | `text-xs`, `text-sm`, `text-md`, `text-lg`, `text-xl` y `text-2xl` (con interlineado); `font-regular`, `font-medium` y `font-semibold` | `text-sm font-medium` |
 | Radios | `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` y `rounded-full` | `rounded-md` |
 | Sombras | `shadow-1`, `shadow-2` y `shadow-3` | `shadow-2` |
+| Datos (gráficos) | `bg-dato-serie` (la barra) y `bg-dato-pista` (su fondo) | `bg-dato-serie` |
 | Ancho máximo | `max-w-layout` (1280px) y `max-w-layout-narrow` (720px) | |
 
 - **Clases que no existen:** `bg-blue-500`, `p-5`, `rounded-2xl` y `shadow-lg` no generan CSS.
@@ -257,3 +258,16 @@ useFormulario(esquema, {
   - El error de "al menos una respuesta" va en la ruta `sinRespuestas`, aparte de `respuestas`, porque si no tapa los errores de cada pregunta.
 - **`PreguntaEncuesta` en modo responder:** los controles están habilitados, el error va una vez debajo del grupo y las respuestas breves llevan el contador "N / máximo" del design system.
 - **Situaciones que se explican:** ya respondida, encuesta cerrada, o cambio de versión mientras se respondía ("Abrir la versión actual"). Al terminar se confirma que la respuesta es anónima.
+
+## Resultados de una encuesta (HU-032)
+
+- **`/encuestas/:id/resultados`:** para `ROLES_GESTION`. Se llega con "Ver resultados" desde la encuesta, cuando ya tiene una versión publicada.
+- **Indicadores:** participantes (todas las versiones), respuestas (de la versión vigente) y periodo analizado (primera y última respuesta).
+- **Detalle oculto:** con menos de 3 respuestas el backend no manda el detalle (RN-73), y la pantalla explica por qué y cuántas van.
+- **Gráfico por pregunta de selección** (`DistribucionPregunta`): una lista de medidores, siguiendo la guía de visualización.
+  - Cada opción muestra su nombre, una barra fina y la cifra "N · %", en el orden de la encuesta.
+  - Un solo tono y sin leyenda, porque es una sola serie. Todas las cifras están impresas: nada depende de un tooltip.
+  - Cada fila es enfocable con el teclado y se anuncia con su cifra.
+  - En la selección múltiple se aclara que los porcentajes pueden sumar más de 100 %.
+- **Respuestas breves:** sin autor y en orden alfabético, no en el orden en que se guardaron, para que el orden no permita deducir quién escribió cada una.
+- **Colores de datos:** `--color-dato-serie` y `--color-dato-pista` (`theme.css`) vienen de la paleta de referencia de visualización (azul), no de la marca. Están validados contra `bg-surface` en claro y en oscuro.

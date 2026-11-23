@@ -99,6 +99,12 @@
   --color-error-text: #991B1B;
   --color-error-icon: #DC2626;
 
+  /* --- Color: datos (gráficos). Azul de la paleta de referencia de visualización, no la marca:
+         el violeta significa "acción" y los avisos tienen sus colores. Validado (validate_palette.js)
+         contra bg-surface en claro y en oscuro. La pista es un paso más claro del mismo azul. --- */
+  --color-dato-serie: #2a78d6;
+  --color-dato-pista: #cde2fb;
+
   /* --- Tipografía (font-sans, font-regular|medium|semibold, text-xs…2xl) --- */
   --font-sans: var(--font-family-sans);
   --font-weight-regular: 400;
@@ -223,6 +229,9 @@
   --color-error-border: #7F1D1D;
   --color-error-text: #FECACA;
   --color-error-icon: #F87171;
+
+  --color-dato-serie: #3987e5;
+  --color-dato-pista: #0d366b;
 
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
   --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.40);

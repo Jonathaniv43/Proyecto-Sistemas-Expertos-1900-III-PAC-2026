@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, Pencil, Plus, TriangleAlert } from 'lucide-react'
+import { ArrowLeft, ChartColumn, Eye, Pencil, Plus, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useWatch } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { AreaTexto } from '@/shared/components/ui/AreaTexto'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
+import { clasesBoton } from '@/shared/components/ui/clases'
 import { DialogoConfirmacion } from '@/shared/components/ui/DialogoConfirmacion'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { MensajeCampo } from '@/shared/components/ui/MensajeCampo'
@@ -230,6 +231,12 @@ function Encuesta({ encuesta, tipos, onCambio }: { encuesta: EncuestaDetalle; ti
       {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}
 
       <div className="flex flex-wrap gap-3">
+        {hayPublicada && (
+          <Link to={`/encuestas/${encuesta.id}/resultados`} className={clasesBoton('secundario')}>
+            <ChartColumn aria-hidden size={16} strokeWidth={1.5} />
+            Ver resultados
+          </Link>
+        )}
         {modo === 'editar' ? (
           <Boton variante="secundario" onClick={() => setModo('vista')}>
             <Eye aria-hidden size={16} strokeWidth={1.5} />
