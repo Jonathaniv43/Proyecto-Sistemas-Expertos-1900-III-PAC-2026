@@ -18,7 +18,11 @@ export function RutaPrivada() {
     case 'sin_conexion':
       return <SesionSinConexion />
     case 'sin_sesion': {
-      const estado: EstadoLogin = { desde: rutaActual(location), motivo: sesion.motivo }
+      // Se vuelve a la página donde estaba solo si la sesión se cortó sola (venció, se reemplazó o
+      // nunca hubo). Tras cerrar sesión o cambiar la contraseña, el próximo ingreso empieza en el inicio:
+      // puede entrar otra persona, con otro rol.
+      const volver = sesion.motivo !== 'cerrada' && sesion.motivo !== 'contrasena_cambiada'
+      const estado: EstadoLogin = { desde: volver ? rutaActual(location) : undefined, motivo: sesion.motivo }
       return <Navigate to={RUTA_LOGIN} replace state={estado} />
     }
     case 'activa': {

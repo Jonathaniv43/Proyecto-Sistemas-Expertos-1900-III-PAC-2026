@@ -189,3 +189,13 @@ useFormulario(esquema, {
   - Mientras hay una sesión abierta, `/login` lleva a ella. Para entrar a otra empresa hay que cerrar sesión, o usar otro navegador o una ventana privada.
   - Si dos pestañas inician sesión en empresas distintas, la primera se cierra y lo explica.
 - **Encabezado del área privada:** muestra la empresa, el rol y el botón para cerrar sesión. El menú de cada módulo se agrega con su HU.
+
+## Agregar personas (HU-020)
+
+- **`/personas/nueva`:** solo para `admin_empresa` (`RequiereRol`). Se llega desde el inicio.
+- **Roles:** se elige uno de los 4 de empresa, cada uno con la descripción de lo que puede hacer (`DESCRIPCIONES_ROL_EMPRESA`).
+- **Cuenta existente:** si el correo ya tiene cuenta en Norvia, por ejemplo en otra empresa, se reutiliza. La persona entra con su contraseña de siempre y conserva sus datos.
+- **Cuenta nueva:**
+  - El front genera la contraseña temporal con `generarContrasenaTemporal()`, que cumple la política de HU-114 y no usa caracteres confusos.
+  - La confirmación la muestra una sola vez, con un botón para copiarla. El administrador se la entrega a la persona, que debe cambiarla en el primer ingreso.
+- **Acceso duplicado:** se avisa junto al correo, sin borrar lo demás.

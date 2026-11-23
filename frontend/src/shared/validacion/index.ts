@@ -1,4 +1,5 @@
 export { z } from './zod'
+export { generarContrasenaTemporal } from './contrasenaTemporal'
 export {
   contrasenaIngresada,
   contrasenaNueva,
