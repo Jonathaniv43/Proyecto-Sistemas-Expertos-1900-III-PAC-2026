@@ -5,12 +5,13 @@ import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
+import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
 import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage'
 import { AppLayout } from '@/shared/components/AppLayout'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
-import { ROLES } from '@/shared/sesion'
+import { ROLES, ROLES_GESTION } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
 import { RutaPrivada } from './rutas/RutaPrivada'
 import { SoloSinSesion } from './rutas/SoloSinSesion'
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
               { path: 'personas/nueva', element: <AgregarPersonaPage /> },
               { path: 'personas/encuestados', element: <AgregarEncuestadosPage /> },
             ],
+          },
+          {
+            element: <RequiereRol roles={ROLES_GESTION} />,
+            children: [{ path: 'encuestas/nueva', element: <NuevaEncuestaPage /> }],
           },
         ],
       },

@@ -97,6 +97,76 @@
       0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
   }
 
+  /* Casilla (design-system.css § Checkbox): caja de 16px, radio sm, tilde en text-on-brand. */
+  .casilla {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  .casilla input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .casilla-caja {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border: var(--border-width) solid var(--color-border-input);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-surface);
+    color: var(--color-text-on-brand);
+    transition: background-color 0.12s, border-color 0.12s;
+  }
+
+  .casilla-caja svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+  }
+
+  .casilla:hover .casilla-caja {
+    border-color: var(--color-border-input-hover);
+  }
+
+  .casilla:has(input:checked) .casilla-caja {
+    border-color: var(--color-action-primary);
+    background: var(--color-action-primary);
+  }
+
+  .casilla:has(input:checked) .casilla-caja svg {
+    opacity: 1;
+  }
+
+  .casilla:hover:has(input:checked) .casilla-caja {
+    border-color: var(--color-action-primary-hover);
+    background: var(--color-action-primary-hover);
+  }
+
+  .casilla:has(input:focus-visible) .casilla-caja {
+    box-shadow:
+      0 0 0 var(--focus-ring-offset) var(--color-bg-surface),
+      0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
+  }
+
+  /* Radio y casilla deshabilitados (vista previa de una encuesta): DS § Deshabilitado. */
+  .radio:has(input:disabled),
+  .casilla:has(input:disabled) {
+    cursor: default;
+  }
+
+  .radio:has(input:disabled) .radio-circulo,
+  .casilla:has(input:disabled) .casilla-caja {
+    border-color: var(--color-border-default);
+    background: var(--color-bg-disabled);
+  }
+
   /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
   .area-texto {
     display: block;
