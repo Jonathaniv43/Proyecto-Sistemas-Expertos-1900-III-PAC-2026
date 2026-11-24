@@ -16,11 +16,16 @@ internal static class ProyeccionRiesgo
     private sealed record Fila(
         Guid Id, EstadoRiesgo Estado, Guid? PeligroId, string? PeligroNombre, ClasificacionPeligro? PeligroClasificacion,
         string? DescripcionPeligro, string? Actividad,
-        Guid? EncuestaId, string? EncuestaTitulo, DateTime CreadoEn, UltimaEvaluacion? Evaluacion, int TotalControles);
+        Guid? EncuestaId, string? EncuestaTitulo, DateTime CreadoEn, UltimaEvaluacion? Evaluacion, UltimaEvaluacion? Residual, int TotalControles);
+
+    private static EvaluacionResponseDto? Dto(UltimaEvaluacion? e) => e is null
+        ? null
+        : new EvaluacionResponseDto(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.Probabilidad * e.Severidad,
+            EvaluacionRiesgo.Clasificar(e.Probabilidad * e.Severidad), e.EvaluadoPorId, e.Persona.NombreCompleto, e.EvaluadoEn);
 
     /// <summary>
     /// Nombre del peligro (catálogo global), título de la encuesta que lo sugirió y la última evaluación inicial
-    /// con su evaluador y cuántos controles tiene (todo de la misma empresa). El nivel, la clasificación y el nombre completo se calculan en memoria.
+    /// y la última residual con su evaluador y cuántos controles tiene (todo de la misma empresa). El nivel, la clasificación y el nombre completo se calculan en memoria.
     /// </summary>
     internal static async Task<List<RiesgoResponseDto>> ListarAsync(NorviaDbContext db, IQueryable<RiesgoEmpresa> riesgos, CancellationToken ct)
     {
@@ -34,15 +39,18 @@ internal static class ProyeccionRiesgo
                     .OrderByDescending(e => e.EvaluadoEn).ThenByDescending(e => e.Id)
                     .Select(e => new UltimaEvaluacion(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.EvaluadoPorId, e.EvaluadoPor.Persona, e.EvaluadoEn))
                     .FirstOrDefault(),
+                r.Evaluaciones
+                    .Where(e => e.Tipo == TipoEvaluacion.Residual)
+                    .OrderByDescending(e => e.EvaluadoEn).ThenByDescending(e => e.Id)
+                    .Select(e => new UltimaEvaluacion(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.EvaluadoPorId, e.EvaluadoPor.Persona, e.EvaluadoEn))
+                    .FirstOrDefault(),
                 r.Controles.Count))
             .ToListAsync(ct);
 
         return filas.Select(f => new RiesgoResponseDto(
                 f.Id, f.Estado, f.PeligroId, f.PeligroNombre, f.PeligroClasificacion, f.DescripcionPeligro, f.Actividad, f.EncuestaId, f.EncuestaTitulo, f.CreadoEn,
-                f.Evaluacion is { } e
-                    ? new EvaluacionResponseDto(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.Probabilidad * e.Severidad,
-                        EvaluacionRiesgo.Clasificar(e.Probabilidad * e.Severidad), e.EvaluadoPorId, e.Persona.NombreCompleto, e.EvaluadoEn)
-                    : null,
+                Dto(f.Evaluacion),
+                Dto(f.Residual),
                 f.TotalControles))
             .ToList();
     }

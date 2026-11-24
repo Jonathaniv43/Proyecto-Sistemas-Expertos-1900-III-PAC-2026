@@ -44,6 +44,9 @@ public static class CatalogoPermisos
         Empresa("riesgo.matriz", "Ver el mapa de la matriz de riesgos", "GET", "api/riesgos/matriz", "admin_empresa", "responsable_sst"),
         // HU-037: evaluar un riesgo.
         Empresa("riesgo.evaluar", "Evaluar un riesgo", "POST", "api/riesgos/{id}/evaluaciones", "admin_empresa", "responsable_sst"),
+        // HU-040: evaluación residual.
+        Empresa("riesgo.evaluar_residual", "Evaluar el riesgo residual", "POST", "api/riesgos/{id}/evaluaciones-residual",
+            "admin_empresa", "responsable_sst"),
         // HU-039: controles de un riesgo.
         Empresa("riesgo.control.listar", "Ver los controles de un riesgo", "GET", "api/riesgos/{id}/controles",
             "admin_empresa", "responsable_sst"),

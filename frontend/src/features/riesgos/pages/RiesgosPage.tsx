@@ -40,7 +40,7 @@ const ESTADOS: { valor: EstadoRiesgo; texto: string }[] = [
  * - HU-038: mapa de probabilidad × severidad con cuántos riesgos hay en cada celda (tocar una filtra la
  *   lista) y lista filtrable por peligro, clasificación del peligro, nivel y estado, con el nivel más
  *   alto primero para decidir qué atender. Cada riesgo abre su detalle.
- * - HU-036: agregar riesgos; HU-037: su nivel; HU-039: se señalan los altos y críticos sin control (RN-19).
+ * - HU-036: agregar riesgos; HU-037: su nivel; HU-040: el residual al lado; HU-039: se señalan los altos y críticos sin control (RN-19).
  */
 export function RiesgosPage() {
   const matriz = usePeticion(obtenerMatriz)
@@ -151,8 +151,8 @@ export function RiesgosPage() {
                 Mapa de la matriz
               </h2>
               <p className="text-text-secondary">
-                Cuántos riesgos hay en cada combinación de probabilidad y severidad, según su última evaluación. Toca una
-                celda para ver sus riesgos en la lista.
+                Cuántos riesgos hay en cada combinación de probabilidad y severidad, según su última evaluación inicial. Toca
+                una celda para ver sus riesgos en la lista.
               </p>
               <p>
                 {plural(matriz.datos.total, 'riesgo en la matriz', 'riesgos en la matriz')}
@@ -289,6 +289,9 @@ export function RiesgosPage() {
                         </th>
                         <th scope="col">Nivel</th>
                         <th scope="col" className="max-sm:hidden">
+                          Residual
+                        </th>
+                        <th scope="col" className="max-sm:hidden">
                           Origen
                         </th>
                         <th scope="col" className="max-sm:hidden">
@@ -351,6 +354,15 @@ function FilaRiesgo({ riesgo }: { riesgo: Riesgo }) {
       <td className="envolver max-sm:hidden">{riesgo.actividad ?? '—'}</td>
       <td>
         <Nivel riesgo={riesgo} />
+        {riesgo.evaluacionResidual && (
+          <div className="mt-2 grid justify-items-start gap-1 sm:hidden">
+            <span className="text-xs text-text-secondary">Residual</span>
+            <EtiquetaRiesgo nivel={riesgo.evaluacionResidual} />
+          </div>
+        )}
+      </td>
+      <td className="max-sm:hidden">
+        {riesgo.evaluacionResidual ? <EtiquetaRiesgo nivel={riesgo.evaluacionResidual} /> : <span className="text-text-tertiary">—</span>}
       </td>
       <td className="envolver max-sm:hidden">
         <Origen riesgo={riesgo} />
