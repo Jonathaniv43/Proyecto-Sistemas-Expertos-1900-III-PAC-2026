@@ -49,6 +49,7 @@ export interface Tarea {
   riesgoClasificacion: ClasificacionRiesgo | null
   controlTipo: TipoControl | null
   creadaEn: string
+  completadaEn: string | null
 }
 
 /** GET /api/plan-trabajo/responsables: vínculos activos de la empresa que pueden tener tareas (sin encuestados). */

@@ -1,5 +1,5 @@
 import { api } from '@/shared/api'
-import type { CrearTareaManualRequest, PropuestaPlan, Responsable, Tarea } from '../types/plan'
+import type { CrearTareaManualRequest, EstadoTarea, PropuestaPlan, Responsable, Tarea } from '../types/plan'
 
 /** Tareas que se agregarían al plan a partir de los riesgos y sus controles (HU-042). No guarda nada. */
 export const obtenerPropuesta = (signal: AbortSignal) => api.get<PropuestaPlan>('/plan-trabajo/propuesta', { signal }).then((r) => r.data)
@@ -24,3 +24,13 @@ export const asignarTarea = (id: string, datos: { responsableId: string; fechaLi
 
 /** Crea una tarea manual, ya asignada (HU-043). */
 export const crearTareaManual = (datos: CrearTareaManualRequest) => api.post<Tarea>('/plan-trabajo/tareas', datos).then((r) => r.data)
+
+/** Las tareas a cargo de quien tiene la sesión (HU-044): primero las abiertas, por fecha límite. */
+export const listarMisTareas = (signal: AbortSignal) => api.get<Tarea[]>('/plan-trabajo/tareas/mias', { signal }).then((r) => r.data)
+
+/**
+ * Pasa una tarea por pendiente, en progreso o completada (HU-044). 403 `plan.tarea_ajena` si no es su responsable
+ * ni Responsable SST; 409 `plan.falta_evidencia`, `plan.tarea_sin_asignar` o `plan.tarea_cancelada`.
+ */
+export const cambiarEstadoTarea = (id: string, estado: Exclude<EstadoTarea, 'cancelada'>) =>
+  api.patch<Tarea>(`/plan-trabajo/tareas/${id}/estado`, { estado }).then((r) => r.data)

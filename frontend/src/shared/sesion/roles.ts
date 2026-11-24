@@ -35,3 +35,6 @@ export const DESCRIPCIONES_ROL_EMPRESA: Record<(typeof ROLES_EMPRESA)[number], s
 
 /** Roles que gestionan la empresa (personas, encuestas, riesgos, plan). */
 export const ROLES_GESTION: readonly Rol[] = [ROLES.adminEmpresa, ROLES.responsableSst]
+
+/** Roles que pueden tener tareas del plan a su cargo (HU-043, HU-044): todos menos los encuestados. */
+export const ROLES_TAREAS: readonly Rol[] = [ROLES.adminEmpresa, ROLES.responsableSst, ROLES.colaborador]

@@ -15,6 +15,7 @@ import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncue
 import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
+import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
 import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
 import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
@@ -26,7 +27,7 @@ import { PersonasPage } from '@/features/vinculos/pages/PersonasPage'
 import { AppLayout } from '@/shared/components/AppLayout'
 import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
-import { ROLES, ROLES_EMPRESA, ROLES_GESTION } from '@/shared/sesion'
+import { ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_TAREAS } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
 import { RutaPrivada } from './rutas/RutaPrivada'
 import { SoloSinSesion } from './rutas/SoloSinSesion'
@@ -78,6 +79,10 @@ export const router = createBrowserRouter([
               { path: 'mis-encuestas', element: <MisEncuestasPage /> },
               { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
             ],
+          },
+          {
+            element: <RequiereRol roles={ROLES_TAREAS} />,
+            children: [{ path: 'mis-tareas', element: <MisTareasPage /> }],
           },
           {
             element: <RequiereRol roles={ROLES_GESTION} />,
