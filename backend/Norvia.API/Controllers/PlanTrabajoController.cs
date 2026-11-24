@@ -10,6 +10,7 @@ using Norvia.Application.Features.Plan.DTOs;
 using Norvia.Application.Features.Plan.GenerarPlan;
 using Norvia.Application.Features.Plan.GenerarPlan.DTOs;
 using Norvia.Application.Features.Plan.ListarTareas;
+using Norvia.Application.Features.Plan.ListarTareas.DTOs;
 using Norvia.Application.Features.Plan.ListarMisTareas;
 using Norvia.Application.Features.Plan.ListarResponsables;
 using Norvia.Application.Features.Plan.ListarResponsables.DTOs;
@@ -37,11 +38,13 @@ public sealed class PlanTrabajoController : ControllerBase
         GenerarPlanRequestDto request, [FromServices] GenerarPlanServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
-    /// <summary>HU-042: tareas del plan, por prioridad y nivel del riesgo.</summary>
+    /// <summary>HU-042, HU-046: tareas del plan, por prioridad y nivel del riesgo, con filtros.</summary>
     [HttpGet("tareas")]
     [ProducesResponseType(typeof(IReadOnlyList<TareaResponseDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Tareas([FromServices] ListarTareasServicio servicio, CancellationToken cancellationToken) =>
-        Ok(await servicio.EjecutarAsync(cancellationToken));
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Tareas(
+        [FromQuery] FiltrosTareasDto filtros, [FromServices] ListarTareasServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(filtros, cancellationToken));
 
     /// <summary>HU-043: crea una tarea manual, ya asignada (responsable y fecha límite).</summary>
     [HttpPost("tareas")]
