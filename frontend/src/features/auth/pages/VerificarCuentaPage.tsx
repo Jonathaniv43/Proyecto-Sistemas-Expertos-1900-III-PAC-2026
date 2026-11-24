@@ -6,14 +6,16 @@ import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { RequisitosContrasena } from '@/shared/components/ui/RequisitosContrasena'
+import { Volver } from '@/shared/components/ui/Volver'
 import { useFormulario } from '@/shared/forms'
+import { rutaLogin } from '@/shared/sesion'
 import { verificarCuenta } from '../api/verificarCuenta'
 import { verificarCuentaEsquema } from '../schemas/verificarCuenta'
 
 /**
  * Activa la cuenta creada en el registro (HU-017) o por un administrador: con el correo y la
  * contraseña temporal recibidos, la persona elige su contraseña definitiva (HU-114).
- * El enlace del correo apunta aquí; ?correo= rellena el correo y ?rtn= se pasa al login.
+ * El enlace del correo apunta aquí; ?correo= rellena el correo y ?empresa= (id cifrado) se pasa al login.
  */
 export function VerificarCuentaPage() {
   const [parametros] = useSearchParams()
@@ -47,12 +49,13 @@ export function VerificarCuentaPage() {
   if (verificada) {
     return (
       <div className="mx-auto grid max-w-layout-narrow gap-6">
+        <Volver a={rutaLogin(parametros.get('empresa'))} texto="Volver a iniciar sesión" titulo="Cuenta activada" />
         <h1 className="text-xl font-semibold">Cuenta activada</h1>
         <Aviso tipo="exito" titulo="Tu contraseña quedó guardada">
           Ya puedes iniciar sesión con tu correo y tu contraseña nueva.
         </Aviso>
         <Link
-          to={parametros.get('rtn') ? `/login?${new URLSearchParams({ rtn: parametros.get('rtn')! })}` : '/login'}
+          to={rutaLogin(parametros.get('empresa'))}
           className={`${clasesBoton('primario')} justify-self-start`}
         >
           Iniciar sesión
@@ -63,6 +66,7 @@ export function VerificarCuentaPage() {
 
   return (
     <div className="mx-auto grid max-w-layout-narrow gap-6">
+      <Volver a={rutaLogin(parametros.get('empresa'))} texto="Volver a iniciar sesión" titulo="Activa tu cuenta" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Activa tu cuenta</h1>
         <p className="text-text-secondary">

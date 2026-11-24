@@ -10,7 +10,7 @@ import { CuerpoModal, Modal, PieModal } from '@/shared/components/ui/Modal'
 import { useFormulario } from '@/shared/forms'
 import { DESCRIPCIONES_ROL_EMPRESA, ETIQUETAS_ROL, ROLES_EMPRESA } from '@/shared/sesion'
 import { actualizarVinculo } from '../api/vinculos'
-import { editarAccesoEsquema, quitaAcceso } from '../schemas/editarAcceso'
+import { editarAccesoEsquema, MAX_MOTIVO_DETALLE, quitaAcceso } from '../schemas/editarAcceso'
 import type { ActualizarVinculoRequest, EstadoVinculo, Vinculo } from '../types/vinculos'
 
 const OPCIONES_ESTADO: { valor: EstadoVinculo; texto: string; descripcion: string }[] = [
@@ -147,6 +147,7 @@ function Formulario({
               />
               <AreaTexto
                 etiqueta="Detalle del motivo"
+                maximo={MAX_MOTIVO_DETALLE}
                 required={motivo === 'otro'}
                 ayuda="Queda en el historial del acceso."
                 error={errors.motivoDetalle?.message}

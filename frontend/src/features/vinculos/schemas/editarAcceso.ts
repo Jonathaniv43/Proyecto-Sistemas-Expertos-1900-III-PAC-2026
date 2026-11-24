@@ -12,6 +12,8 @@ export const quitaAcceso = (estado: EstadoVinculo) => estado === 'suspendido' ||
  * - si no cambia nada, no hay nada que guardar.
  * `original` es el acceso tal como está: el motivo solo se pide si el estado cambia.
  */
+export const MAX_MOTIVO_DETALLE = 1000
+
 export const editarAccesoEsquema = (original: { rolCodigo: string; estado: EstadoVinculo }) =>
   z
     .object({
@@ -19,7 +21,7 @@ export const editarAccesoEsquema = (original: { rolCodigo: string; estado: Estad
       estado: z.enum(['activo', 'suspendido', 'baja'], 'Elige el estado del acceso.'),
       // Un grupo de radios sin elegir vale null en React Hook Form.
       motivoCodigo: z.enum(['decision_admin', 'baja_laboral', 'otro']).nullish(),
-      motivoDetalle: textoOpcional(1000),
+      motivoDetalle: textoOpcional(MAX_MOTIVO_DETALLE),
     })
     .superRefine((datos, ctx) => {
       const cambiaEstado = datos.estado !== original.estado

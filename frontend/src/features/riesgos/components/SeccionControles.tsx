@@ -12,7 +12,7 @@ import { usePeticion } from '@/shared/hooks/usePeticion'
 import { crearControl, listarControles, listarControlesSugeridos } from '../api/riesgos'
 import { faltaControl, NOMBRE_TIPO_CONTROL, ordenarControles, TIPOS_CONTROL } from '../controles'
 import { ETIQUETAS_CLASIFICACION_RIESGO } from '../niveles'
-import { controlEsquema } from '../schemas/control'
+import { controlEsquema, MAX_DESCRIPCION_CONTROL } from '../schemas/control'
 import type { Control, ControlSugerido, CrearControlRequest, Riesgo, TipoControl } from '../types/riesgos'
 
 /** Texto con que una sugerencia pasa a ser control: el título y, si la plantilla la tiene, su descripción. */
@@ -306,6 +306,7 @@ function FormularioControl({ riesgoId, titulo, iniciales, textoEnviar, onGuardad
       <AreaTexto
         etiqueta="Descripción"
         required
+        maximo={MAX_DESCRIPCION_CONTROL}
         ayuda="Qué se va a hacer. Por ejemplo: Instalar barandas en la escalera de la bodega."
         error={errors.descripcion?.message}
         {...register('descripcion')}

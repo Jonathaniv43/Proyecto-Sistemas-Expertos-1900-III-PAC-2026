@@ -1,4 +1,4 @@
-import { ArrowLeft, ChartColumn, Eye, Pencil, Plus, TriangleAlert } from 'lucide-react'
+import { ChartColumn, Eye, Pencil, Plus, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useWatch } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
@@ -13,7 +13,9 @@ import { DialogoConfirmacion } from '@/shared/components/ui/DialogoConfirmacion'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { MensajeCampo } from '@/shared/components/ui/MensajeCampo'
 import { useFormulario } from '@/shared/forms'
+import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
+import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { useSesion } from '@/shared/sesion'
 import { cerrarEncuesta, guardarBorrador, listarTiposRespuesta, obtenerEncuesta, publicarVersion } from '../api/encuestas'
@@ -21,7 +23,7 @@ import { aSolicitud, desdeVersion } from '../borrador/convertir'
 import { EditorPregunta } from '../components/EditorPregunta'
 import { EstadoEncuesta } from '../components/EstadoEncuesta'
 import { VistaEncuestado } from '../components/VistaEncuestado'
-import { borradorEsquema, type BorradorFormulario } from '../schemas/borrador'
+import { borradorEsquema, MAX_INSTRUCCIONES, type BorradorFormulario } from '../schemas/borrador'
 import type { EncuestaDetalle, TipoRespuestaCatalogo, VersionEncuesta } from '../types/encuestas'
 
 const fechaHora = (iso: string) =>
@@ -46,6 +48,7 @@ export function EncuestaPage() {
   const encuesta = usePeticion(obtenerEncuesta)
   const tipos = usePeticion(listarTiposRespuesta)
   const cargandoVisible = useCargaVisible(encuesta.cargando && !encuesta.datos)
+  useScrollRecordado(Boolean(encuesta.datos && tipos.datos))
 
   const { ejecutar: cargarEncuesta } = encuesta
   const { ejecutar: cargarTipos } = tipos
@@ -58,27 +61,33 @@ export function EncuestaPage() {
   if (encuesta.error?.status === 404) return <NotFoundPage />
   if (encuesta.error || tipos.error) {
     return (
-      <section className="mx-auto flex max-w-layout-narrow flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
-        <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />
-        <h1 className="text-md font-semibold">No se pudo cargar la encuesta</h1>
-        <p className="text-text-secondary">{(encuesta.error ?? tipos.error)!.mensaje}</p>
-        <Boton
-          variante="secundario"
-          onClick={() => {
-            void recargar()
-            void cargarTipos()
-          }}
-        >
-          Reintentar
-        </Boton>
-      </section>
+      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/encuestas" texto="Volver a encuestas" />
+        <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
+          <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />
+          <h1 className="text-md font-semibold">No se pudo cargar la encuesta</h1>
+          <p className="text-text-secondary">{(encuesta.error ?? tipos.error)!.mensaje}</p>
+          <Boton
+            variante="secundario"
+            onClick={() => {
+              void recargar()
+              void cargarTipos()
+            }}
+          >
+            Reintentar
+          </Boton>
+        </section>
+      </div>
     )
   }
   if (!encuesta.datos || !tipos.datos) {
     return (
-      <div aria-busy="true" aria-label="Cargando encuesta" className="mx-auto grid w-full max-w-layout-narrow gap-3">
-        {cargandoVisible &&
-          [0, 1, 2, 3].map((i) => <div key={i} className="h-table-row animate-pulse rounded-sm bg-bg-subtle motion-reduce:animate-none" />)}
+      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/encuestas" texto="Volver a encuestas" />
+        <div aria-busy="true" aria-label="Cargando encuesta" className="grid gap-3">
+          {cargandoVisible &&
+            [0, 1, 2, 3].map((i) => <div key={i} className="h-table-row animate-pulse rounded-sm bg-bg-subtle motion-reduce:animate-none" />)}
+        </div>
       </div>
     )
   }
@@ -208,12 +217,7 @@ function Encuesta({ encuesta, tipos, onCambio }: { encuesta: EncuestaDetalle; ti
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to="/encuestas" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Encuestas
-        </Link>
-      </div>
+      <Volver a="/encuestas" texto="Volver a encuestas" titulo={encuesta.titulo} />
 
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">{encuesta.titulo}</h1>
@@ -266,6 +270,7 @@ function Encuesta({ encuesta, tipos, onCambio }: { encuesta: EncuestaDetalle; ti
             <CampoTexto etiqueta="Título" required autoComplete="off" registro={register('titulo')} error={errors.titulo} />
             <AreaTexto
               etiqueta="Instrucciones"
+              maximo={MAX_INSTRUCCIONES}
               {...register('instrucciones')}
               error={errors.instrucciones?.message}
               ayuda="Opcional. Se muestran al inicio de la encuesta: para qué es y que las respuestas son anónimas."

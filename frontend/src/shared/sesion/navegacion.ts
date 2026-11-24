@@ -10,6 +10,13 @@ export interface EstadoLogin {
 }
 
 export const RUTA_LOGIN = '/login'
+
+/**
+ * Login de una empresa: con su `idEmpresa` cifrado (el que da GET /api/empresas/por-rtn) va directo a
+ * sus credenciales (`/login?empresa=…`); sin él, a buscar la empresa por RTN.
+ */
+export const rutaLogin = (idEmpresa?: string | null) =>
+  idEmpresa ? `${RUTA_LOGIN}?${new URLSearchParams({ empresa: idEmpresa })}` : RUTA_LOGIN
 export const RUTA_INICIO = '/inicio'
 /** Primer ingreso con contraseña temporal: se exige cambiarla antes de continuar. */
 export const RUTA_CAMBIAR_CONTRASENA = '/cambiar-contrasena'

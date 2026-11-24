@@ -11,9 +11,10 @@ import { SelectBusqueda } from '@/shared/components/ui/SelectBusqueda'
 import { useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { crearRiesgo, listarPeligrosDisponibles } from '../api/riesgos'
 import { ETIQUETAS_CLASIFICACION, nombrePeligro } from '../etiquetas'
-import { nuevoRiesgoEsquema } from '../schemas/nuevoRiesgo'
+import { MAX_DESCRIPCION_PELIGRO, nuevoRiesgoEsquema } from '../schemas/nuevoRiesgo'
 import type { PeligroDisponible } from '../types/riesgos'
 import type { EstadoRiesgoAgregado } from './RiesgosPage'
 
@@ -34,6 +35,7 @@ export function NuevoRiesgoPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/riesgos" texto="Volver a la matriz" titulo="Agregar riesgo" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Agregar riesgo</h1>
         <p className="text-text-secondary">
@@ -98,8 +100,8 @@ function Formulario({ peligros, eventoId }: { peligros: PeligroDisponible[]; eve
           accidenteId: eventoId,
         })
         // Desde un evento se sigue a evaluarlo; si no, vuelve a la matriz.
-        if (eventoId) navigate(`/riesgos/${riesgo.id}?evento=${eventoId}`)
-        else navigate('/riesgos', { state: { agregado: nombrePeligro(riesgo) } satisfies EstadoRiesgoAgregado })
+        if (eventoId) navigate(`/riesgos/${riesgo.id}?evento=${eventoId}`, { replace: true })
+        else navigate('/riesgos', { replace: true, state: { agregado: nombrePeligro(riesgo) } satisfies EstadoRiesgoAgregado })
       })}
     >
       {eventoId && (
@@ -141,6 +143,7 @@ function Formulario({ peligros, eventoId }: { peligros: PeligroDisponible[]; eve
         <AreaTexto
           etiqueta="Descripción del peligro"
           required
+          maximo={MAX_DESCRIPCION_PELIGRO}
           ayuda="Qué puede causar daño. Por ejemplo: Piso resbaloso junto a la cafetera."
           error={errors.descripcionPeligro?.message}
           {...register('descripcionPeligro')}

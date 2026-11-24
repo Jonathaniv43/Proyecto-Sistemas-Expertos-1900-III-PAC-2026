@@ -4,6 +4,7 @@ import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { useFormulario } from '@/shared/forms'
+import { Volver } from '@/shared/components/ui/Volver'
 import { iniciarSesionPlataforma } from '../api/sesion'
 import { loginPlataformaEsquema } from '../schemas/login'
 
@@ -22,7 +23,8 @@ export function LoginPlataformaPage() {
   })
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6 sm:py-8">
+    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/" texto="Volver a la página principal" titulo="Acceso del equipo de Norvia" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Acceso del equipo de Norvia</h1>
         <p className="text-text-secondary">Solo para la administración de la plataforma. Las empresas entran desde el inicio de sesión habitual.</p>

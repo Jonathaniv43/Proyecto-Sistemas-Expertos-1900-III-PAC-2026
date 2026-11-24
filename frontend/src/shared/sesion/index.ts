@@ -11,6 +11,7 @@ export {
   type Rol,
 } from './roles'
 export { SiRol } from './SiRol'
+export { leerUltimaEmpresa, recordarEmpresa, type EmpresaLogin } from './ultimaEmpresa'
 export { useSesion, useTieneRol } from './useSesion'
 export {
   destinoSeguro,
@@ -18,5 +19,6 @@ export {
   RUTA_INICIO,
   RUTA_LOGIN,
   rutaActual,
+  rutaLogin,
   type EstadoLogin,
 } from './navegacion'

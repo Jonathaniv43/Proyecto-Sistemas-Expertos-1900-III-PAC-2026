@@ -1,11 +1,15 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { recordarEmpresa } from '@/shared/sesion'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import type { RegistrarEmpresaResponse } from '../types/registro'
 
 /** Confirmación del registro: la empresa existe y quien la registró es su administrador. */
 export function RegistroCompletado({ registro }: { registro: RegistrarEmpresaResponse }) {
-  const verificar = `/verificar-cuenta?${new URLSearchParams({ correo: registro.email, rtn: registro.rtn })}`
+  const verificar = `/verificar-cuenta?${new URLSearchParams({ correo: registro.email, empresa: registro.idEmpresa })}`
+  // La empresa recién registrada queda como la del login, para mostrar su nombre en /login?empresa=….
+  useEffect(() => recordarEmpresa(registro), [registro])
 
   return (
     <section className="grid gap-6" aria-labelledby="titulo-registro-completado">

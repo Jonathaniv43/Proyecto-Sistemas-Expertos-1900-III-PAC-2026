@@ -1,10 +1,11 @@
-import { ArrowLeft, CircleCheck, ClipboardX, TriangleAlert } from 'lucide-react'
+import { CircleCheck, ClipboardX, TriangleAlert } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useController, useWatch, type Control, type UseFormRegister } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { clasesBoton } from '@/shared/components/ui/clases'
+import { Volver } from '@/shared/components/ui/Volver'
 import { useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
@@ -25,20 +26,26 @@ export function ResponderEncuestaPage() {
 
   if (pendientes.error) {
     return (
-      <section className="mx-auto flex max-w-layout-narrow flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
-        <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />
-        <h1 className="text-md font-semibold">No se pudo cargar la encuesta</h1>
-        <p className="text-text-secondary">{pendientes.error.mensaje}</p>
-        <Boton variante="secundario" onClick={() => void cargar()}>
-          Reintentar
-        </Boton>
-      </section>
+      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
+        <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
+          <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />
+          <h1 className="text-md font-semibold">No se pudo cargar la encuesta</h1>
+          <p className="text-text-secondary">{pendientes.error.mensaje}</p>
+          <Boton variante="secundario" onClick={() => void cargar()}>
+            Reintentar
+          </Boton>
+        </section>
+      </div>
     )
   }
   if (pendientes.cargando || !pendientes.datos) {
     return (
-      <div aria-busy="true" aria-label="Cargando encuesta" className="mx-auto grid w-full max-w-layout-narrow gap-3">
-        {cargandoVisible && [0, 1, 2].map((i) => <div key={i} className="h-table-row animate-pulse rounded-sm bg-bg-subtle motion-reduce:animate-none" />)}
+      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
+        <div aria-busy="true" aria-label="Cargando encuesta" className="grid gap-3">
+          {cargandoVisible && [0, 1, 2].map((i) => <div key={i} className="h-table-row animate-pulse rounded-sm bg-bg-subtle motion-reduce:animate-none" />)}
+        </div>
       </div>
     )
   }
@@ -50,12 +57,15 @@ export function ResponderEncuestaPage() {
 /** La encuesta no está entre las pendientes: ya se respondió, se cerró o no existe para esta persona. */
 function YaNoPendiente() {
   return (
-    <section className="mx-auto flex max-w-layout-narrow flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
-      <ClipboardX aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
-      <h1 className="text-md font-semibold">Esta encuesta ya no está pendiente</h1>
-      <p className="text-text-secondary">Puede que ya la hayas respondido o que se haya cerrado.</p>
-      <Link to="/mis-encuestas">Ver mis encuestas</Link>
-    </section>
+    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
+      <section className="flex flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
+        <ClipboardX aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
+        <h1 className="text-md font-semibold">Esta encuesta ya no está pendiente</h1>
+        <p className="text-text-secondary">Puede que ya la hayas respondido o que se haya cerrado.</p>
+        <Link to="/mis-encuestas">Ver mis encuestas</Link>
+      </section>
+    </div>
   )
 }
 
@@ -90,14 +100,17 @@ function Formulario({ encuesta }: { encuesta: EncuestaPendiente }) {
 
   if (enviada) {
     return (
-      <section className="mx-auto flex max-w-layout-narrow flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
-        <CircleCheck aria-hidden size={32} strokeWidth={1.5} className="text-success-icon" />
-        <h1 className="text-md font-semibold">¡Gracias! Tu respuesta quedó registrada</h1>
-        <p className="text-text-secondary">Es anónima: nadie en la empresa puede ver quién respondió qué.</p>
-        <Link to="/mis-encuestas" className={clasesBoton('secundario')}>
-          Volver a mis encuestas
-        </Link>
-      </section>
+      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
+        <section className="flex flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
+          <CircleCheck aria-hidden size={32} strokeWidth={1.5} className="text-success-icon" />
+          <h1 className="text-md font-semibold">¡Gracias! Tu respuesta quedó registrada</h1>
+          <p className="text-text-secondary">Es anónima: nadie en la empresa puede ver quién respondió qué.</p>
+          <Link to="/mis-encuestas" className={clasesBoton('secundario')}>
+            Ver mis encuestas
+          </Link>
+        </section>
+      </div>
     )
   }
 
@@ -106,12 +119,7 @@ function Formulario({ encuesta }: { encuesta: EncuestaPendiente }) {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to="/mis-encuestas" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Mis encuestas
-        </Link>
-      </div>
+      <Volver a="/mis-encuestas" texto="Volver a mis encuestas" titulo={encuesta.titulo} />
 
       <form
         noValidate

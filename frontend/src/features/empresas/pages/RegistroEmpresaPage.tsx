@@ -9,6 +9,8 @@ import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
 import { useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
+import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { listarRubrosRegistro, registrarEmpresa } from '../api/registro'
 import { RegistroCompletado } from '../components/RegistroCompletado'
 import { registroEmpresaEsquema } from '../schemas/registroEmpresa'
@@ -75,6 +77,7 @@ export function RegistroEmpresaPage() {
   if (registro) {
     return (
       <div className="mx-auto grid max-w-layout-narrow gap-6">
+        <Volver a="/" texto="Volver a la página principal" titulo="Registro completado" />
         <h1 className="text-xl font-semibold">Registro completado</h1>
         <RegistroCompletado registro={registro} />
       </div>
@@ -85,6 +88,7 @@ export function RegistroEmpresaPage() {
 
   return (
     <div className="mx-auto grid max-w-layout-narrow gap-6">
+      <Volver a="/" texto="Volver a la página principal" titulo="Registra tu empresa" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Registra tu empresa</h1>
         <p className="text-text-secondary">
@@ -116,6 +120,7 @@ export function RegistroEmpresaPage() {
             inputMode="numeric"
             autoComplete="off"
             registro={register('rtn')}
+            largoExacto={14}
             error={errors.rtn}
             ayuda="14 dígitos. Con este número vas a iniciar sesión."
           />
@@ -200,6 +205,7 @@ export function RegistroEmpresaPage() {
             inputMode={tipoDocumento === 'dni' ? 'numeric' : 'text'}
             autoComplete="off"
             registro={register('numeroDocumento')}
+            largoExacto={tipoDocumento === 'dni' ? 13 : undefined}
             error={errors.numeroDocumento}
             ayuda={tipoDocumento === 'dni' ? '13 dígitos.' : 'Letras, números y guiones.'}
           />
@@ -216,7 +222,10 @@ export function RegistroEmpresaPage() {
 
         <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-text-secondary">
-            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+            ¿Ya tienes cuenta?{' '}
+            <Link to="/login" state={estadoVolver('/registro', 'Volver al registro')}>
+              Inicia sesión
+            </Link>
           </p>
           <Boton type="submit" cargando={isSubmitting} textoCargando="Registrando…">
             Registrar empresa

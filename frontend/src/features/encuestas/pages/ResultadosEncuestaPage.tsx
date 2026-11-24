@@ -1,10 +1,11 @@
-import { ArrowLeft, ChartColumn, ShieldCheck, TriangleAlert } from 'lucide-react'
+import { ChartColumn, ShieldCheck, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { Indicador } from '@/shared/components/datos/Indicador'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
+import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { obtenerEncuesta, obtenerReporte } from '../api/encuestas'
@@ -48,12 +49,7 @@ export function ResultadosEncuestaPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to={`/encuestas/${id}`} className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a la encuesta
-        </Link>
-      </div>
+      <Volver a={`/encuestas/${id}`} texto="Volver a la encuesta" titulo={encuesta.datos?.titulo} />
 
       {encuesta.error || (reporte.error && reporte.error.codigo !== 'encuestas.sin_version_publicada') ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">

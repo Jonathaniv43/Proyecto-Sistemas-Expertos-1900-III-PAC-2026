@@ -7,6 +7,7 @@ import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
 import { useFormulario } from '@/shared/forms'
 import { DESCRIPCIONES_ROL_EMPRESA, ETIQUETAS_ROL, ROLES_EMPRESA, useSesion } from '@/shared/sesion'
 import { generarContrasenaTemporal } from '@/shared/validacion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { crearVinculo } from '../api/vinculos'
 import { PersonaAgregada } from '../components/PersonaAgregada'
 import { agregarPersonaEsquema } from '../schemas/agregarPersona'
@@ -54,6 +55,7 @@ export function AgregarPersonaPage() {
   if (resultado) {
     return (
       <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/personas" texto="Volver a personas" titulo="Persona agregada" />
         <h1 className="text-xl font-semibold">Persona agregada</h1>
         <PersonaAgregada
           persona={resultado.persona}
@@ -70,6 +72,7 @@ export function AgregarPersonaPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/personas" texto="Volver a personas" titulo="Agregar una persona" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Agregar una persona</h1>
         <p className="text-text-secondary">
