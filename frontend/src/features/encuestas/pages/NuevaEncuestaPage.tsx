@@ -8,6 +8,7 @@ import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { GrupoCasillas } from '@/shared/components/ui/GrupoCasillas'
 import { useFormulario } from '@/shared/forms'
+import { ROLES, useTieneRol } from '@/shared/sesion'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { crearEncuesta, listarCategoriasDisponibles } from '../api/encuestas'
@@ -191,11 +192,19 @@ interface ContenidoProps {
 
 /** Estados de pantalla del design system: cargando, error al cargar, vacío y con datos. */
 function Contenido({ estado, cargandoVisible, onReintentar, children }: ContenidoProps) {
+  const administra = useTieneRol([ROLES.adminEmpresa])
   if (estado.error) {
     if (estado.error.codigo === 'encuestas.empresa_sin_rubro') {
       return (
         <EstadoVacio icono={<TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />} titulo="Tu empresa todavía no tiene rubro">
-          Las categorías de riesgo dependen del rubro. Pide a quien administra la empresa que lo complete en el perfil.
+          Las categorías de riesgo dependen del rubro.{' '}
+          {administra ? (
+            <>
+              Elígelo en el <Link to="/empresa">perfil de la empresa</Link>.
+            </>
+          ) : (
+            'Pide a quien administra la empresa que lo complete en el perfil.'
+          )}
         </EstadoVacio>
       )
     }

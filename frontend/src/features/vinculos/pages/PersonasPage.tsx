@@ -75,7 +75,7 @@ export function PersonasPage() {
         </div>
       </header>
 
-      <div role="status">{mensaje && <Aviso tipo="exito">{mensaje}</Aviso>}</div>
+      <div role="status" className="contents">{mensaje && <Aviso tipo="exito">{mensaje}</Aviso>}</div>
 
       {personas.error && !lista ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">

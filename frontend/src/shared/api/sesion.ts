@@ -168,6 +168,15 @@ export const sesion = {
     return true
   },
 
+  /** La razón social cambió en el perfil (HU-026): se actualiza la que muestra el encabezado. */
+  actualizarRazonSocial(razonSocial: string) {
+    if (!usuario?.empresa || usuario.empresa.razonSocial === razonSocial) return
+    const empresa = { ...usuario.empresa, razonSocial }
+    escribir(CLAVE_EMPRESA, JSON.stringify(empresa))
+    usuario = { ...usuario, empresa }
+    avisarCambio()
+  },
+
   /** Marca que ya se cambió la contraseña temporal (HU-114). */
   marcarContrasenaCambiada() {
     if (usuario?.debeCambiarPassword) {

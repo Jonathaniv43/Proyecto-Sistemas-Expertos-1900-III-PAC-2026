@@ -1,11 +1,22 @@
-import { ClipboardCheck, ClipboardList, Contact, UserPlus, Users } from 'lucide-react'
+import { Building2, ClipboardCheck, ClipboardList, Contact, UserPlus, Users } from 'lucide-react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Aviso } from '@/shared/components/ui/Aviso'
 import { clasesBoton } from '@/shared/components/ui/clases'
-import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, SiRol, useSesion } from '@/shared/sesion'
+import { usePeticion } from '@/shared/hooks/usePeticion'
+import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
+import { obtenerPerfilCompleto } from '../api/perfil'
 
 /** Primera pantalla después de iniciar sesión. Las funciones de cada módulo se agregan con su HU. */
 export function InicioPage() {
   const sesion = useSesion()
+  const administra = useTieneRol([ROLES.adminEmpresa])
+  const perfil = usePeticion(obtenerPerfilCompleto)
+  const { ejecutar: cargarPerfil } = perfil
+  useEffect(() => {
+    if (administra) void cargarPerfil()
+  }, [administra, cargarPerfil])
+
   if (sesion.estado !== 'activa') return null
   const { usuario } = sesion
 
@@ -19,6 +30,11 @@ export function InicioPage() {
             : `Entraste${usuario.empresa ? ` a ${usuario.empresa.razonSocial}` : ''} como ${etiquetaRol(usuario.rol)}.`}
         </p>
       </div>
+      {administra && perfil.datos === false && (
+        <Aviso tipo="advertencia" titulo="Completa el perfil de la empresa">
+          Falta el rubro o el número de trabajadores permanentes. <Link to="/empresa">Completar el perfil</Link>
+        </Aviso>
+      )}
       <SiRol roles={ROLES_EMPRESA}>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link to="/mis-encuestas" className={clasesBoton('secundario')}>
@@ -32,6 +48,10 @@ export function InicioPage() {
           <Link to="/encuestas" className={clasesBoton('secundario')}>
             <ClipboardList aria-hidden size={16} strokeWidth={1.5} />
             Encuestas
+          </Link>
+          <Link to="/empresa" className={clasesBoton('secundario')}>
+            <Building2 aria-hidden size={16} strokeWidth={1.5} />
+            Perfil de la empresa
           </Link>
         </div>
       </SiRol>
