@@ -84,7 +84,7 @@ export function AgregarEncuestadosPage() {
           ) : (
             <LoteEncuestados key={ronda} textoInicial={textoLote} onEnviado={setLote} />
           )}
-          <Link to="/inicio">Cancelar</Link>
+          <Link to="/personas">Cancelar</Link>
         </>
       )}
     </div>

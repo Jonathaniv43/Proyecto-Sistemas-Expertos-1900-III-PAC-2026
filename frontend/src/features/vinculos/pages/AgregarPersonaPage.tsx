@@ -111,7 +111,7 @@ export function AgregarPersonaPage() {
           error={errors.rolCodigo}
         />
         <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/inicio">Cancelar</Link>
+          <Link to="/personas">Cancelar</Link>
           <Boton type="submit" cargando={isSubmitting} textoCargando="Agregando…">
             Agregar persona
           </Boton>

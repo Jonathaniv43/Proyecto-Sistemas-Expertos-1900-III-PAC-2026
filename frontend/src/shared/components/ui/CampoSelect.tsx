@@ -12,6 +12,8 @@ interface CampoSelectProps {
   error?: FieldError
   ayuda?: ReactNode
   disabled?: boolean
+  /** Filtros: opción vacía elegible ("Todos los roles") en vez de "Selecciona…". */
+  todos?: string
   className?: string
 }
 
@@ -19,7 +21,7 @@ interface CampoSelectProps {
  * Select cerrado como el input, con chevron y "Selecciona…" sin valor (design-system.md § Select).
  * Usa el select nativo: en celular el sistema abre su propia lista. Con 5 opciones o menos, usar GrupoRadio.
  */
-export function CampoSelect({ etiqueta, required, registro, opciones, error, ayuda, disabled, className = '' }: CampoSelectProps) {
+export function CampoSelect({ etiqueta, required, registro, opciones, error, ayuda, disabled, todos, className = '' }: CampoSelectProps) {
   const id = useId()
   const idMensaje = `${id}-mensaje`
   const mensaje = error?.message
@@ -37,12 +39,16 @@ export function CampoSelect({ etiqueta, required, registro, opciones, error, ayu
           aria-describedby={mensaje || ayuda ? idMensaje : undefined}
           aria-required={required || undefined}
           className={`${clasesControl(Boolean(mensaje))} cursor-pointer appearance-none pr-8 invalid:text-text-tertiary`}
-          required
+          required={todos === undefined}
           {...registro}
         >
-          <option value="" disabled>
-            Selecciona…
-          </option>
+          {todos === undefined ? (
+            <option value="" disabled>
+              Selecciona…
+            </option>
+          ) : (
+            <option value="">{todos}</option>
+          )}
           {opciones.map((opcion) => (
             <option key={opcion.valor} value={opcion.valor} className="text-text-primary">
               {opcion.texto}
