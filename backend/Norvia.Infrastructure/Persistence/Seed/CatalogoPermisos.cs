@@ -44,6 +44,10 @@ public static class CatalogoPermisos
         Empresa("riesgo.matriz", "Ver el mapa de la matriz de riesgos", "GET", "api/riesgos/matriz", "admin_empresa", "responsable_sst"),
         // HU-037: evaluar un riesgo.
         Empresa("riesgo.evaluar", "Evaluar un riesgo", "POST", "api/riesgos/{id}/evaluaciones", "admin_empresa", "responsable_sst"),
+        // HU-042: plan de trabajo.
+        Empresa("plan.propuesta", "Ver el plan de trabajo propuesto", "GET", "api/plan-trabajo/propuesta", "admin_empresa", "responsable_sst"),
+        Empresa("plan.generar", "Confirmar el plan de trabajo", "POST", "api/plan-trabajo/generacion", "admin_empresa", "responsable_sst"),
+        Empresa("tarea.listar", "Ver las tareas del plan", "GET", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
         // HU-040: evaluación residual.
         Empresa("riesgo.evaluar_residual", "Evaluar el riesgo residual", "POST", "api/riesgos/{id}/evaluaciones-residual",
             "admin_empresa", "responsable_sst"),
