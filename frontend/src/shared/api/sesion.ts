@@ -127,6 +127,8 @@ function usuarioDe(token: string, debeCambiarPassword: boolean): UsuarioSesion |
   }
 }
 
+let empresaTerminada: EmpresaSesion | null = null
+
 const avisarCambio = () => oyentesCambio.forEach((oyente) => oyente())
 
 export const sesion = {
@@ -138,6 +140,7 @@ export const sesion = {
 
   /** Inicio de sesión: guarda los tokens y marca un inicio nuevo (las demás pestañas lo notan). */
   iniciar(respuesta: SesionResponse, empresa: EmpresaSesion | null) {
+    empresaTerminada = null
     sesionIdPropio = crypto.randomUUID()
     escribir(CLAVE_SESION_ID, sesionIdPropio)
     escribir(CLAVE_EMPRESA, empresa ? JSON.stringify(empresa) : null)
@@ -190,6 +193,9 @@ export const sesion = {
    * Con `conservarAlmacenamiento` no toca lo guardado: es de la sesión de otra pestaña.
    */
   terminar(motivo: MotivoFinSesion, { conservarAlmacenamiento = false } = {}) {
+    // Al recargar con la sesión vencida todavía no hay usuario: la empresa se lee de lo guardado.
+    // Si termina dos veces (p. ej. la renovación fallida en modo estricto), no se pierde la que se conocía.
+    empresaTerminada = usuario?.empresa ?? leerEmpresa() ?? empresaTerminada
     accessToken = null
     usuario = null
     if (!conservarAlmacenamiento) {
@@ -201,6 +207,9 @@ export const sesion = {
     oyentesFin.forEach((oyente) => oyente(motivo))
     avisarCambio()
   },
+
+  /** Empresa de la última sesión que terminó en esta pestaña (HU-019: no volver a una página de otra empresa). */
+  empresaTerminada: () => empresaTerminada,
 
   /** Suscribe a los fines de sesión; devuelve la función para desuscribirse. */
   alTerminar(oyente: (motivo: MotivoFinSesion) => void) {

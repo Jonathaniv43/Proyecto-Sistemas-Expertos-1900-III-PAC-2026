@@ -9,7 +9,8 @@ import { api, renovarSesion, sesion, type MotivoFinSesion, type UsuarioSesion } 
 export type EstadoSesion =
   | { estado: 'verificando' }
   | { estado: 'sin_conexion' }
-  | { estado: 'sin_sesion'; motivo?: MotivoFinSesion }
+  /** `rtn`: empresa de la sesión que terminó, si había una (para no volver a una página de otra empresa). */
+  | { estado: 'sin_sesion'; motivo?: MotivoFinSesion; rtn?: string }
   | { estado: 'activa'; usuario: UsuarioSesion }
 
 let actual: EstadoSesion = sesion.hayRefresh() ? { estado: 'verificando' } : { estado: 'sin_sesion' }
@@ -28,7 +29,7 @@ sesion.alTerminar((motivo) => {
 sesion.alCambiar(() => {
   const usuario = sesion.obtenerUsuario()
   if (usuario) fijar({ estado: 'activa', usuario })
-  else fijar({ estado: 'sin_sesion', motivo: ultimoMotivo })
+  else fijar({ estado: 'sin_sesion', motivo: ultimoMotivo, rtn: sesion.empresaTerminada()?.rtn })
 })
 
 export const estadoSesion = {

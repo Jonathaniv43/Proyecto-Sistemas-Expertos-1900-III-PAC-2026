@@ -190,6 +190,9 @@ useFormulario(esquema, {
   - Todas las pestañas comparten la sesión, así que no se mezclan datos de dos empresas.
   - Mientras hay una sesión abierta, `/login` lleva a ella. Para entrar a otra empresa hay que cerrar sesión, o usar otro navegador o una ventana privada.
   - Si dos pestañas inician sesión en empresas distintas, la primera se cierra y lo explica.
+- **Varias empresas (HU-019):** misma cuenta (correo y contraseña) en cada empresa, con el rol de cada una. Cerrar sesión en una no cierra la de otro navegador o dispositivo.
+  - Si la sesión se corta sola estando en una página (por ejemplo, `/encuestas/:id`) y después se entra a **otra** empresa, se empieza en el inicio y no en esa página, que es de la empresa anterior. Si se entra a la misma empresa, se vuelve a la página.
+  - Cómo: `RutaPrivada` guarda en el estado del login el RTN de la sesión que terminó (`sesion.empresaTerminada()`), y `destinoSeguro` lo compara con el de la sesión nueva.
 - **Encabezado del área privada:** muestra la empresa, el rol y el botón para cerrar sesión. El menú de cada módulo se agrega con su HU.
 
 ## Agregar personas (HU-020)
