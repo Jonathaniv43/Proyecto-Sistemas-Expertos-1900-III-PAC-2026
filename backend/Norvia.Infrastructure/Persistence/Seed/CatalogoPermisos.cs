@@ -122,6 +122,10 @@ public static class CatalogoPermisos
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
         Empresa("evento.listar", "Listar eventos reportados", "GET", "api/eventos", "admin_empresa", "responsable_sst"),
         Empresa("evento.ver", "Ver detalle de evento", "GET", "api/eventos/{id}", "admin_empresa", "responsable_sst"),
+        // HU-049: investigar, cerrar y descartar eventos (Responsable SST).
+        Empresa("evento.investigar", "Registrar la investigación de un evento", "PUT", "api/eventos/{id}/investigacion", "responsable_sst"),
+        Empresa("evento.cerrar", "Cerrar un evento", "POST", "api/eventos/{id}/cierre", "responsable_sst"),
+        Empresa("evento.descartar", "Descartar un evento", "PATCH", "api/eventos/{id}/descarte", "responsable_sst"),
 
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),

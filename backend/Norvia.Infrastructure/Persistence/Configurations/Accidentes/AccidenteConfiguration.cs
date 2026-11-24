@@ -21,7 +21,7 @@ public class AccidenteConfiguration : IEntityTypeConfiguration<Accidente>
 
         b.HasOne(a => a.Empresa).WithMany().HasForeignKey(a => a.EmpresaId);
 
-        // Pendiente HU-049: FK compuesta para quien descarta el evento (D15).
+        // FK compuesta para quien descarta el evento (D15, HU-049).
         b.HasOne(a => a.DescartadoPor)
             .WithMany()
             .HasForeignKey(a => new { a.EmpresaId, a.DescartadoPorId })
@@ -30,7 +30,7 @@ public class AccidenteConfiguration : IEntityTypeConfiguration<Accidente>
         // RN-26: EstadoEnfermedad es obligatorio y exclusivo de enfermedad_profesional.
         b.Check("EstadoEnfermedadSegunTipo", "(\"EstadoEnfermedad\" IS NOT NULL) = (\"Tipo\" = 'enfermedad_profesional')");
 
-        // Pendiente HU-049: reglas de integridad para cierre y descarte de eventos.
+        // Integridad del cierre y del descarte (RN-28, HU-049).
         b.Check("CerradoEn", "(\"CerradoEn\" IS NOT NULL) = (\"Estado\" = 'cerrado')");
         b.Check("Descarte", "(\"DescartadoPorId\" IS NOT NULL AND \"DescartadoEn\" IS NOT NULL) = (\"Estado\" = 'descartado')");
         b.Check("MotivoDescarte", "\"MotivoDescarte\" IS NULL OR \"Estado\" = 'descartado'");

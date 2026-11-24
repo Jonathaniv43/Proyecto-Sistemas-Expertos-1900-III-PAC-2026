@@ -74,8 +74,9 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<EvaluacionRiesgo> EvaluacionRiesgo => Set<EvaluacionRiesgo>();
     public DbSet<Control> Control => Set<Control>();
 
-    // Accidentes / Eventos (M6; pendiente HU-049: InvestigacionAccidente)
+    // Accidentes / Eventos (M6)
     public DbSet<Accidente> Accidente => Set<Accidente>();
+    public DbSet<InvestigacionAccidente> InvestigacionAccidente => Set<InvestigacionAccidente>();
 
     // Plan de trabajo (M5)
     public DbSet<Tarea> Tarea => Set<Tarea>();
