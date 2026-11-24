@@ -13,6 +13,7 @@ import { SelectBusqueda } from '@/shared/components/ui/SelectBusqueda'
 import { useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { OPCIONES_PRIORIDAD } from '@/shared/tareas'
 import { hoyHonduras } from '@/shared/validacion'
 import { crearTareaManual, listarResponsables } from '../api/plan'
 import { opcionesResponsable } from '../etiquetas'
@@ -105,11 +106,7 @@ function Formulario({ responsables }: { responsables: Responsable[] }) {
         required
         registro={register('prioridad')}
         error={errors.prioridad}
-        opciones={[
-          { valor: '1', texto: 'Alta', descripcion: 'Hay que atenderla primero.' },
-          { valor: '2', texto: 'Media' },
-          { valor: '3', texto: 'Baja', descripcion: 'Puede esperar a las demás.' },
-        ]}
+        opciones={OPCIONES_PRIORIDAD}
       />
       <SelectBusqueda
         etiqueta="Responsable"

@@ -9,13 +9,16 @@ import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { ROLES, useTieneRol } from '@/shared/sesion'
 import { obtenerEvento } from '../api/eventos'
+import { SeccionCierre } from '../components/SeccionCierre'
 import { SeccionInvestigacion } from '../components/SeccionInvestigacion'
+import { SeccionMedidas } from '../components/SeccionMedidas'
 import { ESTADOS_ENFERMEDAD, ESTADOS_EVENTO, fechaHora, NOMBRE_TIPO } from '../etiquetas'
 import type { EventoDetalle } from '../types/eventos'
 
 /**
  * HU-047: un evento reportado. No muestra quién lo reportó porque no se guarda (RN-27, D11).
  * HU-049: su investigación, cierre o descarte; solo el Responsable SST los registra, el admin consulta.
+ * HU-050: sus medidas correctivas (tareas del plan) con su avance.
  */
 export function EventoPage() {
   const { id = '' } = useParams()
@@ -28,6 +31,11 @@ export function EventoPage() {
   const { ejecutar } = peticion
   const cargar = useCallback(() => void ejecutar(id), [ejecutar, id])
   useEffect(cargar, [cargar])
+
+  const alCambiar = (nuevo: EventoDetalle, texto: string) => {
+    setActualizado(nuevo)
+    setMensaje(texto)
+  }
 
   if (peticion.error?.status === 404) return <NotFoundPage />
   const e = actualizado?.id === id ? actualizado : peticion.datos
@@ -89,14 +97,11 @@ export function EventoPage() {
           {e.estado === 'cerrado' && e.cerradoEn && (
             <Aviso tipo="info" titulo="Evento cerrado">{`Se cerró el ${fechaHora(e.cerradoEn)}, con su investigación y sus medidas correctivas.`}</Aviso>
           )}
-          <SeccionInvestigacion
-            evento={e}
-            puedeGestionar={puedeGestionar}
-            onCambio={(nuevo, texto) => {
-              setActualizado(nuevo)
-              setMensaje(texto)
-            }}
-          />
+          <SeccionInvestigacion evento={e} puedeGestionar={puedeGestionar} onCambio={alCambiar} />
+          <SeccionMedidas evento={e} puedeGestionar={puedeGestionar} onCambio={alCambiar} />
+          {puedeGestionar && (e.estado === 'abierto' || e.estado === 'en_investigacion') && (
+            <SeccionCierre evento={e} onCambio={alCambiar} />
+          )}
         </>
       )}
     </div>

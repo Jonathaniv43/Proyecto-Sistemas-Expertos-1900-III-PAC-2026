@@ -4,14 +4,12 @@ import { AreaTexto } from '@/shared/components/ui/AreaTexto'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoFecha } from '@/shared/components/ui/CampoFecha'
-import { DialogoConfirmacion } from '@/shared/components/ui/DialogoConfirmacion'
 import { SelectBusqueda } from '@/shared/components/ui/SelectBusqueda'
-import { extraerError } from '@/shared/api/errores'
 import { useFormulario } from '@/shared/forms'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { etiquetaRol, useSesion } from '@/shared/sesion'
 import { fechaCorta, hoyHonduras, isoATexto } from '@/shared/validacion'
-import { cerrarEvento, descartarEvento, listarInvestigadores, registrarInvestigacion } from '../api/eventos'
+import { listarPersonas, registrarInvestigacion } from '../api/eventos'
 import { investigacionEsquema } from '../schemas/investigacion'
 import type { EventoDetalle } from '../types/eventos'
 
@@ -21,17 +19,15 @@ const fechaHonduras = (iso: string) =>
 
 interface Props {
   evento: EventoDetalle
-  /** Responsable SST: registra la investigación, cierra y descarta. El admin solo consulta. */
+  /** Responsable SST: registra la investigación. El admin solo consulta. */
   puedeGestionar: boolean
   onCambio: (evento: EventoDetalle, mensaje: string) => void
 }
 
 /**
- * HU-049: investigación, cierre y descarte de un evento.
- * - La investigación registra causas inmediatas y de fondo, conclusiones, quién investigó y cuándo (art. 46.1.a);
- *   guardarla deja el evento "en investigación" y se puede corregir mientras siga abierto.
- * - Un evento no se cierra sin causas y medidas correctivas (RN-28): el botón explica qué falta.
- * - Un reporte falso, duplicado o inválido se descarta con motivo opcional, sin investigarlo.
+ * HU-049: la investigación registra causas inmediatas y de fondo, conclusiones, quién investigó y cuándo
+ * (art. 46.1.a); guardarla deja el evento "en investigación" y se puede corregir mientras siga abierto.
+ * El cierre y el descarte están en `SeccionCierre`.
  */
 export function SeccionInvestigacion({ evento, puedeGestionar, onCambio }: Props) {
   const [editando, setEditando] = useState(false)
@@ -41,54 +37,51 @@ export function SeccionInvestigacion({ evento, puedeGestionar, onCambio }: Props
   if (evento.estado === 'descartado') return null
 
   return (
-    <>
-      <section aria-labelledby="titulo-investigacion" className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6">
-        <header className="grid gap-1">
-          <h2 id="titulo-investigacion" className="text-md font-semibold">
-            Investigación
-          </h2>
-          <p className="text-text-secondary">Por qué ocurrió: las causas inmediatas y las de fondo, para que no se repita.</p>
-        </header>
-        {editando ? (
-          <Formulario
-            evento={evento}
-            onCancelar={() => setEditando(false)}
-            onGuardado={(e) => {
-              setEditando(false)
-              onCambio(e, 'La investigación quedó guardada.')
-            }}
-          />
-        ) : inv ? (
-          <>
-            <dl className="grid gap-4">
-              <Dato etiqueta="Causas inmediatas">{inv.causasInmediatas}</Dato>
-              <Dato etiqueta="Causas de fondo">{inv.causasBasicas}</Dato>
-              {inv.conclusiones && <Dato etiqueta="Conclusiones">{inv.conclusiones}</Dato>}
-              <Dato etiqueta="Investigó">{`${inv.investigadaPorNombre}, el ${fechaCorta(inv.fechaInvestigacion)}`}</Dato>
-            </dl>
-            {puedeGestionar && !terminado && (
-              <div>
-                <Boton variante="secundario" onClick={() => setEditando(true)}>
-                  Editar la investigación
-                </Boton>
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            <p className="text-text-secondary">Todavía no se investiga.</p>
-            {puedeGestionar && !terminado && (
-              <div>
-                <Boton variante="secundario" onClick={() => setEditando(true)}>
-                  Registrar la investigación
-                </Boton>
-              </div>
-            )}
-          </>
-        )}
-      </section>
-      {puedeGestionar && !terminado && !editando && <Cierre evento={evento} onCambio={onCambio} />}
-    </>
+    <section aria-labelledby="titulo-investigacion" className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6">
+      <header className="grid gap-1">
+        <h2 id="titulo-investigacion" className="text-md font-semibold">
+          Investigación
+        </h2>
+        <p className="text-text-secondary">Por qué ocurrió: las causas inmediatas y las de fondo, para que no se repita.</p>
+      </header>
+      {editando ? (
+        <Formulario
+          evento={evento}
+          onCancelar={() => setEditando(false)}
+          onGuardado={(e) => {
+            setEditando(false)
+            onCambio(e, 'La investigación quedó guardada.')
+          }}
+        />
+      ) : inv ? (
+        <>
+          <dl className="grid gap-4">
+            <Dato etiqueta="Causas inmediatas">{inv.causasInmediatas}</Dato>
+            <Dato etiqueta="Causas de fondo">{inv.causasBasicas}</Dato>
+            {inv.conclusiones && <Dato etiqueta="Conclusiones">{inv.conclusiones}</Dato>}
+            <Dato etiqueta="Investigó">{`${inv.investigadaPorNombre}, el ${fechaCorta(inv.fechaInvestigacion)}`}</Dato>
+          </dl>
+          {puedeGestionar && !terminado && (
+            <div>
+              <Boton variante="secundario" onClick={() => setEditando(true)}>
+                Editar la investigación
+              </Boton>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <p className="text-text-secondary">Todavía no se investiga.</p>
+          {puedeGestionar && !terminado && (
+            <div>
+              <Boton variante="secundario" onClick={() => setEditando(true)}>
+                Registrar la investigación
+              </Boton>
+            </div>
+          )}
+        </>
+      )}
+    </section>
   )
 }
 
@@ -110,7 +103,7 @@ interface FormularioProps {
 function Formulario({ evento, onCancelar, onGuardado }: FormularioProps) {
   const sesion = useSesion()
   const yo = sesion.estado === 'activa' ? sesion.usuario.vinculoId : null
-  const personas = usePeticion(listarInvestigadores)
+  const personas = usePeticion(listarPersonas)
   const { ejecutar } = personas
   useEffect(() => {
     void ejecutar()
@@ -199,83 +192,5 @@ function Formulario({ evento, onCancelar, onGuardado }: FormularioProps) {
         </Boton>
       </div>
     </form>
-  )
-}
-
-function Cierre({ evento, onCambio }: { evento: EventoDetalle; onCambio: Props['onCambio'] }) {
-  const [dialogo, setDialogo] = useState<'cerrar' | 'descartar'>()
-  const [motivo, setMotivo] = useState('')
-  const [ocupado, setOcupado] = useState(false)
-  const [error, setError] = useState<string>()
-  const falta = [
-    !evento.investigacion && 'registrar la investigación',
-    evento.totalMedidas === 0 && 'definir al menos una medida correctiva',
-  ].filter(Boolean)
-
-  const ejecutar = async (accion: () => Promise<EventoDetalle>, mensaje: string) => {
-    setOcupado(true)
-    setError(undefined)
-    try {
-      const e = await accion()
-      setDialogo(undefined)
-      onCambio(e, mensaje)
-    } catch (causa) {
-      setDialogo(undefined)
-      setError(extraerError(causa).mensaje)
-    } finally {
-      setOcupado(false)
-    }
-  }
-
-  return (
-    <section aria-labelledby="titulo-cierre" className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6">
-      <header className="grid gap-1">
-        <h2 id="titulo-cierre" className="text-md font-semibold">
-          Cierre
-        </h2>
-        <p className="text-text-secondary">
-          {`${evento.totalMedidas === 1 ? '1 medida correctiva' : `${evento.totalMedidas} medidas correctivas`}. Las medidas son tareas del plan de trabajo con origen en este evento.`}
-        </p>
-      </header>
-      {error && <Aviso tipo="error">{error}</Aviso>}
-      {falta.length > 0 && (
-        <p className="text-sm text-text-secondary">{`Para cerrarlo falta ${falta.join(' y ')}.`}</p>
-      )}
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <Boton disabled={falta.length > 0} onClick={() => setDialogo('cerrar')}>
-          Cerrar el evento
-        </Boton>
-        <Boton variante="secundario" onClick={() => setDialogo('descartar')}>
-          Descartar el reporte
-        </Boton>
-      </div>
-
-      <DialogoConfirmacion
-        abierto={dialogo === 'cerrar'}
-        titulo="¿Cerrar el evento?"
-        textoConfirmar="Cerrar el evento"
-        textoCargando="Cerrando…"
-        cargando={ocupado}
-        onConfirmar={() => void ejecutar(() => cerrarEvento(evento.id), 'El evento quedó cerrado.')}
-        onCancelar={() => setDialogo(undefined)}
-      >
-        Ya no se podrá editar la investigación. Las medidas correctivas siguen en el plan de trabajo hasta completarse.
-      </DialogoConfirmacion>
-      <DialogoConfirmacion
-        abierto={dialogo === 'descartar'}
-        titulo="¿Descartar el reporte?"
-        textoConfirmar="Descartar el reporte"
-        textoCargando="Descartando…"
-        peligro
-        cargando={ocupado}
-        onConfirmar={() => void ejecutar(() => descartarEvento(evento.id, motivo), 'El reporte quedó descartado.')}
-        onCancelar={() => setDialogo(undefined)}
-      >
-        <div className="grid gap-4">
-          <p>Para reportes falsos, duplicados o inválidos. No se investiga y queda fuera de las estadísticas.</p>
-          <AreaTexto etiqueta="Motivo" ayuda="Opcional. Por ejemplo: duplicado del reporte del lunes." value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        </div>
-      </DialogoConfirmacion>
-    </section>
   )
 }

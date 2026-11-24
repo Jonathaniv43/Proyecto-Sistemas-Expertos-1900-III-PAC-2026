@@ -386,7 +386,13 @@ function OrigenTarea({ tarea }: { tarea: Tarea }) {
         {tarea.controlTipo ? ` · Control: ${TIPOS_CONTROL[tarea.controlTipo].toLowerCase()}` : ' · Tarea modelo'}
       </span>
     )
-  return <span className="text-xs text-text-secondary">{tarea.origen === 'accidente' ? 'Accidente' : 'Manual'}</span>
+  if (tarea.origen === 'accidente' && tarea.accidenteId)
+    return (
+      <span className="text-xs text-text-secondary">
+        <Link to={`/eventos/${tarea.accidenteId}`}>Medida de un evento</Link>
+      </span>
+    )
+  return <span className="text-xs text-text-secondary">Manual</span>
 }
 
 function Estado({ tarea }: { tarea: Tarea }) {

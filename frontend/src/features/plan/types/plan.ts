@@ -1,4 +1,7 @@
 import type { ClasificacionRiesgo } from '@/shared/riesgo/niveles'
+import type { EstadoTarea } from '@/shared/tareas'
+
+export type { EstadoTarea }
 
 /** Jerarquía de controles (RN-21). */
 export type TipoControl = 'eliminacion' | 'sustitucion' | 'ingenieria' | 'administrativo' | 'epp'
@@ -29,7 +32,6 @@ export interface PropuestaPlan {
   riesgosSinEvaluar: number
 }
 
-export type EstadoTarea = 'pendiente' | 'en_progreso' | 'completada' | 'cancelada'
 
 /** GET /api/plan-trabajo/tareas. Responsable y fecha límite se asignan en HU-043. */
 export interface Tarea {
@@ -48,6 +50,8 @@ export interface Tarea {
   riesgoNivel: number | null
   riesgoClasificacion: ClasificacionRiesgo | null
   controlTipo: TipoControl | null
+  /** Con origen accidente: el evento del que sale la medida correctiva (HU-050). */
+  accidenteId: string | null
   creadaEn: string
   completadaEn: string | null
 }
