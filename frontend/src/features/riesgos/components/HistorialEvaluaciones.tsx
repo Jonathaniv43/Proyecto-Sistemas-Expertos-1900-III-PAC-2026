@@ -1,5 +1,6 @@
 import { TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Boton } from '@/shared/components/ui/Boton'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { usePeticion } from '@/shared/hooks/usePeticion'
@@ -21,6 +22,7 @@ interface HistorialEvaluacionesProps {
 /**
  * HU-041: todas las evaluaciones del riesgo, iniciales y residuales, con fecha y autor, la más reciente primero.
  * Ninguna se borra al evaluar de nuevo (RN-20): la vigente de cada tipo lleva el badge "Vigente".
+ * HU-051: las que se hicieron a raíz de un evento enlazan a él ("Tras un evento").
  */
 export function HistorialEvaluaciones({ riesgoId, version }: HistorialEvaluacionesProps) {
   const peticion = usePeticion(listarEvaluaciones)
@@ -102,6 +104,11 @@ function Fila({ evaluacion: e, vigente }: { evaluacion: Evaluacion; vigente: boo
       <td className="envolver">
         <div className="tabular-nums">{fechaHora(e.evaluadoEn)}</div>
         <div className="text-xs text-text-secondary">por {e.evaluadoPorNombre}</div>
+        {e.accidenteId && (
+          <Link to={`/eventos/${e.accidenteId}`} className="text-xs">
+            Tras un evento
+          </Link>
+        )}
         {/* En celular, el tipo y el detalle van aquí: así el nivel queda a la vista sin desplazar la tabla. */}
         <div className="mt-1 grid justify-items-start gap-1 text-sm sm:hidden">
           <Tipo evaluacion={e} vigente={vigente} />

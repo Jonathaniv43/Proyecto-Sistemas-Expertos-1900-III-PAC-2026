@@ -16,6 +16,7 @@ namespace Norvia.Application.Features.Riesgos.EvaluarRiesgo;
 /// La vigente es la más reciente.</item>
 /// <item>Solo se evalúan riesgos confirmados: los sugeridos o descartados no están en la matriz (RN-18).</item>
 /// </list>
+/// HU-051: si se reevalúa a raíz de un evento, la evaluación guarda cuál (de la empresa y no descartado).
 /// La evaluación residual (después de los controles) es HU-040.
 /// </summary>
 public sealed class EvaluarRiesgoServicio(
@@ -31,6 +32,8 @@ public sealed class EvaluarRiesgoServicio(
         var estado = await repositorio.EstadoDelRiesgoAsync(riesgoId, ct);
         if (estado is null) return Errores.RiesgoNoEncontrado;
         if (estado != EstadoRiesgo.Confirmado) return Errores.RiesgoFueraDeMatriz;
+        if (request.AccidenteId is Guid accidenteId && !await repositorio.EventoEnlazableAsync(accidenteId, ct))
+            return Errores.EventoInvalido;
 
         var evaluacion = new EvaluacionRiesgo
         {
@@ -39,6 +42,7 @@ public sealed class EvaluarRiesgoServicio(
             Probabilidad = request.Probabilidad!.Value,
             Severidad = request.Severidad!.Value,
             EvaluadoPorId = vinculoId,
+            AccidenteId = request.AccidenteId,
             EvaluadoEn = await reloj.AhoraAsync(ct)
         };
         repositorio.Agregar(evaluacion);

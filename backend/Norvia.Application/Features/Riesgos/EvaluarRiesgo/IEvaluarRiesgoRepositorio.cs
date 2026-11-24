@@ -11,5 +11,8 @@ public interface IEvaluarRiesgoRepositorio
     /// <summary>Nombre completo de la persona del vínculo (quien evalúa).</summary>
     Task<string> NombreDelVinculoAsync(Guid vinculoId, CancellationToken ct);
 
+    /// <summary>true si el evento es de la empresa de la sesión y no está descartado (HU-051).</summary>
+    Task<bool> EventoEnlazableAsync(Guid accidenteId, CancellationToken ct);
+
     void Agregar(EvaluacionRiesgo evaluacion);
 }

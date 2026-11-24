@@ -29,6 +29,8 @@ export interface Evaluacion {
   evaluadoPorId: string
   evaluadoPorNombre: string
   evaluadoEn: string
+  /** Evento a raíz del cual se hizo (HU-051); null si no. Solo en evaluaciones iniciales. */
+  accidenteId: string | null
 }
 
 /** GET /api/riesgos y /api/riesgos/{id}, y respuesta de POST /api/riesgos (HU-036). */
@@ -45,6 +47,8 @@ export interface Riesgo {
   /** Encuesta que lo sugirió (HU-035); null si se agregó a mano. */
   encuestaId: string | null
   encuestaTitulo: string | null
+  /** Evento que lo reveló (HU-051); null si no salió de un evento. */
+  accidenteId: string | null
   creadoEn: string
   /** Última evaluación inicial (HU-037); null si todavía no se evaluó. */
   evaluacion: Evaluacion | null
@@ -67,6 +71,8 @@ export interface CrearRiesgoRequest {
   peligroId?: string
   descripcionPeligro?: string
   actividad: string
+  /** HU-051: el evento que lo reveló, si se agrega a raíz de uno. */
+  accidenteId?: string
 }
 
 /** GET /api/riesgos/matriz (HU-038): solo las celdas con riesgos, por la última evaluación inicial. */

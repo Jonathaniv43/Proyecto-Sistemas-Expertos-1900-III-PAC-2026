@@ -10,6 +10,8 @@ using Norvia.Application.Features.Eventos.CerrarEvento;
 using Norvia.Application.Features.Eventos.CrearMedidaCorrectiva;
 using Norvia.Application.Features.Eventos.CrearMedidaCorrectiva.DTOs;
 using Norvia.Application.Features.Eventos.ListarMedidasCorrectivas;
+using Norvia.Application.Features.Eventos.ListarRiesgosDelEvento;
+using Norvia.Application.Features.Eventos.ListarRiesgosDelEvento.DTOs;
 using Norvia.Application.Features.Eventos.DescartarEvento;
 using Norvia.Application.Features.Eventos.DescartarEvento.DTOs;
 using Norvia.Application.Features.Eventos.RegistrarInvestigacion;
@@ -99,4 +101,12 @@ public sealed class EventosController : ControllerBase
     public async Task<IActionResult> CrearMedida(
         Guid id, CrearMedidaCorrectivaRequestDto request, [FromServices] CrearMedidaCorrectivaServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-051: los riesgos que el evento reveló y los que se reevaluaron a raíz de él, con el nivel de antes y después.</summary>
+    [HttpGet("{id:guid}/riesgos")]
+    [ProducesResponseType(typeof(IReadOnlyList<RiesgoDelEventoResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarRiesgos(
+        Guid id, [FromServices] ListarRiesgosDelEventoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }

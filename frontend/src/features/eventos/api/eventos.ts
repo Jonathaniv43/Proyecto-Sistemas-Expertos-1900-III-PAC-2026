@@ -8,6 +8,8 @@ import type {
   Persona,
   RegistrarInvestigacionRequest,
   ReportarEventoRequest,
+  RiesgoDeMatriz,
+  RiesgoDelEvento,
 } from '../types/eventos'
 
 /** Reporta un evento de forma anónima (HU-047). 400 `eventos.fecha_futura` si la fecha y hora todavía no llegan. */
@@ -50,3 +52,10 @@ export const listarMedidas = (signal: AbortSignal, id: string) =>
  */
 export const crearMedida = (id: string, datos: CrearMedidaRequest) =>
   api.post<MedidaCorrectiva>(`/eventos/${id}/medidas-correctivas`, datos).then((r) => r.data)
+
+/** Riesgos que el evento reveló y los que se reevaluaron a raíz de él (HU-051). */
+export const listarRiesgosDelEvento = (signal: AbortSignal, id: string) =>
+  api.get<RiesgoDelEvento[]>(`/eventos/${id}/riesgos`, { signal }).then((r) => r.data)
+
+/** Riesgos de la matriz (confirmados), para elegir cuál reevaluar tras el evento. */
+export const listarRiesgosDeMatriz = (signal: AbortSignal) => api.get<RiesgoDeMatriz[]>('/riesgos', { signal }).then((r) => r.data)

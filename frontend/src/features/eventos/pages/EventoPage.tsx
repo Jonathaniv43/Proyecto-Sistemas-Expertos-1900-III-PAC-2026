@@ -12,6 +12,7 @@ import { obtenerEvento } from '../api/eventos'
 import { SeccionCierre } from '../components/SeccionCierre'
 import { SeccionInvestigacion } from '../components/SeccionInvestigacion'
 import { SeccionMedidas } from '../components/SeccionMedidas'
+import { SeccionRiesgos } from '../components/SeccionRiesgos'
 import { ESTADOS_ENFERMEDAD, ESTADOS_EVENTO, fechaHora, NOMBRE_TIPO } from '../etiquetas'
 import type { EventoDetalle } from '../types/eventos'
 
@@ -19,6 +20,7 @@ import type { EventoDetalle } from '../types/eventos'
  * HU-047: un evento reportado. No muestra quién lo reportó porque no se guarda (RN-27, D11).
  * HU-049: su investigación, cierre o descarte; solo el Responsable SST los registra, el admin consulta.
  * HU-050: sus medidas correctivas (tareas del plan) con su avance.
+ * HU-051: los riesgos de la matriz que reveló o hizo reevaluar.
  */
 export function EventoPage() {
   const { id = '' } = useParams()
@@ -99,6 +101,7 @@ export function EventoPage() {
           )}
           <SeccionInvestigacion evento={e} puedeGestionar={puedeGestionar} onCambio={alCambiar} />
           <SeccionMedidas evento={e} puedeGestionar={puedeGestionar} onCambio={alCambiar} />
+          <SeccionRiesgos evento={e} puedeGestionar={puedeGestionar} />
           {puedeGestionar && (e.estado === 'abierto' || e.estado === 'en_investigacion') && (
             <SeccionCierre evento={e} onCambio={alCambiar} />
           )}

@@ -1,3 +1,4 @@
+import type { ClasificacionRiesgo } from '@/shared/riesgo/niveles'
 import type { EstadoTarea } from '@/shared/tareas'
 
 /** Tipo de evento (RN-26). */
@@ -102,4 +103,29 @@ export interface CrearMedidaRequest {
   responsableId: string
   fechaLimite: string
   requiereEvidencia: boolean
+}
+
+/**
+ * GET /api/eventos/{id}/riesgos (HU-051). `revelado`: el evento lo reveló (nivel = su nivel inicial actual).
+ * `reevaluado`: ya estaba en la matriz y se reevaluó a raíz del evento (nivel anterior → nivel de esa evaluación).
+ */
+export interface RiesgoDelEvento {
+  riesgoId: string
+  nombre: string
+  actividad: string | null
+  relacion: 'revelado' | 'reevaluado'
+  nivelAnterior: number | null
+  clasificacionAnterior: ClasificacionRiesgo | null
+  nivel: number | null
+  clasificacion: ClasificacionRiesgo | null
+  evaluadoEn: string | null
+}
+
+/** Lo que el evento necesita de un riesgo de la matriz (GET /api/riesgos) para elegir cuál reevaluar. */
+export interface RiesgoDeMatriz {
+  id: string
+  peligroNombre: string | null
+  descripcionPeligro: string | null
+  actividad: string | null
+  evaluacion: { nivel: number; clasificacion: ClasificacionRiesgo } | null
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Entities.Accidentes;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Encuestas;
@@ -35,6 +36,13 @@ public class RiesgoEmpresaConfiguration : IEntityTypeConfiguration<RiesgoEmpresa
             .HasForeignKey(r => new { r.EmpresaId, r.EncuestaId })
             .HasPrincipalKey(e => new { e.EmpresaId, e.Id });
 
+        // Evento que lo reveló (HU-051): de la misma empresa.
+        b.HasOne<Accidente>()
+            .WithMany()
+            .HasForeignKey(r => new { r.EmpresaId, r.AccidenteId })
+            .HasPrincipalKey(a => new { a.EmpresaId, a.Id });
+
+        b.Check("UnSoloOrigen", "\"EncuestaId\" IS NULL OR \"AccidenteId\" IS NULL");
         b.Check("PeligroODescripcion", "\"PeligroId\" IS NOT NULL OR \"DescripcionPeligro\" IS NOT NULL");
         b.Check("SugeridoConOrigen",
             "\"Estado\" <> 'sugerido' OR (\"EncuestaId\" IS NOT NULL AND \"PeligroId\" IS NOT NULL)");

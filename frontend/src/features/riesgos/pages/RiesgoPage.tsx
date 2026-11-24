@@ -1,7 +1,7 @@
 import { ArrowLeft, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useWatch } from 'react-hook-form'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -28,12 +28,14 @@ const exigeControl = (c: ClasificacionRiesgo) => c === 'alto' || c === 'critico'
  * 5 con su explicación a la vista (o tocando una celda del mapa), se ve el nivel calculado y queda quién
  * evaluó y cuándo. Volver a evaluar no borra la evaluación anterior (RN-20). HU-039: sus controles. HU-040:
  * la evaluación residual, al lado de la inicial. HU-041: el historial de todas las evaluaciones.
+ * HU-051: con `?evento=<id>` se llega desde un evento para reevaluarlo; la evaluación inicial queda enlazada con él.
  */
 export function RiesgoPage() {
   const { id = '' } = useParams()
   const peticion = usePeticion(obtenerRiesgo)
   const cargandoVisible = useCargaVisible(peticion.cargando)
   const [riesgo, setRiesgo] = useState<Riesgo>()
+  const eventoId = useSearchParams()[0].get('evento') ?? undefined
 
   const { ejecutar } = peticion
   const cargar = useCallback(() => {
@@ -76,7 +78,11 @@ export function RiesgoPage() {
             <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-3">
               <Dato etiqueta="Actividad">{riesgo.actividad ?? '—'}</Dato>
               <Dato etiqueta="Origen">
-                {riesgo.encuestaId ? (
+                {riesgo.accidenteId ? (
+                  <>
+                    Revelado por un <Link to={`/eventos/${riesgo.accidenteId}`}>evento</Link>
+                  </>
+                ) : riesgo.encuestaId ? (
                   <>
                     Encuesta{' '}
                     <Link to={`/encuestas/${riesgo.encuestaId}/resultados`}>{riesgo.encuestaTitulo ?? 'sin título'}</Link>
@@ -97,8 +103,17 @@ export function RiesgoPage() {
             </Aviso>
           ) : (
             <>
+              {eventoId && (
+                <Aviso tipo="info" titulo="Revisión tras un evento">
+                  <>
+                    La evaluación inicial que guardes quedará enlazada con el evento.{' '}
+                    <Link to={`/eventos/${eventoId}`}>Volver al evento</Link>
+                  </>
+                </Aviso>
+              )}
               <SeccionEvaluacion
                 riesgo={riesgo}
+                eventoId={eventoId}
                 onEvaluado={(e) => setRiesgo((r) => r && (e.tipo === 'residual' ? { ...r, evaluacionResidual: e } : { ...r, evaluacion: e }))}
               />
               <SeccionControles riesgo={riesgo} onCambio={(totalControles) => setRiesgo((r) => r && { ...r, totalControles })} />
@@ -138,8 +153,17 @@ function comparar(inicial: Evaluacion, residual: Evaluacion) {
  * Evaluación del riesgo. HU-037: la inicial. HU-040: la residual, con los controles aplicados, separada de la
  * inicial y a su lado para ver si el riesgo bajó. La residual pide la inicial y al menos un control.
  */
-function SeccionEvaluacion({ riesgo, onEvaluado }: { riesgo: Riesgo; onEvaluado: (e: Evaluacion) => void }) {
-  const [evaluando, setEvaluando] = useState<TipoEvaluacion | null>(riesgo.evaluacion ? null : 'inicial')
+function SeccionEvaluacion({
+  riesgo,
+  eventoId,
+  onEvaluado,
+}: {
+  riesgo: Riesgo
+  /** HU-051: se llegó desde un evento; la reevaluación inicial se abre de una vez y se enlaza con él. */
+  eventoId?: string
+  onEvaluado: (e: Evaluacion) => void
+}) {
+  const [evaluando, setEvaluando] = useState<TipoEvaluacion | null>(riesgo.evaluacion && !eventoId ? null : 'inicial')
   const [guardada, setGuardada] = useState<Evaluacion>()
   const inicial = riesgo.evaluacion
   const residual = riesgo.evaluacionResidual
@@ -168,6 +192,7 @@ function SeccionEvaluacion({ riesgo, onEvaluado }: { riesgo: Riesgo; onEvaluado:
         {guardada && !evaluando && (
           <Aviso tipo="exito">
             {`Evaluación ${guardada.tipo === 'residual' ? 'residual ' : ''}guardada: ${ETIQUETAS_CLASIFICACION_RIESGO[guardada.clasificacion]} · ${guardada.nivel}.`}
+            {guardada.accidenteId && ' Quedó enlazada con el evento.'}
           </Aviso>
         )}
       </div>
@@ -175,6 +200,7 @@ function SeccionEvaluacion({ riesgo, onEvaluado }: { riesgo: Riesgo; onEvaluado:
       {evaluando || !inicial ? (
         <FormularioEvaluacion
           riesgoId={riesgo.id}
+          eventoId={eventoId}
           tipo={evaluando ?? 'inicial'}
           actual={(evaluando === 'residual' ? residual : inicial) ?? null}
           onCancelar={inicial ? () => setEvaluando(null) : undefined}
@@ -255,13 +281,15 @@ function AvisoControl() {
 
 interface FormularioEvaluacionProps {
   riesgoId: string
+  /** HU-051: la evaluación inicial se enlaza con este evento. */
+  eventoId?: string
   tipo: TipoEvaluacion
   actual: Evaluacion | null
   onCancelar?: () => void
   onGuardada: (evaluacion: Evaluacion) => void
 }
 
-function FormularioEvaluacion({ riesgoId, tipo, actual, onCancelar, onGuardada }: FormularioEvaluacionProps) {
+function FormularioEvaluacion({ riesgoId, eventoId, tipo, actual, onCancelar, onGuardada }: FormularioEvaluacionProps) {
   const residual = tipo === 'residual'
   const {
     register,
@@ -280,6 +308,7 @@ function FormularioEvaluacion({ riesgoId, tipo, actual, onCancelar, onGuardada }
       'riesgos.no_en_matriz': { mensaje: 'Este riesgo ya no está en la matriz. Vuelve a la matriz para ver su estado.' },
       'riesgos.sin_controles': { mensaje: 'El riesgo ya no tiene controles. Agrega uno para evaluar el residual.' },
       'riesgos.sin_evaluacion_inicial': { mensaje: 'Primero hay que hacer la evaluación inicial.' },
+      'riesgos.evento_invalido': { mensaje: 'El evento ya no existe o se descartó, así que la evaluación no se puede enlazar con él.' },
     },
   })
   const p = Number(useWatch({ control, name: 'probabilidad' })) || null
@@ -292,7 +321,7 @@ function FormularioEvaluacion({ riesgoId, tipo, actual, onCancelar, onGuardada }
       aria-label={residual ? 'Evaluación residual' : 'Evaluación inicial'}
       className="grid gap-6"
       onSubmit={enviar(async (datos) =>
-        onGuardada(await (residual ? evaluarRiesgoResidual(riesgoId, datos) : evaluarRiesgo(riesgoId, datos))),
+        onGuardada(await (residual ? evaluarRiesgoResidual(riesgoId, datos) : evaluarRiesgo(riesgoId, { ...datos, accidenteId: eventoId }))),
       )}
     >
       {residual && (
