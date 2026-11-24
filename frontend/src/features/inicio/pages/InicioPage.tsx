@@ -1,4 +1,4 @@
-import { Building2, ClipboardCheck, ClipboardList, Contact, UserPlus, Users } from 'lucide-react'
+import { Building2, ClipboardCheck, ClipboardList, Contact, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -48,6 +48,10 @@ export function InicioPage() {
           <Link to="/encuestas" className={clasesBoton('secundario')}>
             <ClipboardList aria-hidden size={16} strokeWidth={1.5} />
             Encuestas
+          </Link>
+          <Link to="/riesgos" className={clasesBoton('secundario')}>
+            <ShieldAlert aria-hidden size={16} strokeWidth={1.5} />
+            Matriz de riesgos
           </Link>
           <Link to="/empresa" className={clasesBoton('secundario')}>
             <Building2 aria-hidden size={16} strokeWidth={1.5} />

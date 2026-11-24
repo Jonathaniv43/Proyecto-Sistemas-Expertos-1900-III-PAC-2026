@@ -34,6 +34,13 @@ public static class CatalogoPermisos
         Empresa("encuesta.peligro_sugerido.revisar", "Confirmar o descartar un peligro sugerido", "PATCH",
             "api/encuestas/{id}/peligros-sugeridos/{riesgoId}", "admin_empresa", "responsable_sst"),
 
+        // HU-036: matriz de riesgos de la empresa.
+        Empresa("riesgo.listar", "Ver los riesgos de la matriz", "GET", "api/riesgos", "admin_empresa", "responsable_sst"),
+        Empresa("riesgo.leer", "Ver un riesgo", "GET", "api/riesgos/{id}", "admin_empresa", "responsable_sst"),
+        Empresa("riesgo.peligros", "Ver el catálogo de peligros para agregar riesgos", "GET", "api/riesgos/peligros-disponibles",
+            "admin_empresa", "responsable_sst"),
+        Empresa("riesgo.crear", "Agregar un riesgo a la matriz", "POST", "api/riesgos", "admin_empresa", "responsable_sst"),
+
         // HU-032: reporte anónimo.
         Empresa("encuesta.reporte", "Ver reporte anónimo de encuesta", "GET", "api/encuestas/{id}/reporte",
             "admin_empresa", "responsable_sst"),
