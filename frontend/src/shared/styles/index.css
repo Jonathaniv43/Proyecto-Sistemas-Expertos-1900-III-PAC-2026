@@ -18,6 +18,12 @@
     @apply text-text-link hover:text-text-link-hover;
   }
 
+  /* Edge trae su propio botón para ver la contraseña: se oculta, CampoTexto ya tiene el suyo. */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+
   /* El anillo de foco nunca se elimina (design-system.md § Bordes). */
   :focus-visible {
     outline: var(--focus-ring-width) solid var(--color-focus-ring);
@@ -27,6 +33,21 @@
 
 /* Spinner de botón (design-system.css § Botón): solo dentro de botones. */
 @layer components {
+  /* Contenedor de cada pantalla (AppLayout): siempre deja el espacio de seguridad arriba, a los
+     lados y abajo. Las páginas no agregan su propio padding superior. */
+  .pagina {
+    padding-top: calc(var(--layout-space-top) + var(--safe-top));
+    padding-right: calc(var(--layout-gutter) + var(--safe-right));
+    padding-bottom: calc(var(--layout-space-bottom) + var(--safe-bottom));
+    padding-left: calc(var(--layout-gutter) + var(--safe-left));
+  }
+
+  /* Mismos márgenes laterales que .pagina, para barras fijas alineadas con el contenido. */
+  .margen-lateral {
+    padding-right: calc(var(--layout-gutter) + var(--safe-right));
+    padding-left: calc(var(--layout-gutter) + var(--safe-left));
+  }
+
   .spinner {
     width: 14px;
     height: 14px;
@@ -316,6 +337,73 @@
     }
   }
 
+  /* Ver/ocultar contraseña (CampoTexto): dentro del input, a la derecha y centrado; más chico que la
+     caja para no tapar su borde. 32px en escritorio (caja de 36), 36px en celular (caja de 44). */
+  .boton-icono.boton-ver-contrasena {
+    position: absolute;
+    top: 50%;
+    right: var(--space-1);
+    width: var(--space-8);
+    height: var(--space-8);
+    border-radius: var(--radius-sm);
+    transform: translateY(-50%);
+  }
+
+  @media (max-width: 639px) {
+    .boton-icono.boton-ver-contrasena {
+      width: var(--control-height);
+      height: var(--control-height);
+    }
+  }
+
+  /* Barra fija de "Volver" (design-system.md § Volver): aparece al desplazar, debajo de las listas
+     desplegables (z 30) y de los modales (top-layer). */
+  .barra-volver {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 20;
+    /* Aire arriba y abajo del link (--space-2), y debajo del notch / barra de estado en celular. */
+    height: calc(var(--control-height) + 2 * var(--space-2) + var(--safe-top));
+    padding-top: calc(var(--space-2) + var(--safe-top));
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-1);
+    opacity: 0;
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition:
+      opacity 0.12s,
+      transform 0.12s,
+      visibility 0.12s;
+  }
+
+  .barra-volver[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+  }
+
+  .barra-volver-titulo {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 639px) {
+    .barra-volver {
+      height: calc(var(--control-height-touch) + 2 * var(--space-2) + var(--safe-top));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .barra-volver {
+      transition: none;
+    }
+  }
+
   /* Diálogo de confirmación (design-system.md § Modal y § Diálogo): <dialog> nativo, 400px;
      en celular sale como hoja inferior. */
   .dialogo {
@@ -339,6 +427,8 @@
       max-width: 100%;
       margin: auto 0 0;
       border-radius: 16px 16px 0 0;
+      /* Hoja inferior: encima de la barra de gestos. */
+      padding-bottom: calc(var(--space-6) + var(--safe-bottom));
     }
   }
 
@@ -400,6 +490,15 @@
       max-height: 100dvh;
       border-radius: 0;
     }
+
+    /* Pantalla completa: cabecera bajo el notch y pie sobre la barra de gestos. */
+    .modal-cabecera {
+      padding-top: calc(var(--space-4) + var(--safe-top));
+    }
+
+    .modal-pie {
+      padding-bottom: calc(var(--space-4) + var(--safe-bottom));
+    }
   }
 
   /* Select con búsqueda (design-system.md § Select, lista abierta): a 4px del campo y con su ancho;
@@ -442,6 +541,7 @@
       max-height: none;
       flex: 1;
       min-height: 0;
+      padding-bottom: calc(var(--space-1) + var(--safe-bottom));
     }
 
     .lista-busqueda-fondo {

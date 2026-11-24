@@ -1,11 +1,8 @@
 import { api, type SesionResponse } from '@/shared/api'
+import type { EmpresaLogin } from '@/shared/sesion'
 
-export interface EmpresaPorRtn {
-  /** Identificador de empresa cifrado que pide el login. */
-  idEmpresa: string
-  razonSocial: string
-  rtn: string
-}
+/** Respuesta de por-rtn: `idEmpresa` cifrado (va tal cual al login), razón social y RTN. */
+export type EmpresaPorRtn = EmpresaLogin
 
 /** GET /api/empresas/por-rtn (anónimo): 404 si no hay una empresa activa con ese RTN. */
 export const resolverEmpresaPorRtn = (rtn: string) =>

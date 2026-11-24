@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom'
 import { Boton } from '@/shared/components/ui/Boton'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
+import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { listarEncuestas } from '../api/encuestas'
 import { EstadoEncuesta } from '../components/EstadoEncuesta'
 
@@ -14,6 +16,7 @@ const fecha = (iso: string) => new Date(iso).toLocaleDateString('es-HN', { day: 
 export function EncuestasPage() {
   const encuestas = usePeticion(listarEncuestas)
   const cargandoVisible = useCargaVisible(encuestas.cargando)
+  useScrollRecordado(Boolean(encuestas.datos))
   const { ejecutar: cargar } = encuestas
   useEffect(() => {
     void cargar()
@@ -21,6 +24,7 @@ export function EncuestasPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout gap-6">
+      <Volver a="/inicio" texto="Volver al inicio" titulo="Encuestas" ancho="layout" />
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-xl font-semibold">Encuestas</h1>
         <Link to="/encuestas/nueva" className={clasesBoton('primario')}>

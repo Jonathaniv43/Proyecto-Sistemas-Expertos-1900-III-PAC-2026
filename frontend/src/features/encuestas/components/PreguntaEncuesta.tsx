@@ -2,6 +2,7 @@ import { Check } from 'lucide-react'
 import { useId } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { MensajeCampo } from '@/shared/components/ui/MensajeCampo'
+import { Contador } from '@/shared/components/ui/Contador'
 import type { PreguntaPreview } from '../types/encuestas'
 
 /** Controles para responder (HU-031). Sin ellos, la pregunta es de solo lectura (vista previa). */
@@ -118,7 +119,6 @@ function AreaRespuesta({ numero, soloLectura, respuesta }: { numero: number; sol
   }
   const largo = respuesta?.texto?.length ?? 0
   const maximo = respuesta?.maxCaracteres ?? null
-  const pasado = maximo !== null && largo > maximo
   return (
     <div className="grid gap-1">
       <textarea
@@ -133,9 +133,8 @@ function AreaRespuesta({ numero, soloLectura, respuesta }: { numero: number; sol
         {...respuesta?.registro}
       />
       {maximo !== null && (
-        // Contador del área de texto (DS): Caption terciario; al pasarse, en rojo.
-        <span className={`justify-self-end text-xs tabular-nums ${pasado ? 'text-error-text' : 'text-text-tertiary'}`}>
-          {largo} / {maximo}
+        <span className="justify-self-end">
+          <Contador actual={largo} limite={maximo} />
         </span>
       )}
     </div>

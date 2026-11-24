@@ -11,6 +11,7 @@ import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { ETIQUETAS_ROL, etiquetaRol, ROLES_EMPRESA, useSesion } from '@/shared/sesion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { listarVinculos } from '../api/vinculos'
 import { EditarAccesoModal } from '../components/EditarAccesoModal'
 import { EstadoVinculo } from '../components/EstadoVinculo'
@@ -59,6 +60,7 @@ export function PersonasPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout gap-6">
+      <Volver a="/inicio" texto="Volver al inicio" titulo="Personas" ancho="layout" />
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="grid gap-1">
           <h1 className="text-xl font-semibold">Personas</h1>

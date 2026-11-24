@@ -1,12 +1,15 @@
-import { ArrowLeft, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useWatch } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
+import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
+import { Volver } from '@/shared/components/ui/Volver'
 import { useFormulario } from '@/shared/forms'
+import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { evaluarRiesgo, obtenerRiesgo } from '../api/riesgos'
@@ -32,6 +35,7 @@ export function RiesgoPage() {
   const peticion = usePeticion(obtenerRiesgo)
   const cargandoVisible = useCargaVisible(peticion.cargando)
   const [riesgo, setRiesgo] = useState<Riesgo>()
+  useScrollRecordado(Boolean(riesgo))
 
   const { ejecutar } = peticion
   const cargar = useCallback(() => {
@@ -43,12 +47,7 @@ export function RiesgoPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to="/riesgos" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a la matriz
-        </Link>
-      </div>
+      <Volver a="/riesgos" texto="Volver a la matriz" titulo={riesgo && nombrePeligro(riesgo)} />
 
       {peticion.error && !riesgo ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
@@ -77,7 +76,7 @@ export function RiesgoPage() {
                 {riesgo.encuestaId ? (
                   <>
                     Encuesta{' '}
-                    <Link to={`/encuestas/${riesgo.encuestaId}/resultados`}>{riesgo.encuestaTitulo ?? 'sin título'}</Link>
+                    <Link to={`/encuestas/${riesgo.encuestaId}/resultados`} state={estadoVolver(`/riesgos/${riesgo.id}`, 'Volver al riesgo')}>{riesgo.encuestaTitulo ?? 'sin título'}</Link>
                   </>
                 ) : (
                   'Agregado a mano'

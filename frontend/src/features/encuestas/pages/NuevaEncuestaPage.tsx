@@ -11,6 +11,7 @@ import { useFormulario } from '@/shared/forms'
 import { ROLES, useTieneRol } from '@/shared/sesion'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { crearEncuesta, listarCategoriasDisponibles } from '../api/encuestas'
 import { PreguntaEncuesta } from '../components/PreguntaEncuesta'
 import { nuevaEncuestaEsquema } from '../schemas/nuevaEncuesta'
@@ -64,6 +65,7 @@ export function NuevaEncuestaPage() {
   if (creada) {
     return (
       <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/encuestas" texto="Volver a encuestas" titulo="Borrador creado" />
         <h1 className="text-xl font-semibold">Borrador creado</h1>
         <Aviso tipo="exito" titulo={`"${creada.encuesta.titulo}" quedó como borrador`}>
           Incluye {plural(creada.preguntas, 'pregunta', 'preguntas')}. Mientras sea borrador, los encuestados no la ven.
@@ -91,6 +93,7 @@ export function NuevaEncuestaPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/encuestas" texto="Volver a encuestas" titulo="Nueva encuesta" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Nueva encuesta</h1>
         <p className="text-text-secondary">

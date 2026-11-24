@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { EncabezadoSesion } from '@/shared/components/EncabezadoSesion'
-import { type EstadoLogin, RUTA_CAMBIAR_CONTRASENA, RUTA_LOGIN, rutaActual, useSesion } from '@/shared/sesion'
+import { type EstadoLogin, leerUltimaEmpresa, RUTA_CAMBIAR_CONTRASENA, rutaActual, rutaLogin, useSesion } from '@/shared/sesion'
 import { SesionSinConexion, VerificandoSesion } from './PantallasSesion'
 
 /**
@@ -23,7 +23,10 @@ export function RutaPrivada() {
       // puede entrar otra persona, con otro rol.
       const volver = sesion.motivo !== 'cerrada' && sesion.motivo !== 'contrasena_cambiada'
       const estado: EstadoLogin = { desde: volver ? rutaActual(location) : undefined, motivo: sesion.motivo, rtn: sesion.rtn }
-      return <Navigate to={RUTA_LOGIN} replace state={estado} />
+      // Si la empresa de la sesión que terminó es la última resuelta aquí, se va directo a su login.
+      const ultima = leerUltimaEmpresa()
+      const idEmpresa = ultima && ultima.rtn === sesion.rtn ? ultima.idEmpresa : undefined
+      return <Navigate to={rutaLogin(idEmpresa)} replace state={estado} />
     }
     case 'activa': {
       const enCambio = location.pathname === RUTA_CAMBIAR_CONTRASENA

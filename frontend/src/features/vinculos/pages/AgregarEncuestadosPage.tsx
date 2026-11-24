@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSesion } from '@/shared/sesion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { FormularioEncuestado } from '../components/FormularioEncuestado'
 import { LoteEncuestados, type ResultadoEnvio } from '../components/LoteEncuestados'
 import { PersonaAgregada } from '../components/PersonaAgregada'
@@ -34,6 +35,7 @@ export function AgregarEncuestadosPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/personas" texto="Volver a personas" titulo={titulo} />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">{titulo}</h1>
         {!uno && !lote && (

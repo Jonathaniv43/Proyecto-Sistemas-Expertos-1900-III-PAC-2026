@@ -49,9 +49,12 @@ const pregunta = z
     }
   })
 
+/** Largo máximo de las instrucciones (contador del área de texto). */
+export const MAX_INSTRUCCIONES = 2000
+
 export const borradorEsquema = z.object({
   titulo: textoRequerido(200),
-  instrucciones: textoOpcional(2000),
+  instrucciones: textoOpcional(MAX_INSTRUCCIONES),
   preguntas: z.array(pregunta).min(1, 'La encuesta debe tener al menos una pregunta.'),
 })
 

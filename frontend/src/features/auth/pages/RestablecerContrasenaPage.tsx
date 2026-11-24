@@ -9,7 +9,8 @@ import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { RequisitosContrasena } from '@/shared/components/ui/RequisitosContrasena'
 import { useFormulario } from '@/shared/forms'
-import { useSesion } from '@/shared/sesion'
+import { Volver } from '@/shared/components/ui/Volver'
+import { leerUltimaEmpresa, rutaLogin, useSesion } from '@/shared/sesion'
 import { confirmarCambioContrasena } from '../api/contrasena'
 import { restablecerContrasenaEsquema } from '../schemas/cambioContrasena'
 
@@ -40,9 +41,16 @@ export function RestablecerContrasenaPage() {
   })
   const nueva = useWatch({ control, name: 'contrasenaNueva' }) ?? ''
 
+  const volver = conSesion ? (
+    <Volver a="/inicio" texto="Volver al inicio" titulo="Elige tu contraseña nueva" />
+  ) : (
+    <Volver a="/" texto="Volver a la página principal" titulo="Elige tu contraseña nueva" />
+  )
+
   if (estado === 'enlace_invalido') {
     return (
       <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        {volver}
         <section className="flex flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <Link2Off aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
           <h1 className="text-md font-semibold">El enlace ya no sirve</h1>
@@ -61,12 +69,13 @@ export function RestablecerContrasenaPage() {
   if (estado === 'cambiada') {
     return (
       <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+        <Volver a="/" texto="Volver a la página principal" titulo="Contraseña cambiada" />
         <h1 className="text-xl font-semibold">Contraseña cambiada</h1>
         <Aviso tipo="exito" titulo="Tu contraseña nueva ya está activa">
           Vale en todas las empresas donde tienes acceso. Por seguridad cerramos tus sesiones abiertas: vuelve a iniciar
           sesión con la contraseña nueva.
         </Aviso>
-        <Link to="/login" className={`${clasesBoton('primario')} justify-self-start`}>
+        <Link to={rutaLogin(leerUltimaEmpresa()?.idEmpresa)} className={`${clasesBoton('primario')} justify-self-start`}>
           Iniciar sesión
         </Link>
       </div>
@@ -75,6 +84,7 @@ export function RestablecerContrasenaPage() {
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      {volver}
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Elige tu contraseña nueva</h1>
         <p className="text-text-secondary">Valdrá en todas las empresas donde tienes acceso.</p>

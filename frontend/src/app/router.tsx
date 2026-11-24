@@ -24,6 +24,7 @@ import { PersonasPage } from '@/features/vinculos/pages/PersonasPage'
 import { AppLayout } from '@/shared/components/AppLayout'
 import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
+import { registrarHistorial } from '@/shared/components/ui/historialVolver'
 import { ROLES, ROLES_EMPRESA, ROLES_GESTION } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
 import { RutaPrivada } from './rutas/RutaPrivada'
@@ -96,3 +97,6 @@ export const router = createBrowserRouter([
     ],
   },
 ])
+
+// "Volver" regresa a la pantalla anterior: se registra de dónde se llegó a cada entrada del historial.
+registrarHistorial(router)
