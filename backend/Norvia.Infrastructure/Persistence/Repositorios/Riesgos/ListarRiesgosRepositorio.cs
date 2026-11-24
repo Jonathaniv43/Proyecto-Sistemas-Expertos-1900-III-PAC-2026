@@ -10,8 +10,7 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Riesgos;
 public sealed class ListarRiesgosRepositorio(NorviaDbContext db) : IListarRiesgosRepositorio
 {
     public async Task<IReadOnlyList<RiesgoResponseDto>> ListarConfirmadosAsync(CancellationToken ct) =>
-        await ProyeccionRiesgo.Proyectar(db, db.RiesgoEmpresa.AsNoTracking()
+        await ProyeccionRiesgo.ListarAsync(db, db.RiesgoEmpresa.AsNoTracking()
                 .Where(r => r.Estado == EstadoRiesgo.Confirmado)
-                .OrderByDescending(r => r.CreadoEn))
-            .ToListAsync(ct);
+                .OrderByDescending(r => r.CreadoEn), ct);
 }

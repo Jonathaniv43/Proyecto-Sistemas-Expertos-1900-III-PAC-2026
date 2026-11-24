@@ -7,6 +7,6 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Riesgos;
 
 public sealed class ObtenerRiesgoRepositorio(NorviaDbContext db) : IObtenerRiesgoRepositorio
 {
-    public Task<RiesgoResponseDto?> BuscarAsync(Guid id, CancellationToken ct) =>
-        ProyeccionRiesgo.Proyectar(db, db.RiesgoEmpresa.AsNoTracking().Where(r => r.Id == id)).FirstOrDefaultAsync(ct);
+    public async Task<RiesgoResponseDto?> BuscarAsync(Guid id, CancellationToken ct) =>
+        (await ProyeccionRiesgo.ListarAsync(db, db.RiesgoEmpresa.AsNoTracking().Where(r => r.Id == id), ct)).FirstOrDefault();
 }

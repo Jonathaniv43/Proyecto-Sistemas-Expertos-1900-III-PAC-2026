@@ -3,6 +3,8 @@ using Norvia.API.Extensiones;
 using Norvia.Application.Features.Riesgos.CrearRiesgo;
 using Norvia.Application.Features.Riesgos.CrearRiesgo.DTOs;
 using Norvia.Application.Features.Riesgos.DTOs;
+using Norvia.Application.Features.Riesgos.EvaluarRiesgo;
+using Norvia.Application.Features.Riesgos.EvaluarRiesgo.DTOs;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles.DTOs;
 using Norvia.Application.Features.Riesgos.ListarRiesgos;
@@ -42,4 +44,14 @@ public sealed class RiesgosController : ControllerBase
     public async Task<IActionResult> Crear(
         CrearRiesgoRequestDto request, [FromServices] CrearRiesgoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-037: evaluación inicial (probabilidad × severidad); se suma al historial del riesgo.</summary>
+    [HttpPost("{id:guid}/evaluaciones")]
+    [ProducesResponseType(typeof(EvaluacionResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Evaluar(
+        Guid id, EvaluarRiesgoRequestDto request, [FromServices] EvaluarRiesgoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttpCreado(this);
 }
