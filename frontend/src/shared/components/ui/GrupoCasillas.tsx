@@ -9,7 +9,8 @@ export interface OpcionCasilla {
 }
 
 interface GrupoCasillasProps {
-  etiqueta: string
+  /** Texto de la leyenda; puede llevar más que texto (p. ej. el nivel de un riesgo en el plan). */
+  etiqueta: ReactNode
   required?: boolean
   opciones: readonly OpcionCasilla[]
   /** Valores marcados (controlado: con React Hook Form, usar `useController`). */

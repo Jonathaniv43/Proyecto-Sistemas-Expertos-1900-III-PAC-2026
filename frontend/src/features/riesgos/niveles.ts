@@ -1,4 +1,6 @@
-import type { ClasificacionRiesgo } from './types/riesgos'
+import type { ClasificacionRiesgo } from '@/shared/riesgo/niveles'
+
+export { CLASES_NIVEL, ETIQUETAS_CLASIFICACION_RIESGO } from '@/shared/riesgo/niveles'
 
 /**
  * Escalas de la evaluación (RN-15, RN-80): cada valor del 1 al 5 con su explicación, que se muestra al
@@ -20,21 +22,7 @@ export const SEVERIDADES = [
   { valor: 5, nombre: 'Catastrófica', explicacion: 'Muerte, incapacidad permanente total o varias personas afectadas.' },
 ] as const
 
-export const ETIQUETAS_CLASIFICACION_RIESGO: Record<ClasificacionRiesgo, string> = {
-  bajo: 'Bajo',
-  medio: 'Medio',
-  alto: 'Alto',
-  critico: 'Crítico',
-}
-
 /** RN-16, igual que el backend: solo para la vista previa mientras se elige; el valor guardado lo calcula la API. */
 export const clasificar = (nivel: number): ClasificacionRiesgo =>
   nivel <= 4 ? 'bajo' : nivel <= 9 ? 'medio' : nivel <= 14 ? 'alto' : 'critico'
 
-/** Clases del color de cada nivel (design-system.md § Semánticas: riesgo): fondo y texto encima. */
-export const CLASES_NIVEL: Record<ClasificacionRiesgo, string> = {
-  bajo: 'bg-riesgo-bajo text-riesgo-bajo-texto',
-  medio: 'bg-riesgo-medio text-riesgo-medio-texto',
-  alto: 'bg-riesgo-alto text-riesgo-alto-texto',
-  critico: 'bg-riesgo-critico text-riesgo-critico-texto',
-}
