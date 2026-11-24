@@ -126,6 +126,8 @@ public static class CatalogoPermisos
         Empresa("evento.investigar", "Registrar la investigación de un evento", "PUT", "api/eventos/{id}/investigacion", "responsable_sst"),
         Empresa("evento.cerrar", "Cerrar un evento", "POST", "api/eventos/{id}/cierre", "responsable_sst"),
         Empresa("evento.descartar", "Descartar un evento", "PATCH", "api/eventos/{id}/descarte", "responsable_sst"),
+        // HU-052: estadísticas de eventos, solo cifras (art. 47.e).
+        Empresa("evento.estadisticas", "Ver las estadísticas de eventos", "GET", "api/eventos/estadisticas", "admin_empresa", "responsable_sst"),
         // HU-051: los riesgos de la matriz que el evento reveló o hizo reevaluar.
         Empresa("evento.riesgos", "Ver los riesgos enlazados con un evento", "GET", "api/eventos/{id}/riesgos", "admin_empresa", "responsable_sst"),
         // HU-050: medidas correctivas, que son tareas del plan con origen en el evento.
