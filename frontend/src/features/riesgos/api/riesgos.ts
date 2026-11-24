@@ -21,14 +21,20 @@ export const obtenerMatriz = (signal: AbortSignal) => api.get<MatrizRiesgos>('/r
 export const listarPeligrosDisponibles = (signal: AbortSignal) =>
   api.get<PeligroDisponible[]>('/riesgos/peligros-disponibles', { signal }).then((r) => r.data)
 
-/** Agrega un riesgo a la matriz. 409 `riesgos.duplicado` si ya está con la misma actividad. */
+/**
+ * Agrega un riesgo a la matriz. 409 `riesgos.duplicado` si ya está con la misma actividad. HU-051: con `accidenteId`
+ * queda enlazado con el evento que lo reveló (400 `riesgos.evento_invalido`).
+ */
 export const crearRiesgo = (datos: CrearRiesgoRequest) => api.post<Riesgo>('/riesgos', datos).then((r) => r.data)
 
 /** Un riesgo de la empresa, con su última evaluación. 404 si no existe o es de otra empresa. */
 export const obtenerRiesgo = (signal: AbortSignal, id: string) => api.get<Riesgo>(`/riesgos/${id}`, { signal }).then((r) => r.data)
 
-/** Evaluación inicial (HU-037). Se suma al historial: la anterior no se borra. 409 si el riesgo no está en la matriz. */
-export const evaluarRiesgo = (id: string, datos: { probabilidad: number; severidad: number }) =>
+/**
+ * Evaluación inicial (HU-037). Se suma al historial: la anterior no se borra. 409 si el riesgo no está en la matriz.
+ * HU-051: con `accidenteId` queda enlazada con el evento a raíz del cual se reevalúa (400 `riesgos.evento_invalido`).
+ */
+export const evaluarRiesgo = (id: string, datos: { probabilidad: number; severidad: number; accidenteId?: string }) =>
   api.post<Evaluacion>(`/riesgos/${id}/evaluaciones`, datos).then((r) => r.data)
 
 /** Historial de evaluaciones del riesgo (HU-041): iniciales y residuales, la más reciente primero. */

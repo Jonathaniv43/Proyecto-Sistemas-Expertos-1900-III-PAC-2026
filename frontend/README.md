@@ -489,3 +489,11 @@ useFormulario(esquema, {
 - **`components/SeccionCierre.tsx`:** cierre y descarte, separados de `SeccionInvestigacion`.
 - **`shared/tareas`:** estados de tarea, prioridades, `vencida` y `tareaAsignadaEsquema`, compartidos por `plan` (tarea manual) y `eventos` (medida). `plan/etiquetas.ts` y `plan/schemas/tareaManual.ts` los reexportan.
 - **Plan de trabajo:** una tarea con origen accidente enlaza al evento (`accidenteId`) con "Medida de un evento".
+
+## Riesgos tras un evento (HU-051)
+
+- **`eventos/components/SeccionRiesgos.tsx`**, en `/eventos/:id`: los riesgos que el evento reveló y los que se reevaluaron por él (`GET /eventos/{id}/riesgos`), con el nivel de antes y el de después. El Responsable SST tiene dos acciones:
+  - "Agregar un riesgo" lleva a `/riesgos/nuevo?evento=…`;
+  - "Reevaluar un riesgo" abre un modal para elegirlo de la matriz y lleva a `/riesgos/:id?evento=…`.
+- **`riesgos`:** el parámetro `evento` hace que `NuevoRiesgoPage` envíe `accidenteId` y que, al guardar, lleve a evaluar el riesgo. En `RiesgoPage`, abre la reevaluación inicial y la envía con `accidenteId`. El origen "Revelado por un evento" y "Tras un evento" en `HistorialEvaluaciones` enlazan al evento.
+- **`Modal`:** `CuerpoModal` alinea su contenido arriba (`content-start`); en celular, el modal ocupa la pantalla y antes repartía las filas.
