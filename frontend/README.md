@@ -350,3 +350,14 @@ useFormulario(esquema, {
 - **`EtiquetaRiesgo`:** el chip neutro de design-system.md § Etiqueta de riesgo. Los colores de nivel (`--color-riesgo-*` en `theme.css`) se usan desde HU-037.
 - Los peligros sugeridos (HU-035) enlazan a la matriz.
 
+## Evaluar un riesgo (HU-037)
+
+- **`/riesgos/:id`:** se llega desde el nombre del riesgo en la matriz. Muestra el peligro, la actividad, el origen y la evaluación vigente: etiqueta "Medio · 6", los dos valores con su nombre y "Evaluado por … el …".
+- **Formulario:**
+  - **Probabilidad y severidad:** dos listas de radios con la explicación de cada valor (`niveles.ts`, RN-80). El esquema Zod pide las dos, del 1 al 5.
+  - **`MapaCalor`:** un atajo sincronizado. Cada celda es un botón (`aria-pressed`) que elige las dos a la vez y se usa con teclado.
+  - **Nivel calculado:** se ve al instante (`clasificar`, igual que RN-16). Para alto y crítico avisa que necesitan al menos un control. El valor guardado lo calcula el backend.
+- **Volver a evaluar:** parte de la evaluación vigente; la anterior se conserva (RN-20). Un riesgo sugerido o descartado no muestra el formulario.
+- **Matriz:** la columna Nivel muestra la etiqueta con el cuadrado de color (`--color-riesgo-*`, clases en `CLASES_NIVEL`).
+- **CSS:** `.cuadro-riesgo` y `.mapa-calor*` en `index.css`. La escala de espaciado no tiene 10 ni 44px, y en celular el título "Probabilidad" pasa arriba para que las celdas conserven sus 44px.
+

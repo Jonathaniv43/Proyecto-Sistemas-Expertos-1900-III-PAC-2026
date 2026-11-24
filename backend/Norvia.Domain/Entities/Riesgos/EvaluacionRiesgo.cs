@@ -19,6 +19,18 @@ public class EvaluacionRiesgo : ITieneEmpresa
     /// <summary>Probabilidad × Severidad; se calcula y no se guarda (RN-15).</summary>
     public int Nivel => Probabilidad * Severidad;
 
+    /// <summary>Clasificación del nivel (RN-16); se calcula y no se guarda.</summary>
+    public ClasificacionRiesgo Clasificacion => Clasificar(Nivel);
+
+    /// <summary>RN-16: 1–4 bajo, 5–9 medio, 10–14 alto, 15–25 crítico.</summary>
+    public static ClasificacionRiesgo Clasificar(int nivel) => nivel switch
+    {
+        <= 4 => ClasificacionRiesgo.Bajo,
+        <= 9 => ClasificacionRiesgo.Medio,
+        <= 14 => ClasificacionRiesgo.Alto,
+        _ => ClasificacionRiesgo.Critico
+    };
+
     public Empresa Empresa { get; set; } = null!;
     public RiesgoEmpresa RiesgoEmpresa { get; set; } = null!;
     public VinculoEmpresa EvaluadoPor { get; set; } = null!;

@@ -12,6 +12,22 @@ export type ClasificacionPeligro =
   | 'locativo'
   | 'otro'
 
+/** Clasificación del nivel de riesgo (RN-16): 1–4 bajo, 5–9 medio, 10–14 alto, 15–25 crítico. */
+export type ClasificacionRiesgo = 'bajo' | 'medio' | 'alto' | 'critico'
+
+/** Evaluación de un riesgo (HU-037). Nivel y clasificación los calcula el backend; no se guardan. */
+export interface Evaluacion {
+  id: string
+  tipo: 'inicial' | 'residual'
+  probabilidad: number
+  severidad: number
+  nivel: number
+  clasificacion: ClasificacionRiesgo
+  evaluadoPorId: string
+  evaluadoPorNombre: string
+  evaluadoEn: string
+}
+
 /** GET /api/riesgos y /api/riesgos/{id}, y respuesta de POST /api/riesgos (HU-036). */
 export interface Riesgo {
   id: string
@@ -25,6 +41,8 @@ export interface Riesgo {
   encuestaId: string | null
   encuestaTitulo: string | null
   creadoEn: string
+  /** Última evaluación inicial (HU-037); null si todavía no se evaluó. */
+  evaluacion: Evaluacion | null
 }
 
 /** GET /api/riesgos/peligros-disponibles: peligros activos del catálogo. */

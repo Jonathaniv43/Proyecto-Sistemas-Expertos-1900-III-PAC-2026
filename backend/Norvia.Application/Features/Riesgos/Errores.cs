@@ -8,6 +8,9 @@ public static class Errores
     public static readonly Error RiesgoNoEncontrado = new("riesgos.no_encontrado",
         "El riesgo no existe en esta empresa.", TipoError.NoEncontrado);
 
+    public static readonly Error RiesgoFueraDeMatriz = new("riesgos.no_en_matriz",
+        "El riesgo no está en la matriz: primero hay que confirmarlo.", TipoError.Conflicto);
+
     public static readonly Error PeligroInvalido = new("riesgos.peligro_invalido",
         "El peligro indicado no existe o ya no está disponible en el catálogo.", TipoError.Validacion);
 
