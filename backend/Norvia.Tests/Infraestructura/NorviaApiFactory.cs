@@ -59,6 +59,10 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting("StaffSeed:Password", StaffPassword);
         // Catálogos vacíos: cada prueba crea lo que necesita. La carga de HU-097 se prueba aparte (CatalogoSstTests).
         builder.UseSetting("CatalogoSst:Cargar", "false");
+        // HU-118: sin proceso en segundo plano; cada prueba procesa la bandeja a mano (EnvioNotificacionesPendientes),
+        // así controla cuándo se envía. Lote grande: otras pruebas también dejan notificaciones pendientes.
+        builder.UseSetting("Notificaciones:Habilitado", "false");
+        builder.UseSetting("Notificaciones:LoteMaximo", "1000");
         builder.ConfigureTestServices(servicios => servicios.AddSingleton<IEnvioCorreo>(Correos));
     }
 

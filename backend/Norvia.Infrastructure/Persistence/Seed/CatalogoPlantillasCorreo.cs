@@ -71,6 +71,25 @@ public static class CatalogoPlantillasCorreo
                   <p style="font-size: 0.875rem; color: #666;">Si no solicitaste este mensaje, ignorálo.</p>
                 </body>
                 </html>
+                """),
+        new(
+            Id: 4,
+            Codigo: "notificacion",
+            Nombre: "Notificación de Norvia",
+            Descripcion: "HU-118: correo de una notificación (tarea asignada, HU-081; política publicada, HU-116), enviado por la bandeja de salida con reintentos. Los valores llegan ya codificados para HTML, salvo {{Asunto}}.",
+            Asunto: "Norvia — {{Asunto}}",
+            CuerpoHtml: """
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="utf-8" /><title>{{Titulo}}</title></head>
+                <body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #1a1a1a; max-width: 520px;">
+                  <p>Hola <strong>{{Nombre}}</strong>,</p>
+                  <h2 style="font-size: 1.125rem;">{{Titulo}}</h2>
+                  <p>{{Mensaje}}</p>
+                  <p><a href="{{Url}}" style="color: #4f46e5;">Abrir en Norvia</a></p>
+                  <p style="font-size: 0.875rem; color: #666;">También la encontrás en tus notificaciones dentro de Norvia.</p>
+                </body>
+                </html>
                 """)
     ];
 }

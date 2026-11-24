@@ -5,6 +5,7 @@ using Norvia.API.Binding;
 using Norvia.API.Extensiones;
 using Norvia.API.Filtros;
 using Norvia.API.Middleware;
+using Norvia.API.SegundoPlano;
 using Norvia.API.Seguridad;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application;
@@ -33,6 +34,8 @@ builder.Services.AddAutenticacionJwt();
 builder.Services.AddCorsFrontend();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantActual, TenantActual>();
+// HU-118: bandeja de salida del correo de las notificaciones, con reintentos.
+builder.Services.AddHostedService<ProcesadorCorreosPendientes>();
 
 var app = builder.Build();
 

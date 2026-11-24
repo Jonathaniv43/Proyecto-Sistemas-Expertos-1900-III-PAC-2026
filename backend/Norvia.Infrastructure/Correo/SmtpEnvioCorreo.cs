@@ -11,7 +11,7 @@ public sealed class SmtpEnvioCorreo(
     IOptions<CorreoOpciones> opciones,
     ILogger<SmtpEnvioCorreo> log) : IEnvioCorreo
 {
-    public async Task<bool> EnviarAsync(MensajeCorreo mensaje, CancellationToken cancellationToken)
+    public async Task<ResultadoEnvioCorreo> EnviarAsync(MensajeCorreo mensaje, CancellationToken cancellationToken)
     {
         var cfg = opciones.Value;
         try
@@ -30,12 +30,13 @@ public sealed class SmtpEnvioCorreo(
 
             await cliente.SendAsync(email, cancellationToken);
             await cliente.DisconnectAsync(true, cancellationToken);
-            return true;
+            return ResultadoEnvioCorreo.Exito;
         }
-        catch (Exception ex)
+        // Si se canceló (la API se está apagando), no cuenta como intento fallido.
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {
             log.LogError(ex, "No se pudo enviar correo a {Destino}", mensaje.Destino);
-            return false;
+            return ResultadoEnvioCorreo.Fallo($"{ex.GetType().Name}: {ex.Message}");
         }
     }
 }
