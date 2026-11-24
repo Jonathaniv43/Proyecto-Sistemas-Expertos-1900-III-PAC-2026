@@ -1,5 +1,6 @@
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
+using Norvia.Application.Common.Notificaciones;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Features.Eventos.CrearMedidaCorrectiva.DTOs;
 using Norvia.Application.Features.Eventos.DTOs;
@@ -12,12 +13,14 @@ namespace Norvia.Application.Features.Eventos.CrearMedidaCorrectiva;
 /// HU-050: convierte una medida correctiva en una tarea del plan de trabajo con origen "accidente" (RN-23, D6,
 /// art. 46.1.a). Queda pendiente, con responsable (persona activa de la empresa) y fecha límite no anterior a hoy.
 /// Solo mientras el evento siga abierto o en investigación: cerrado o descartado ya no recibe medidas.
+/// HU-081: se avisa al responsable (RN-77).
 /// </summary>
 public sealed class CrearMedidaCorrectivaServicio(
     ICrearMedidaCorrectivaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Notificador notificador) : IServicioCasoDeUso
 {
     public async Task<Resultado<MedidaCorrectivaResponseDto>> EjecutarAsync(
         Guid eventoId, CrearMedidaCorrectivaRequestDto request, CancellationToken ct)
@@ -41,6 +44,7 @@ public sealed class CrearMedidaCorrectivaServicio(
             CreadaPorId = vinculoId
         };
         repositorio.Agregar(tarea);
+        notificador.TareaAsignada(tarea);
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);
