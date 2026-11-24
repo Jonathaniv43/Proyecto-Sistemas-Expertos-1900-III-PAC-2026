@@ -475,3 +475,10 @@ useFormulario(esquema, {
 - **`shared/components/ui/CampoHora`:** hora escrita en 12 horas. `leerHora` acepta "2:30 pm", "230p" o "14:30", y al salir del campo queda "02:30 p. m.".
 - **`CampoFecha`:** tiene `maximo` para no admitir fechas futuras.
 - **`shared/validacion/fechas.ts`:** `leerHora`, `horaATexto` y `minutosAhoraHonduras`.
+
+## Investigar, cerrar y descartar eventos (HU-049)
+
+- **`components/SeccionInvestigacion.tsx`**, dentro de `/eventos/:id`:
+  - **Investigación:** se ve como texto y, para el Responsable SST, se registra o se corrige con un formulario (`schemas/investigacion.ts`). Pide causas inmediatas y de fondo, conclusiones opcionales, quién investigó (por defecto quien registra; la lista sale de `/plan-trabajo/responsables`) y la fecha, entre el día del evento y hoy en Honduras.
+  - **Cierre:** muestra cuántas medidas correctivas hay. "Cerrar el evento" se deshabilita y dice qué falta mientras no haya investigación y al menos una medida (RN-28). "Descartar el reporte" pide motivo opcional. Ambos usan `DialogoConfirmacion`.
+- **`EventoPage`:** lo que devuelven investigar, cerrar y descartar reemplaza el evento cargado, sin volver a pedirlo. Muestra un aviso cuando el evento está cerrado o descartado (quién, cuándo y por qué). El admin solo consulta (`useTieneRol([ROLES.responsableSst])`).

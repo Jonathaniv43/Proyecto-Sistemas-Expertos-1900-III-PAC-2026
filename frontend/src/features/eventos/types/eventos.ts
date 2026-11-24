@@ -36,3 +36,42 @@ export interface FiltrosEventos {
   estado?: EstadoEvento
   esGrave?: boolean
 }
+
+/** Investigación de un evento (HU-049). */
+export interface Investigacion {
+  causasInmediatas: string
+  /** Causas de fondo. */
+  causasBasicas: string
+  conclusiones: string | null
+  investigadaPorId: string
+  investigadaPorNombre: string
+  /** aaaa-mm-dd */
+  fechaInvestigacion: string
+}
+
+/** GET /api/eventos/{id}: el evento con su investigación, cierre o descarte (HU-049). */
+export interface EventoDetalle extends Evento {
+  investigacion: Investigacion | null
+  cerradoEn: string | null
+  descartadoEn: string | null
+  descartadoPorNombre: string | null
+  motivoDescarte: string | null
+  /** Medidas correctivas no canceladas (tareas del evento, HU-050); para cerrar hace falta al menos una (RN-28). */
+  totalMedidas: number
+}
+
+/** PUT /api/eventos/{id}/investigacion */
+export interface RegistrarInvestigacionRequest {
+  causasInmediatas: string
+  causasBasicas: string
+  conclusiones?: string
+  investigadaPorId: string
+  fechaInvestigacion: string
+}
+
+/** Personas que pueden investigar: vínculos activos de la empresa, sin encuestados. */
+export interface Persona {
+  id: string
+  nombreCompleto: string
+  rolCodigo: string
+}
