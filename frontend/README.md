@@ -323,3 +323,11 @@ useFormulario(esquema, {
 - **Motivo del cierre entre pestañas:** al terminar una sesión se guarda el motivo (`norvia.motivoFin`) antes de borrar el refresh. Así las otras pestañas también explican por qué se cerró: contraseña cambiada, sesión vencida, etc.
 - **Primer ingreso con contraseña temporal** (`/cambiar-contrasena`): no cambia. Se cambia con la contraseña actual, sin correo.
 
+## Revisar los peligros sugeridos (HU-035)
+
+- **Dónde:** en la misma sección "Peligros sugeridos" de los resultados (HU-033). Arriba se indica cuántas sugerencias quedan por revisar.
+- **Confirmar…** (`ConfirmarPeligroModal`): pide la actividad relacionada, opcional y de hasta 200 caracteres. El peligro queda "En la matriz" y se muestra su actividad.
+- **Descartar…:** usa el diálogo de confirmación, porque la decisión no se cambia después. Queda "Descartado".
+- **Una sola vez:** `PATCH /encuestas/{id}/peligros-sugeridos/{riesgoId}` con `estado` y `actividad`. Si otra persona ya la revisó (409 `encuestas.sugerencia_ya_revisada`), se avisa y la lista se recarga con su decisión.
+- **Al recargar:** las decisiones vienen en la misma lista de HU-033 (`estado` y `actividad`).
+

@@ -195,8 +195,27 @@ export interface PeligrosSugeridos {
     peligroId: string
     peligroNombre: string
     estado: EstadoRiesgo
+    /** Actividad donde se presenta, si se indicó al confirmarlo (HU-035). */
+    actividad: string | null
     /** Respuestas que eligieron una opción de exposición; cada una cuenta una vez por peligro. */
     respuestasConExposicion: number
     preguntas: { preguntaId: string; texto: string; respuestasConExposicion: number }[]
   }[]
+}
+
+/** PATCH /api/encuestas/{id}/peligros-sugeridos/{riesgoId} (HU-035): se revisa una sola vez. */
+export interface RevisarPeligroRequest {
+  estado: 'confirmado' | 'descartado'
+  /** Solo al confirmar: actividad o lugar donde se presenta el riesgo. */
+  actividad?: string
+}
+
+export interface PeligroRevisado {
+  riesgoId: string
+  encuestaId: string
+  peligroId: string
+  estado: EstadoRiesgo
+  actividad: string | null
+  revisadoPorId: string
+  revisadoEn: string
 }
