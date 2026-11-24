@@ -34,7 +34,7 @@ public sealed class LoginEmpresaServicio(
             return Errores.CredencialesInvalidas;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
-        var sesion = new SesionToken(acceso.Id, TipoSesion.Empresa, vinculo.Id, vinculo.EmpresaId, vinculo.Rol.Codigo);
+        var sesion = new SesionToken(acceso.Id, TipoSesion.Empresa, vinculo.Id, vinculo.EmpresaId, vinculo.Rol.Codigo, acceso.Email);
         var (fila, respuesta) = emisor.Emitir(sesion, ahora, acceso.DebeCambiarPassword);
 
         repo.AgregarRefresh(fila);

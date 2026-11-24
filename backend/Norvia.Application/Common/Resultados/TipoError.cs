@@ -8,5 +8,6 @@ public enum TipoError
     Prohibido,      // 403
     NoEncontrado,   // 404
     Conflicto,      // 409
+    Expirado,       // 410: el recurso existió pero ya no sirve (p. ej. un enlace vencido o usado)
     Servidor        // 500
 }

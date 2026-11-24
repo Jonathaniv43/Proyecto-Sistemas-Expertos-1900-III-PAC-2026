@@ -4,7 +4,11 @@ using Norvia.API.Extensiones;
 using Norvia.Application.Features.Auth.CerrarSesion;
 using Norvia.Application.Features.Auth.CerrarSesion.DTOs;
 using Norvia.Application.Features.Auth.DTOs;
+using Norvia.Application.Features.Auth.ConfirmarCambioContrasena;
+using Norvia.Application.Features.Auth.ConfirmarCambioContrasena.DTOs;
 using Norvia.Application.Features.Auth.ReestablecerContrasena;
+using Norvia.Application.Features.Auth.SolicitarCambioContrasena;
+using Norvia.Application.Features.Auth.SolicitarCambioContrasena.DTOs;
 using Norvia.Application.Features.Auth.ReestablecerContrasena.DTOs;
 using Norvia.Application.Features.Auth.LoginEmpresa;
 using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
@@ -69,6 +73,32 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ReestablecerContrasena(
         ReestablecerContrasenaRequestDto request, [FromServices] ReestablecerContrasenaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// HU-022: envía al correo de la cuenta un enlace para cambiar la contraseña. Respuesta siempre genérica (202).
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("contrasena/solicitud")]
+    [ProducesResponseType(typeof(SolicitarCambioContrasenaResponseDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SolicitarCambioContrasena(
+        SolicitarCambioContrasenaRequestDto request, [FromServices] SolicitarCambioContrasenaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttpAceptado(this);
+
+    /// <summary>
+    /// HU-022: cambia la contraseña con el token del enlace. Vale en todas las empresas de la cuenta y
+    /// cierra todas sus sesiones. 410 si el enlace venció, ya se usó o fue alterado.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("contrasena/confirmacion")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status410Gone)]
+    public async Task<IActionResult> ConfirmarCambioContrasena(
+        ConfirmarCambioContrasenaRequestDto request, [FromServices] ConfirmarCambioContrasenaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 

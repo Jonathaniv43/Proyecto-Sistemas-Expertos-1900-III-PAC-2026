@@ -26,6 +26,7 @@ public sealed class JwtTokenServicio(IOptions<JwtOpciones> opciones, ICifradorEm
         {
             new(JwtRegisteredClaimNames.Sub, sesion.AccesoId.ToString()),
             new("tipo_sesion", sesion.Tipo == TipoSesion.Empresa ? "empresa" : "plataforma"),
+            new(JwtRegisteredClaimNames.Email, sesion.Email),
         };
         if (sesion.RolCodigo is not null)
             claims.Add(new Claim(ClaimTypes.Role, sesion.RolCodigo));

@@ -54,13 +54,13 @@ public sealed class RefrescarSesionServicio(
         {
             var v = fila.VinculoEmpresa;
             return v is not null && v.Estado == EstadoVinculo.Activo && v.Empresa.Estado == EstadoEmpresa.Activa
-                ? new SesionToken(fila.AccesoId, TipoSesion.Empresa, v.Id, v.EmpresaId, v.Rol.Codigo)
+                ? new SesionToken(fila.AccesoId, TipoSesion.Empresa, v.Id, v.EmpresaId, v.Rol.Codigo, fila.Acceso.Email)
                 : null;
         }
 
         var staff = fila.Acceso.Staff;
         return staff is not null && staff.Activo
-            ? new SesionToken(fila.AccesoId, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo)
+            ? new SesionToken(fila.AccesoId, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo, fila.Acceso.Email)
             : null;
     }
 }

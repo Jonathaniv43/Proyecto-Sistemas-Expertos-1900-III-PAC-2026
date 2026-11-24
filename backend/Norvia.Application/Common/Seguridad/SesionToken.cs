@@ -8,4 +8,6 @@ public sealed record SesionToken(
     TipoSesion Tipo,
     Guid? VinculoEmpresaId,
     Guid? EmpresaId,
-    string? RolCodigo);
+    string? RolCodigo,
+    /// <summary>Correo del Acceso: la web lo muestra (p. ej. a dónde se envía el enlace de HU-022).</summary>
+    string Email);
