@@ -1,3 +1,8 @@
+import type { ClasificacionRiesgo } from '@/shared/riesgo/niveles'
+
+/** Clasificación del nivel de riesgo (RN-16); definida en shared porque también la usa el plan de trabajo. */
+export type { ClasificacionRiesgo }
+
 /** Estado de un riesgo de la empresa (RN-18). La matriz solo muestra los confirmados. */
 export type EstadoRiesgo = 'sugerido' | 'confirmado' | 'descartado'
 
@@ -12,8 +17,6 @@ export type ClasificacionPeligro =
   | 'locativo'
   | 'otro'
 
-/** Clasificación del nivel de riesgo (RN-16): 1–4 bajo, 5–9 medio, 10–14 alto, 15–25 crítico. */
-export type ClasificacionRiesgo = 'bajo' | 'medio' | 'alto' | 'critico'
 
 /** Evaluación de un riesgo (HU-037). Nivel y clasificación los calcula el backend; no se guardan. */
 export interface Evaluacion {

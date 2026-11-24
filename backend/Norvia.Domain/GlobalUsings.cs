@@ -6,3 +6,4 @@ global using Norvia.Domain.Entities.Empresas;
 global using Norvia.Domain.Entities.Encuestas;
 global using Norvia.Domain.Entities.Riesgos;
 global using Norvia.Domain.Enums;
+global using Norvia.Domain.Entities.Plan;

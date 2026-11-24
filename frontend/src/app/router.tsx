@@ -15,6 +15,7 @@ import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncue
 import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
+import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
 import { RiesgoPage } from '@/features/riesgos/pages/RiesgoPage'
 import { RiesgosPage } from '@/features/riesgos/pages/RiesgosPage'
@@ -84,6 +85,7 @@ export const router = createBrowserRouter([
               { path: 'riesgos', element: <RiesgosPage /> },
               { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
               { path: 'riesgos/:id', element: <RiesgoPage /> },
+              { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },

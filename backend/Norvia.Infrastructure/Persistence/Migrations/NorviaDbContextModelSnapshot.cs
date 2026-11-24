@@ -554,8 +554,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("EmpresaId", "Id");
-
                     b.HasIndex("EmpresaId", "DescartadoPorId");
 
                     b.HasIndex("EmpresaId", "FechaHoraEvento");
@@ -1450,6 +1448,107 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.ToTable("RespuestaEncuesta");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Plan.Tarea", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AccidenteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletadaEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ControlId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreadaEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CreadaPorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
+                    b.Property<DateOnly?>("FechaLimite")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("PlantillaTareaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<short>("Prioridad")
+                        .HasColumnType("smallint");
+
+                    b.Property<bool>("RequiereEvidencia")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("ResponsableId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RiesgoEmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EmpresaId", "Id");
+
+                    b.HasIndex("ControlId")
+                        .IsUnique()
+                        .HasFilter("\"ControlId\" IS NOT NULL");
+
+                    b.HasIndex("PlantillaTareaId");
+
+                    b.HasIndex("EmpresaId", "AccidenteId");
+
+                    b.HasIndex("EmpresaId", "CreadaPorId");
+
+                    b.HasIndex("EmpresaId", "ResponsableId");
+
+                    b.HasIndex("EmpresaId", "RiesgoEmpresaId");
+
+                    b.HasIndex("RiesgoEmpresaId", "ControlId");
+
+                    b.HasIndex("RiesgoEmpresaId", "PlantillaTareaId")
+                        .IsUnique()
+                        .HasFilter("\"RiesgoEmpresaId\" IS NOT NULL AND \"PlantillaTareaId\" IS NOT NULL");
+
+                    b.HasIndex("EmpresaId", "Estado", "Prioridad");
+
+                    b.ToTable("Tarea", t =>
+                        {
+                            t.HasCheckConstraint("CK_Tarea_CompletadaEn", "(\"CompletadaEn\" IS NOT NULL) = (\"Estado\" = 'completada')");
+
+                            t.HasCheckConstraint("CK_Tarea_ControlConRiesgo", "\"ControlId\" IS NULL OR \"RiesgoEmpresaId\" IS NOT NULL");
+
+                            t.HasCheckConstraint("CK_Tarea_Estado", "\"Estado\" IN ('pendiente', 'en_progreso', 'completada', 'cancelada')");
+
+                            t.HasCheckConstraint("CK_Tarea_IniciadaConResponsable", "\"Estado\" NOT IN ('en_progreso', 'completada') OR (\"ResponsableId\" IS NOT NULL AND \"FechaLimite\" IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_Tarea_Prioridad", "\"Prioridad\" BETWEEN 1 AND 3");
+
+                            t.HasCheckConstraint("CK_Tarea_UnOrigen", "\"RiesgoEmpresaId\" IS NULL OR \"AccidenteId\" IS NULL");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Riesgos.Control", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1487,8 +1586,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasAlternateKey("EmpresaId", "Id");
-
-                    b.HasAlternateKey("RiesgoEmpresaId", "Id");
 
                     b.HasIndex("PlantillaTareaId");
 
@@ -2170,6 +2267,65 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("EncuestaVersion");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Plan.Tarea", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Catalogos.PlantillaTarea", "PlantillaTarea")
+                        .WithMany()
+                        .HasForeignKey("PlantillaTareaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Accidentes.Accidente", "Accidente")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "AccidenteId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "CreadaPor")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "CreadaPorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "Responsable")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "ResponsableId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Riesgos.RiesgoEmpresa", "RiesgoEmpresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "RiesgoEmpresaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Riesgos.Control", "Control")
+                        .WithMany()
+                        .HasForeignKey("RiesgoEmpresaId", "ControlId")
+                        .HasPrincipalKey("RiesgoEmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Accidente");
+
+                    b.Navigation("Control");
+
+                    b.Navigation("CreadaPor");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("PlantillaTarea");
+
+                    b.Navigation("Responsable");
+
+                    b.Navigation("RiesgoEmpresa");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Riesgos.Control", b =>

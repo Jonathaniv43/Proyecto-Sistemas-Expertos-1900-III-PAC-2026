@@ -1,5 +1,5 @@
-import { CLASES_NIVEL, ETIQUETAS_CLASIFICACION_RIESGO } from '../niveles'
-import type { ClasificacionRiesgo } from '../types/riesgos'
+import { CLASES_NIVEL, ETIQUETAS_CLASIFICACION_RIESGO } from './niveles'
+import type { ClasificacionRiesgo } from './niveles'
 
 /**
  * Etiqueta de riesgo (design-system.md § Etiqueta de riesgo): chip neutro; solo el cuadrado lleva el

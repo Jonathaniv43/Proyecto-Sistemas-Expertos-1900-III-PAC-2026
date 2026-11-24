@@ -396,3 +396,13 @@ useFormulario(esquema, {
   - **Comparación:** debajo de los paneles, una frase dice si el riesgo bajó, siguió igual o subió.
   - **Volver a evaluar** cualquiera de las dos parte de la vigente del mismo tipo; la otra no cambia.
 - **Matriz (`/riesgos`):** columna "Residual" (`evaluacionResidual`); en celular va bajo el nivel. El mapa y el orden siguen usando la inicial.
+
+## Plan de trabajo (HU-042)
+
+- **`/plan-de-trabajo`** (feature `plan`, enlace en Inicio para `admin_empresa` y `responsable_sst`):
+  - **Tareas propuestas (`GET /plan-trabajo/propuesta`):** agrupadas por riesgo, con su nivel y prioridad; cada tarea dice si sale de un control (y su tipo) o de una tarea modelo del peligro, y si pide evidencia. Todas empiezan marcadas (`GrupoCasillas`).
+  - **Confirmar (`POST /plan-trabajo/generacion`)** envía las claves marcadas; lo desmarcado se vuelve a proponer. Al terminar recarga la propuesta y la lista.
+  - **Riesgos sin evaluar:** no entran; un aviso dice cuántos y enlaza a la matriz.
+  - **Tareas del plan (`GET /plan-trabajo/tareas`):** tabla por prioridad con el nivel del riesgo, estado y responsable. En celular, prioridad, nivel y responsable van en la primera celda.
+- **`shared/riesgo/`:** `EtiquetaRiesgo` y la clasificación de niveles (`niveles.ts`) pasaron aquí desde `features/riesgos`, porque el plan también las usa (las features no se importan entre sí). `features/riesgos/niveles.ts` reexporta lo compartido.
+- `GrupoCasillas` acepta una leyenda con más que texto (`etiqueta: ReactNode`).
