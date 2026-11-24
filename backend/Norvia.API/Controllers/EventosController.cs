@@ -3,9 +3,14 @@ using Norvia.API.Extensiones;
 using Norvia.Application.Features.Eventos.ListarEventos;
 using Norvia.Application.Features.Eventos.ListarEventos.DTOs;
 using Norvia.Application.Features.Eventos.ObtenerEvento;
-using Norvia.Application.Features.Eventos.ObtenerEvento.DTOs;
+using Norvia.Application.Features.Eventos.DTOs;
 using Norvia.Application.Features.Eventos.ReportarEvento;
 using Norvia.Application.Features.Eventos.ReportarEvento.DTOs;
+using Norvia.Application.Features.Eventos.CerrarEvento;
+using Norvia.Application.Features.Eventos.DescartarEvento;
+using Norvia.Application.Features.Eventos.DescartarEvento.DTOs;
+using Norvia.Application.Features.Eventos.RegistrarInvestigacion;
+using Norvia.Application.Features.Eventos.RegistrarInvestigacion.DTOs;
 
 namespace Norvia.API.Controllers;
 
@@ -47,4 +52,32 @@ public sealed class EventosController : ControllerBase
     public async Task<IActionResult> Obtener(
         Guid id, [FromServices] ObtenerEventoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-049: registra o corrige la investigación (causas, conclusiones, quién y cuándo); el evento queda en investigación.</summary>
+    [HttpPut("{id:guid}/investigacion")]
+    [ProducesResponseType(typeof(EventoDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Investigar(
+        Guid id, RegistrarInvestigacionRequestDto request, [FromServices] RegistrarInvestigacionServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-049: cierra el evento; exige investigación y al menos una medida correctiva (RN-28).</summary>
+    [HttpPost("{id:guid}/cierre")]
+    [ProducesResponseType(typeof(EventoDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Cerrar(Guid id, [FromServices] CerrarEventoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-049: descarta un reporte falso, duplicado o inválido, con motivo opcional (RN-28).</summary>
+    [HttpPatch("{id:guid}/descarte")]
+    [ProducesResponseType(typeof(EventoDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Descartar(
+        Guid id, DescartarEventoRequestDto request, [FromServices] DescartarEventoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
 }

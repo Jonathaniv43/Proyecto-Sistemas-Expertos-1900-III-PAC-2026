@@ -576,6 +576,47 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Accidentes.InvestigacionAccidente", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccidenteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CausasBasicas")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CausasInmediatas")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Conclusiones")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("FechaInvestigacion")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("InvestigadaPorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EmpresaId", "Id");
+
+                    b.HasIndex("EmpresaId", "AccidenteId")
+                        .IsUnique();
+
+                    b.HasIndex("EmpresaId", "InvestigadaPorId");
+
+                    b.ToTable("InvestigacionAccidente");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1885,6 +1926,35 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Empresa");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Accidentes.InvestigacionAccidente", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Accidentes.Accidente", "Accidente")
+                        .WithOne("Investigacion")
+                        .HasForeignKey("Norvia.Domain.Entities.Accidentes.InvestigacionAccidente", "EmpresaId", "AccidenteId")
+                        .HasPrincipalKey("Norvia.Domain.Entities.Accidentes.Accidente", "EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "InvestigadaPor")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "InvestigadaPorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Accidente");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("InvestigadaPor");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>
                 {
                     b.HasOne("Norvia.Domain.Entities.Catalogos.Rubro", "Rubro")
@@ -2456,6 +2526,11 @@ namespace Norvia.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VinculoEmpresa", b =>
                 {
                     b.Navigation("HistorialEstados");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Accidentes.Accidente", b =>
+                {
+                    b.Navigation("Investigacion");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>

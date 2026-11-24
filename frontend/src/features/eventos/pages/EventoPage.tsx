@@ -1,25 +1,36 @@
 import { ArrowLeft, TriangleAlert } from 'lucide-react'
-import { useCallback, useEffect, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
+import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { ROLES, useTieneRol } from '@/shared/sesion'
 import { obtenerEvento } from '../api/eventos'
+import { SeccionInvestigacion } from '../components/SeccionInvestigacion'
 import { ESTADOS_ENFERMEDAD, ESTADOS_EVENTO, fechaHora, NOMBRE_TIPO } from '../etiquetas'
+import type { EventoDetalle } from '../types/eventos'
 
-/** HU-047: un evento reportado. No muestra quién lo reportó porque no se guarda (RN-27, D11). */
+/**
+ * HU-047: un evento reportado. No muestra quién lo reportó porque no se guarda (RN-27, D11).
+ * HU-049: su investigación, cierre o descarte; solo el Responsable SST los registra, el admin consulta.
+ */
 export function EventoPage() {
   const { id = '' } = useParams()
   const peticion = usePeticion(obtenerEvento)
   const cargandoVisible = useCargaVisible(peticion.cargando)
+  const puedeGestionar = useTieneRol([ROLES.responsableSst])
+  // Lo que devuelven investigar, cerrar y descartar reemplaza lo cargado.
+  const [actualizado, setActualizado] = useState<EventoDetalle>()
+  const [mensaje, setMensaje] = useState<string>()
   const { ejecutar } = peticion
   const cargar = useCallback(() => void ejecutar(id), [ejecutar, id])
   useEffect(cargar, [cargar])
 
   if (peticion.error?.status === 404) return <NotFoundPage />
-  const e = peticion.datos
+  const e = actualizado?.id === id ? actualizado : peticion.datos
 
   return (
     <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
@@ -67,6 +78,25 @@ export function EventoPage() {
             </div>
             <p className="text-sm text-text-secondary">El reporte es anónimo: Norvia no guarda quién lo envió.</p>
           </section>
+          <div role="status" className="contents">
+            {mensaje && <Aviso tipo="exito">{mensaje}</Aviso>}
+          </div>
+          {e.estado === 'descartado' && (
+            <Aviso tipo="info" titulo="Reporte descartado">
+              {`Lo descartó ${e.descartadoPorNombre ?? 'el Responsable SST'} el ${fechaHora(e.descartadoEn!)}. ${e.motivoDescarte ? `Motivo: ${e.motivoDescarte}` : 'Sin motivo indicado.'} No cuenta en las estadísticas.`}
+            </Aviso>
+          )}
+          {e.estado === 'cerrado' && e.cerradoEn && (
+            <Aviso tipo="info" titulo="Evento cerrado">{`Se cerró el ${fechaHora(e.cerradoEn)}, con su investigación y sus medidas correctivas.`}</Aviso>
+          )}
+          <SeccionInvestigacion
+            evento={e}
+            puedeGestionar={puedeGestionar}
+            onCambio={(nuevo, texto) => {
+              setActualizado(nuevo)
+              setMensaje(texto)
+            }}
+          />
         </>
       )}
     </div>
