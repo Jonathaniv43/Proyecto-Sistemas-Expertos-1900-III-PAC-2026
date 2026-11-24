@@ -59,6 +59,7 @@ public sealed class ObtenerPeligrosSugeridosServicio(
                 g.Key,
                 nombres.GetValueOrDefault(g.Key, string.Empty),
                 riesgos[g.Key].Estado,
+                riesgos[g.Key].Actividad,
                 // Una respuesta cuenta una vez por peligro, aunque lo indique en varias preguntas.
                 g.Select(e => e.RespuestaId).Distinct().Count(),
                 g.GroupBy(e => (e.PreguntaId, e.PreguntaTexto))

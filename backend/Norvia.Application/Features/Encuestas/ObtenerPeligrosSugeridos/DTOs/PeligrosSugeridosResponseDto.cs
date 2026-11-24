@@ -14,6 +14,8 @@ public sealed record PeligroSugeridoDto(
     Guid PeligroId,
     string PeligroNombre,
     EstadoRiesgo Estado,
+    /// <summary>Actividad donde se presenta, si se indicó al confirmarlo (HU-035).</summary>
+    string? Actividad,
     int RespuestasConExposicion,
     IReadOnlyList<PreguntaOrigenDto> Preguntas);
 

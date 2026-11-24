@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Norvia.Domain.Entities.Catalogos;
@@ -95,24 +96,25 @@ public sealed class PeligrosSugeridosTests(NorviaApiFactory api)
     }
 
     [Fact]
-    public async Task Una_sugerencia_ya_revisada_conserva_su_estado_y_no_se_duplica()
+    public async Task Una_sugerencia_ya_revisada_conserva_su_estado_y_su_actividad_y_no_se_duplica()
     {
         var (empresa, cliente) = await EmpresaConResponsableAsync();
         var e = await CrearEncuestaAsync(empresa.EmpresaId, empresa.AdminVinculoId);
         for (var i = 0; i < 3; i++) await ResponderAsync(empresa.EmpresaId, e.VersionId, (e.Unica, e.UnicaSi));
-        await cliente.GetAsync(Ruta(e.EncuestaId));
+        var antes = Sugerencias(await Escenario.Json(await cliente.GetAsync(Ruta(e.EncuestaId))));
+        Assert.Equal(JsonValueKind.Null, antes[e.PeligroX].GetProperty("actividad").ValueKind);
 
-        await using (var db = api.NuevoContexto(empresa.EmpresaId))
-        {
-            var riesgo = await db.RiesgoEmpresa.SingleAsync(r => r.EncuestaId == e.EncuestaId);
-            riesgo.Estado = EstadoRiesgo.Confirmado; // como si HU-035 lo hubiera confirmado
-            await db.SaveChangesAsync();
-        }
+        // HU-035: se confirma con su actividad.
+        var riesgoId = antes[e.PeligroX].GetProperty("riesgoSugeridoId").GetGuid();
+        var confirmar = await cliente.PatchAsJsonAsync($"{Ruta(e.EncuestaId)}/{riesgoId}",
+            new { estado = "confirmado", actividad = "Bodega" });
+        Assert.Equal(HttpStatusCode.OK, confirmar.StatusCode);
         await ResponderAsync(empresa.EmpresaId, e.VersionId, (e.Unica, e.UnicaSi));
 
         var s = Sugerencias(await Escenario.Json(await cliente.GetAsync(Ruta(e.EncuestaId))));
 
         Assert.Equal("confirmado", s[e.PeligroX].GetProperty("estado").GetString());
+        Assert.Equal("Bodega", s[e.PeligroX].GetProperty("actividad").GetString());
         Assert.Equal(1, await ContarRiesgosAsync(empresa.EmpresaId, e.EncuestaId));
     }
 

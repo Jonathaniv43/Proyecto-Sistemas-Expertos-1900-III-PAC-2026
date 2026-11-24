@@ -7,9 +7,11 @@ import type {
   EncuestaPendiente,
   EncuestaResumen,
   GuardarBorradorRequest,
+  PeligroRevisado,
   PeligrosSugeridos,
   ReporteEncuesta,
   ResponderEncuestaRequest,
+  RevisarPeligroRequest,
   TipoRespuestaCatalogo,
   VersionEncuesta,
 } from '../types/encuestas'
@@ -55,3 +57,7 @@ export const obtenerReporte = (signal: AbortSignal, id: string) =>
 /** Peligros sugeridos por las respuestas (HU-033). Registra las sugerencias nuevas como riesgos sugeridos. */
 export const obtenerPeligrosSugeridos = (signal: AbortSignal, id: string) =>
   api.get<PeligrosSugeridos>(`/encuestas/${id}/peligros-sugeridos`, { signal }).then((r) => r.data)
+
+/** Confirma (pasa a la matriz) o descarta un peligro sugerido (HU-035). 409 si ya se revisó. */
+export const revisarPeligroSugerido = (encuestaId: string, riesgoId: string, datos: RevisarPeligroRequest) =>
+  api.patch<PeligroRevisado>(`/encuestas/${encuestaId}/peligros-sugeridos/${riesgoId}`, datos).then((r) => r.data)
