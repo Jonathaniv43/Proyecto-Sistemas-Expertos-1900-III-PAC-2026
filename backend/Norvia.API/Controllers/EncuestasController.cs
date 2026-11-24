@@ -23,6 +23,8 @@ using Norvia.Application.Features.Encuestas.ObtenerReporteEncuesta.DTOs;
 using Norvia.Application.Features.Encuestas.PublicarVersionEncuesta;
 using Norvia.Application.Features.Encuestas.ResponderEncuesta;
 using Norvia.Application.Features.Encuestas.ResponderEncuesta.DTOs;
+using Norvia.Application.Features.Encuestas.RevisarPeligroSugerido;
+using Norvia.Application.Features.Encuestas.RevisarPeligroSugerido.DTOs;
 
 namespace Norvia.API.Controllers;
 
@@ -143,4 +145,15 @@ public sealed class EncuestasController : ControllerBase
     public async Task<IActionResult> ObtenerPeligrosSugeridos(
         Guid id, [FromServices] ObtenerPeligrosSugeridosServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-035: confirma o descarta un peligro sugerido (<c>riesgoId</c> = <c>riesgoSugeridoId</c> de HU-033).</summary>
+    [HttpPatch("{id:guid}/peligros-sugeridos/{riesgoId:guid}")]
+    [ProducesResponseType(typeof(PeligroSugeridoRevisadoResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RevisarPeligroSugerido(
+        Guid id, Guid riesgoId, RevisarPeligroSugeridoRequestDto request,
+        [FromServices] RevisarPeligroSugeridoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, riesgoId, request, cancellationToken)).AHttp(this);
 }

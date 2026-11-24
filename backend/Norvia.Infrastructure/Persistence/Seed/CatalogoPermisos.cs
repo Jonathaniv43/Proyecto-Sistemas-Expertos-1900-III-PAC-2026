@@ -30,6 +30,10 @@ public static class CatalogoPermisos
         Empresa("encuesta.peligros_sugeridos", "Ver peligros sugeridos por la encuesta", "GET", "api/encuestas/{id}/peligros-sugeridos",
             "admin_empresa", "responsable_sst"),
 
+        // HU-035: confirmar o descartar un peligro sugerido.
+        Empresa("encuesta.peligro_sugerido.revisar", "Confirmar o descartar un peligro sugerido", "PATCH",
+            "api/encuestas/{id}/peligros-sugeridos/{riesgoId}", "admin_empresa", "responsable_sst"),
+
         // HU-032: reporte anónimo.
         Empresa("encuesta.reporte", "Ver reporte anónimo de encuesta", "GET", "api/encuestas/{id}/reporte",
             "admin_empresa", "responsable_sst"),

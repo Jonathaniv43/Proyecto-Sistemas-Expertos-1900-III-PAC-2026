@@ -62,6 +62,14 @@ public static class Errores
         "Las respuestas no cumplen las reglas de las preguntas (obligatorias, tipo u opciones).",
         TipoError.Validacion);
 
+    public static readonly Error SugerenciaNoEncontrada = new("encuestas.sugerencia_no_encontrada",
+        "El peligro sugerido no existe en esta encuesta.",
+        TipoError.NoEncontrado);
+
+    public static readonly Error SugerenciaYaRevisada = new("encuestas.sugerencia_ya_revisada",
+        "Este peligro sugerido ya fue confirmado o descartado.",
+        TipoError.Conflicto);
+
     public static Error RespuestaInvalidaDetalle(string detalle) =>
         new("encuestas.respuesta_invalida", detalle, TipoError.Validacion);
 }
