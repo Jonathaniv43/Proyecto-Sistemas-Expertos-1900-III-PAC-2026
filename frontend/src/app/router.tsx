@@ -14,6 +14,7 @@ import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
 import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage'
+import { PersonasPage } from '@/features/vinculos/pages/PersonasPage'
 import { AppLayout } from '@/shared/components/AppLayout'
 import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
           {
             element: <RequiereRol roles={[ROLES.adminEmpresa]} />,
             children: [
+              { path: 'personas', element: <PersonasPage /> },
               { path: 'personas/nueva', element: <AgregarPersonaPage /> },
               { path: 'personas/encuestados', element: <AgregarEncuestadosPage /> },
             ],

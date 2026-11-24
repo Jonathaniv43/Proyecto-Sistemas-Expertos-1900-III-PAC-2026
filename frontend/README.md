@@ -280,3 +280,17 @@ useFormulario(esquema, {
 - **Estados:** menos de 3 respuestas (no se sugiere nada, RN-73), sin sugerencias, error y carga. Tiene su propia petición: si falla, el resto de los resultados se sigue viendo y se puede reintentar.
 - **Ojo:** el `GET` registra las sugerencias nuevas como riesgos sugeridos (sin repetirlas), así que abrir la página no es solo lectura en el backend.
 
+## Personas y acceso (HU-021)
+
+- **`/personas`:** solo para `admin_empresa`. Se llega con "Ver las personas" desde el inicio, y "Cancelar" de los formularios de alta vuelve aquí.
+- **Lista:** nombre, correo, rol, estado y fecha de alta. Los filtros (búsqueda sin tildes ni mayúsculas, rol y estado) se aplican en el navegador sobre la lista completa.
+- **Editar acceso** (`EditarAccesoModal`, sobre el `Modal` de `shared/components/ui`): cambia el rol y el estado. Se envía solo lo que cambia (`PATCH /vinculos/{id}`).
+  - **Cambiar el rol o reactivar:** se guarda directo.
+  - **Suspender o dar de baja:** pide el motivo (y el detalle si es "Otro motivo") y después confirma con el diálogo de peligro, porque quita el acceso. El backend cierra las sesiones de esa persona en esta empresa; su acceso a otras empresas no cambia.
+  - **Motivos:** se ofrecen "Decisión de la administración", "Dejó de trabajar en la empresa" y "Otro motivo". "Falta de pago de la empresa" no se ofrece: es el motivo de la plataforma al suspender una empresa.
+  - **Errores:** si el backend rechaza el cambio (por ejemplo, porque la empresa se quedaría sin administrador activo), el mensaje se ve en el modal y la fila no cambia.
+- **La propia fila no se edita:** muestra "Tú" y la cambia otra persona administradora. Así nadie se quita el rol o el acceso por error, y la empresa no se queda sin administrador.
+- **Celular:** rol y estado bajan debajo del nombre, para que "Editar acceso" quede a la vista sin desplazar la tabla.
+- **`Modal`** (design-system.md § Modal): `<dialog>` nativo de 560px con encabezado y pie fijos; Esc cierra; con cambios sin guardar, el clic fuera no cierra; en celular ocupa toda la pantalla.
+- **CSS:** `.tabla-contenedor` y `.modal-cuerpo` llevan `position: relative`. Sin eso, lo que está posicionado de forma absoluta adentro (un encabezado `sr-only`, los radios ocultos) se escapa del scroll: ensancha la página o desplaza el modal entero.
+

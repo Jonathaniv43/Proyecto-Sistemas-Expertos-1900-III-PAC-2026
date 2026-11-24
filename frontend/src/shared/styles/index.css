@@ -240,6 +240,66 @@
     }
   }
 
+  /* Modal de formulario (design-system.md § Modal): 560px, encabezado y pie fijos, el medio desplaza. */
+  .modal {
+    width: min(560px, calc(100% - 2 * var(--space-4)));
+    max-height: calc(100dvh - 2 * var(--space-8));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-3);
+  }
+
+  .modal[open],
+  .modal > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .modal > form {
+    flex: 1;
+  }
+
+  .modal::backdrop {
+    background: var(--color-overlay);
+  }
+
+  .modal-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6);
+  }
+
+  /* position: relative: los controles ocultos con position absolute (radios, casillas) quedan dentro del scroll. */
+  .modal-cuerpo {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-2) var(--space-6) var(--space-6);
+  }
+
+  .modal-pie {
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  @media (max-width: 639px) {
+    .modal {
+      width: 100%;
+      max-width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      border-radius: 0;
+    }
+  }
+
   /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
   .area-texto {
     display: block;
@@ -253,7 +313,9 @@
   }
 
   /* Tabla (design-system.css § Tabla): contenedor con borde y desplazamiento horizontal en pantallas chicas. */
+  /* position: relative: así lo absoluto de adentro (p. ej. un encabezado sr-only) no se escapa del scroll y no ensancha la página. */
   .tabla-contenedor {
+    position: relative;
     overflow-x: auto;
     border: var(--border-width) solid var(--color-border-default);
     border-radius: var(--radius-lg);

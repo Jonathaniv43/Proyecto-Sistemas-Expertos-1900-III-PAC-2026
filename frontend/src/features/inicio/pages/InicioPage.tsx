@@ -1,4 +1,4 @@
-import { ClipboardCheck, ClipboardList, UserPlus, Users } from 'lucide-react'
+import { ClipboardCheck, ClipboardList, Contact, UserPlus, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, SiRol, useSesion } from '@/shared/sesion'
@@ -37,6 +37,10 @@ export function InicioPage() {
       </SiRol>
       <SiRol roles={[ROLES.adminEmpresa]}>
         <div className="flex flex-col gap-3 sm:flex-row">
+          <Link to="/personas" className={clasesBoton('secundario')}>
+            <Contact aria-hidden size={16} strokeWidth={1.5} />
+            Ver las personas
+          </Link>
           <Link to="/personas/nueva" className={clasesBoton('secundario')}>
             <UserPlus aria-hidden size={16} strokeWidth={1.5} />
             Agregar una persona

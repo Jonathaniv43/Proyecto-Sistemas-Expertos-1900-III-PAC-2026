@@ -62,3 +62,28 @@ export interface CrearEncuestadosLoteResponse {
   cuentas: EncuestadoCreado[]
   errores: ErrorFila[]
 }
+
+/** Estado del acceso de una persona a la empresa (D22). */
+export type EstadoVinculo = 'activo' | 'suspendido' | 'baja'
+
+/** Motivo de un cambio de estado (RN-59). */
+export type MotivoEstadoVinculo = 'decision_admin' | 'baja_laboral' | 'falta_pago_empresa' | 'otro'
+
+/** GET /api/vinculos y PATCH /api/vinculos/{id} (HU-021). */
+export interface Vinculo {
+  id: string
+  personaId: string
+  email: string
+  nombreCompleto: string
+  rolCodigo: string
+  estado: EstadoVinculo
+  creadoEn: string
+}
+
+/** PATCH /api/vinculos/{id}: se envía solo lo que cambia. El motivo es obligatorio al suspender o dar de baja. */
+export interface ActualizarVinculoRequest {
+  rolCodigo?: string
+  estado?: EstadoVinculo
+  motivoCodigo?: MotivoEstadoVinculo
+  motivoDetalle?: string
+}
