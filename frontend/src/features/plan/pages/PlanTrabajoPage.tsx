@@ -1,5 +1,6 @@
-import { ListChecks, Plus, TriangleAlert } from 'lucide-react'
+import { ListChecks, Plus, Search, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useForm, useWatch, type UseFormReturn } from 'react-hook-form'
 import { Link, useLocation } from 'react-router-dom'
 import { extraerError } from '@/shared/api/errores'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -13,8 +14,10 @@ import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
 import { fechaCorta } from '@/shared/validacion'
 import { generarPlan, listarResponsables, listarTareas, obtenerPropuesta } from '../api/plan'
 import { AsignarTareaModal } from '../components/AsignarTareaModal'
+import { FiltrosPlan } from '../components/FiltrosPlan'
 import { ESTADOS, PRIORIDADES, TIPOS_CONTROL, vencida } from '../etiquetas'
-import type { Tarea, TareaPropuesta } from '../types/plan'
+import { aFiltros, FILTROS_VACIOS, type ValoresFiltros } from '../filtros'
+import type { FiltrosTareas, Responsable, Tarea, TareaPropuesta } from '../types/plan'
 
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
 
@@ -34,6 +37,8 @@ const origenPropuesta = (t: TareaPropuesta) =>
  * modelo de su peligro, de la prioridad más alta a la más baja. Se revisan, se desmarcan las que no se quieran
  * y se confirman; lo que ya tiene tarea no se vuelve a proponer, así que generarlo dos veces no duplica.
  * HU-043: cada tarea se asigna (responsable y fecha límite) y se crean tareas manuales.
+ * HU-046: la lista se filtra por estado (o vencidas), responsable, origen, prioridad y fecha límite; las vencidas
+ * llevan su badge y se cuentan junto a la lista, con un enlace que las filtra.
  */
 export function PlanTrabajoPage() {
   const propuesta = usePeticion(obtenerPropuesta)
@@ -46,15 +51,27 @@ export function PlanTrabajoPage() {
   const { state } = useLocation()
   const creada = (state as EstadoPlanNavegacion | null)?.creada
 
+  // Filtros (HU-046): la clave en texto evita volver a pedir la lista si los valores no cambiaron.
+  const formFiltros = useForm<ValoresFiltros>({ defaultValues: FILTROS_VACIOS })
+  const valores = useWatch({ control: formFiltros.control })
+  const clave = JSON.stringify(aFiltros({ ...FILTROS_VACIOS, ...valores }))
+  const filtros = useMemo<FiltrosTareas>(() => JSON.parse(clave), [clave])
+  const hayFiltros = clave !== '{}'
+
   const { ejecutar: cargarPropuesta } = propuesta
   const { ejecutar: cargarTareas } = tareas
   const { ejecutar: cargarResponsables } = responsables
+  const recargarTareas = useCallback(() => void cargarTareas(filtros), [cargarTareas, filtros])
+  useEffect(recargarTareas, [recargarTareas])
   const cargar = useCallback(() => {
     void cargarPropuesta()
-    void cargarTareas()
     void cargarResponsables()
-  }, [cargarPropuesta, cargarTareas, cargarResponsables])
-  useEffect(cargar, [cargar])
+    recargarTareas()
+  }, [cargarPropuesta, cargarResponsables, recargarTareas])
+  useEffect(() => {
+    void cargarPropuesta()
+    void cargarResponsables()
+  }, [cargarPropuesta, cargarResponsables])
 
   const error = propuesta.error ?? tareas.error
 
@@ -103,7 +120,7 @@ export function PlanTrabajoPage() {
             key={propuesta.datos.tareas.map((t) => t.clave).join()}
             tareas={propuesta.datos.tareas}
             riesgosSinEvaluar={propuesta.datos.riesgosSinEvaluar}
-            hayPlan={tareas.datos.length > 0}
+            hayPlan={hayFiltros || tareas.datos.length > 0}
             onConfirmado={(n) => {
               setAsignada(undefined)
               setAgregadas(n)
@@ -112,6 +129,10 @@ export function PlanTrabajoPage() {
           />
           <SeccionTareas
             tareas={tareas.datos}
+            cargando={tareas.cargando}
+            form={formFiltros}
+            responsables={responsables.datos ?? []}
+            hayFiltros={hayFiltros}
             puedeAsignar={responsables.datos !== undefined}
             onAsignar={(t) => {
               setAsignada(undefined)
@@ -126,7 +147,7 @@ export function PlanTrabajoPage() {
               setAsignando(undefined)
               setAgregadas(undefined)
               setAsignada(`«${t.titulo}» quedó a cargo de ${t.responsableNombre ?? 'la persona elegida'}, para el ${fechaCorta(t.fechaLimite ?? '')}.`)
-              void cargarTareas()
+              recargarTareas()
             }}
           />
         </>
@@ -256,17 +277,37 @@ function AvisoSinEvaluar({ cantidad }: { cantidad: number }) {
 
 interface SeccionTareasProps {
   tareas: Tarea[]
+  cargando: boolean
+  form: UseFormReturn<ValoresFiltros>
+  responsables: Responsable[]
+  hayFiltros: boolean
   puedeAsignar: boolean
   onAsignar: (tarea: Tarea) => void
 }
 
-function SeccionTareas({ tareas, puedeAsignar, onAsignar }: SeccionTareasProps) {
+function SeccionTareas({ tareas, cargando, form, responsables, hayFiltros, puedeAsignar, onAsignar }: SeccionTareasProps) {
+  const vencidas = tareas.filter(vencida).length
+  const soloVencidas = form.watch('estado') === 'vencidas'
   return (
     <section aria-labelledby="titulo-tareas" className="grid gap-4">
       <h2 id="titulo-tareas" className="text-md font-semibold">
         Tareas del plan
       </h2>
-      {tareas.length === 0 ? (
+      {(tareas.length > 0 || hayFiltros) && <FiltrosPlan form={form} responsables={responsables} />}
+      {tareas.length === 0 && hayFiltros ? (
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
+          <Search aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
+          <h3 className="text-md font-semibold">No hay tareas con esos filtros</h3>
+          <p className="text-text-secondary">Prueba con otros o quita los filtros.</p>
+          <button
+            type="button"
+            className="inline-flex min-h-control-touch items-center text-sm font-medium text-text-link hover:text-text-link-hover sm:min-h-control"
+            onClick={() => form.reset(FILTROS_VACIOS)}
+          >
+            Quitar filtros
+          </button>
+        </div>
+      ) : tareas.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <ListChecks aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
           <h3 className="text-md font-semibold">Todavía no hay tareas en el plan</h3>
@@ -275,9 +316,29 @@ function SeccionTareas({ tareas, puedeAsignar, onAsignar }: SeccionTareasProps) 
           </p>
         </div>
       ) : (
-        <div className="grid gap-2">
-          <p className="text-xs text-text-secondary">
+        <div className="grid gap-2" aria-busy={cargando}>
+          <p className="text-xs text-text-secondary" aria-live="polite">
             {plural(tareas.length, 'tarea', 'tareas')}, de la prioridad más alta a la más baja
+            {vencidas > 0 && !soloVencidas && (
+              <>
+                {' · '}
+                <button
+                  type="button"
+                  className="font-medium text-error-text hover:underline"
+                  onClick={() => form.setValue('estado', 'vencidas')}
+                >
+                  {plural(vencidas, 'vencida', 'vencidas')}
+                </button>
+              </>
+            )}
+            {hayFiltros && (
+              <>
+                {' · '}
+                <button type="button" className="font-medium text-text-link hover:text-text-link-hover" onClick={() => form.reset(FILTROS_VACIOS)}>
+                  Quitar filtros
+                </button>
+              </>
+            )}
           </p>
           <div className="tabla-contenedor">
             <table className="tabla">
@@ -338,7 +399,7 @@ function Estado({ tarea }: { tarea: Tarea }) {
   )
 }
 
-function FilaTarea({ tarea, puedeAsignar, onAsignar }: { tarea: Tarea } & Omit<SeccionTareasProps, 'tareas'>) {
+function FilaTarea({ tarea, puedeAsignar, onAsignar }: { tarea: Tarea } & Pick<SeccionTareasProps, 'puedeAsignar' | 'onAsignar'>) {
   return (
     <tr>
       <td className="envolver">

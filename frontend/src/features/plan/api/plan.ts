@@ -1,5 +1,5 @@
 import { api } from '@/shared/api'
-import type { CrearTareaManualRequest, EstadoTarea, PropuestaPlan, Responsable, Tarea } from '../types/plan'
+import type { CrearTareaManualRequest, EstadoTarea, FiltrosTareas, PropuestaPlan, Responsable, Tarea } from '../types/plan'
 
 /** Tareas que se agregarían al plan a partir de los riesgos y sus controles (HU-042). No guarda nada. */
 export const obtenerPropuesta = (signal: AbortSignal) => api.get<PropuestaPlan>('/plan-trabajo/propuesta', { signal }).then((r) => r.data)
@@ -8,8 +8,9 @@ export const obtenerPropuesta = (signal: AbortSignal) => api.get<PropuestaPlan>(
 export const generarPlan = (claves: string[]) =>
   api.post<{ tareasCreadas: number }>('/plan-trabajo/generacion', { claves }).then((r) => r.data)
 
-/** Tareas del plan, por prioridad y nivel del riesgo. */
-export const listarTareas = (signal: AbortSignal) => api.get<Tarea[]>('/plan-trabajo/tareas', { signal }).then((r) => r.data)
+/** Tareas del plan, por prioridad y nivel del riesgo, con filtros (HU-046). */
+export const listarTareas = (signal: AbortSignal, filtros: FiltrosTareas = {}) =>
+  api.get<Tarea[]>('/plan-trabajo/tareas', { signal, params: filtros }).then((r) => r.data)
 
 /** A quién se le puede asignar una tarea (HU-043). */
 export const listarResponsables = (signal: AbortSignal) =>

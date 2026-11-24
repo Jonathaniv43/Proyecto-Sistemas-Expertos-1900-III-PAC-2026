@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DotNetEnv;
+using Norvia.API.Binding;
 using Norvia.API.Extensiones;
 using Norvia.API.Filtros;
 using Norvia.API.Middleware;
@@ -17,7 +18,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-builder.Services.AddControllers(o => o.Filters.Add<ValidacionFiltro>())
+builder.Services.AddControllers(o =>
+    {
+        o.Filters.Add<ValidacionFiltro>();
+        // Enums de la consulta en snake_case, como en el JSON: ?estado=en_progreso.
+        o.ModelBinderProviders.Insert(0, new EnumSnakeCaseBinderProvider());
+    })
     // Enums como texto en snake_case, igual que en la BD: "seleccion_unica", "ergonomico"…
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
         new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower, allowIntegerValues: false)));
