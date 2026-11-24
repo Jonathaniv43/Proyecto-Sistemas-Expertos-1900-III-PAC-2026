@@ -6,7 +6,7 @@ namespace Norvia.Infrastructure.Persistence.Seed;
 /// <summary>
 /// Datos fijos de HU-097 que van en las migraciones (HasData): roles de empresa, roles de staff y rubros.
 /// Los Id son estables; no se cambian una vez publicados. El contenido SST (categorías, preguntas,
-/// peligros y plantillas) se carga aparte cuando el equipo lo redacte y lo revise alguien de SST.
+/// peligros y plantillas de tareas) está en <see cref="CatalogoSst"/> y lo carga <see cref="CatalogoSstSeeder"/>.
 /// </summary>
 public static class CatalogoBase
 {
