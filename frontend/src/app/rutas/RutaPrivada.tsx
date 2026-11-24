@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { CampanaNotificaciones } from '@/features/notificaciones/components/CampanaNotificaciones'
 import { EncabezadoSesion } from '@/shared/components/EncabezadoSesion'
 import { type EstadoLogin, leerUltimaEmpresa, RUTA_CAMBIAR_CONTRASENA, rutaActual, rutaLogin, useSesion } from '@/shared/sesion'
 import { SesionSinConexion, VerificandoSesion } from './PantallasSesion'
@@ -34,7 +35,11 @@ export function RutaPrivada() {
       if (!sesion.usuario.debeCambiarPassword && enCambio) return <Navigate to="/inicio" replace />
       return (
         <>
-          <EncabezadoSesion usuario={sesion.usuario} />
+          <EncabezadoSesion
+            usuario={sesion.usuario}
+            // HU-117: solo las sesiones de empresa tienen bandeja; con contraseña temporal aún no se entra a ella.
+            acciones={sesion.usuario.tipo === 'empresa' && !sesion.usuario.debeCambiarPassword && <CampanaNotificaciones />}
+          />
           <Outlet />
         </>
       )

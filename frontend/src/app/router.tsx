@@ -29,6 +29,7 @@ import { EventoPage } from '@/features/eventos/pages/EventoPage'
 import { EventosPage } from '@/features/eventos/pages/EventosPage'
 import { ReportarEventoPage } from '@/features/eventos/pages/ReportarEventoPage'
 import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
+import { NotificacionesPage } from '@/features/notificaciones/pages/NotificacionesPage'
 import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
 import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
@@ -92,6 +93,8 @@ export const router = createBrowserRouter([
             children: [
               { path: 'mis-encuestas', element: <MisEncuestasPage /> },
               { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
+              // HU-117: la bandeja propia (RN-79).
+              { path: 'notificaciones', element: <NotificacionesPage /> },
               // HU-047: cualquier persona de la empresa reporta, de forma anónima.
               { path: 'eventos/reportar', element: <ReportarEventoPage /> },
             ],

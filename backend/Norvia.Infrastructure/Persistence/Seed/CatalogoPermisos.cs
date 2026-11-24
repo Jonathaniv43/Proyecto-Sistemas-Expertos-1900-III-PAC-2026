@@ -22,8 +22,16 @@ public static class CatalogoPermisos
         Empresa("encuesta.responder", "Responder encuesta", "POST", "api/encuestas/{id}/respuestas",
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
+        // HU-117: la bandeja propia. Todos los roles, porque las políticas avisan a cada vínculo activo (RN-75);
+        // que cada quien vea y marque solo las suyas (RN-79) lo valida la aplicación.
+        Empresa("notificacion.listar", "Ver mis notificaciones", "GET", "api/notificaciones",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        Empresa("notificacion.no_leidas", "Ver cuántas notificaciones no he leído", "GET", "api/notificaciones/no-leidas",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        Empresa("notificacion.leer", "Marcar una notificación como leída", "PATCH", "api/notificaciones/{id}/lectura",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+
         // Acceso mínimo del encuestado (además de pendientes/responder).
-        Empresa("notificacion.listar", "Ver notificaciones", "GET", "api/notificaciones", "encuestado"),
         Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
 
         // HU-033: peligros sugeridos por las respuestas.
