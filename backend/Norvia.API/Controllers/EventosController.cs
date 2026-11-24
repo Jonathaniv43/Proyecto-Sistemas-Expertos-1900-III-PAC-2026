@@ -12,6 +12,8 @@ using Norvia.Application.Features.Eventos.CrearMedidaCorrectiva.DTOs;
 using Norvia.Application.Features.Eventos.ListarMedidasCorrectivas;
 using Norvia.Application.Features.Eventos.ListarRiesgosDelEvento;
 using Norvia.Application.Features.Eventos.ListarRiesgosDelEvento.DTOs;
+using Norvia.Application.Features.Eventos.ObtenerEstadisticas;
+using Norvia.Application.Features.Eventos.ObtenerEstadisticas.DTOs;
 using Norvia.Application.Features.Eventos.DescartarEvento;
 using Norvia.Application.Features.Eventos.DescartarEvento.DTOs;
 using Norvia.Application.Features.Eventos.RegistrarInvestigacion;
@@ -24,7 +26,6 @@ namespace Norvia.API.Controllers;
 /// <para>
 /// Pendiente de futuras HUs en este controlador:
 /// - HU-100: <c>POST /api/eventos/{id}/evidencias</c> (adjuntos en almacenamiento externo).
-/// - HU-052: <c>GET /api/eventos/estadisticas</c>.
 /// </para>
 /// </summary>
 [ApiController]
@@ -47,6 +48,14 @@ public sealed class EventosController : ControllerBase
         [FromQuery] string? estado, [FromQuery] string? tipo, [FromQuery] bool? esGrave,
         [FromServices] ListarEventosServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(estado, tipo, esGrave, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-052: cuántos eventos hubo en el periodo, por tipo, gravedad y mes; sin descartados ni datos de personas.</summary>
+    [HttpGet("estadisticas")]
+    [ProducesResponseType(typeof(EstadisticasEventosResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Estadisticas(
+        [FromQuery] FiltrosEstadisticasDto filtros, [FromServices] ObtenerEstadisticasServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(filtros, cancellationToken)).AHttp(this);
 
     /// <summary>HU-047: detalle completo de un evento reportado en la empresa.</summary>
     [HttpGet("{id:guid}")]

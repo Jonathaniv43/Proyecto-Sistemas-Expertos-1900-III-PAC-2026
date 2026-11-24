@@ -497,3 +497,8 @@ useFormulario(esquema, {
   - "Reevaluar un riesgo" abre un modal para elegirlo de la matriz y lleva a `/riesgos/:id?evento=…`.
 - **`riesgos`:** el parámetro `evento` hace que `NuevoRiesgoPage` envíe `accidenteId` y que, al guardar, lleve a evaluar el riesgo. En `RiesgoPage`, abre la reevaluación inicial y la envía con `accidenteId`. El origen "Revelado por un evento" y "Tras un evento" en `HistorialEvaluaciones` enlazan al evento.
 - **`Modal`:** `CuerpoModal` alinea su contenido arriba (`content-start`); en celular, el modal ocupa la pantalla y antes repartía las filas.
+
+## Estadísticas de eventos (HU-052)
+
+- **`/eventos/estadisticas` (`EstadisticasEventosPage`):** periodo con Desde y Hasta (`schemas/periodo.ts`, espejo del validador: como máximo 24 meses), que se aplica al cambiar si es válido. Tiene atajos de periodo. Muestra indicadores y medidores por tipo, gravedad y mes. Solo cifras.
+- **`shared/components/datos`:** `Indicador` y `ListaMedidores` (barra con `--color-dato-serie`), que antes eran de los resultados de encuesta y ahora también usan las estadísticas.
