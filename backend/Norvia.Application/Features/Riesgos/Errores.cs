@@ -22,4 +22,10 @@ public static class Errores
 
     public static readonly Error SugerenciaYaAceptada = new("riesgos.sugerencia_aceptada",
         "Esa sugerencia ya es un control de este riesgo.", TipoError.Conflicto);
+
+    public static readonly Error SinEvaluacionInicial = new("riesgos.sin_evaluacion_inicial",
+        "Primero hay que hacer la evaluación inicial del riesgo.", TipoError.Conflicto);
+
+    public static readonly Error SinControles = new("riesgos.sin_controles",
+        "El riesgo todavía no tiene controles: la evaluación residual mide el riesgo con los controles aplicados.", TipoError.Conflicto);
 }
