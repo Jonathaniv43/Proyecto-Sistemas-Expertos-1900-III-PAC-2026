@@ -431,3 +431,11 @@ useFormulario(esquema, {
   - **Si pide evidencia,** "Marcar como completada" queda deshabilitado (RN-25): adjuntarla es HU-045.
   - **Errores:** van junto a la tarea. Si ya no es suya (403) o no existe (404), el aviso va arriba y la lista se recarga.
 - `features/plan/etiquetas.ts` reúne prioridades, tipos de control, badges de estado y `vencida()`, que usan el plan y "Mis tareas".
+
+## Filtrar el plan (HU-046)
+
+- **Plan de trabajo, "Tareas del plan":** `FiltrosPlan` con estado ("Vencidas" incluida), responsable ("Sin responsable" incluido), origen, prioridad, y "Vence desde" y "Vence hasta" (`CampoFecha`).
+  - **El formulario es de la página** (React Hook Form): el enlace "N vencidas" y "Quitar filtros" lo cambian desde fuera.
+  - **`filtros.ts`** convierte lo elegido en parámetros de `GET /plan-trabajo/tareas`. Una fecha a medio escribir no filtra; si no existe, o si el rango es imposible, se avisa y no se filtra.
+  - **La lista se vuelve a pedir** solo cuando cambian los parámetros (la clave es el JSON de los filtros).
+- **Vencidas:** badge en cada fila y, junto al total, "N vencidas" en rojo, que las filtra.

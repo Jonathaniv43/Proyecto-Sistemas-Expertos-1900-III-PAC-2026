@@ -69,3 +69,17 @@ export interface CrearTareaManualRequest {
   fechaLimite: string
   requiereEvidencia: boolean
 }
+
+/** Filtros de GET /api/plan-trabajo/tareas (HU-046). Todos opcionales. */
+export interface FiltrosTareas {
+  estado?: EstadoTarea
+  /** Pendientes o en progreso con la fecha límite pasada. */
+  vencidas?: boolean
+  responsableId?: string
+  sinResponsable?: boolean
+  origen?: Tarea['origen']
+  prioridad?: 1 | 2 | 3
+  /** aaaa-mm-dd, incluidas. */
+  fechaDesde?: string
+  fechaHasta?: string
+}
