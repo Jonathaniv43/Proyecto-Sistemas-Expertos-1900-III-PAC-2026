@@ -48,6 +48,10 @@ public static class CatalogoPermisos
         Empresa("plan.propuesta", "Ver el plan de trabajo propuesto", "GET", "api/plan-trabajo/propuesta", "admin_empresa", "responsable_sst"),
         Empresa("plan.generar", "Confirmar el plan de trabajo", "POST", "api/plan-trabajo/generacion", "admin_empresa", "responsable_sst"),
         Empresa("tarea.listar", "Ver las tareas del plan", "GET", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
+        // HU-044: atender mis tareas. Quién cambia el estado lo decide además la aplicación (RN-24).
+        Empresa("tarea.mias", "Ver mis tareas", "GET", "api/plan-trabajo/tareas/mias", "admin_empresa", "responsable_sst", "colaborador"),
+        Empresa("tarea.estado", "Cambiar el estado de una tarea", "PATCH", "api/plan-trabajo/tareas/{id}/estado",
+            "admin_empresa", "responsable_sst", "colaborador"),
         // HU-043: asignar tareas y crear tareas manuales.
         Empresa("tarea.crear", "Crear una tarea manual", "POST", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
         Empresa("tarea.asignar", "Asignar responsable y fecha límite a una tarea", "PUT", "api/plan-trabajo/tareas/{id}/asignacion",
