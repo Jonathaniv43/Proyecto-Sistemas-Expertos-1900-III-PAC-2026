@@ -47,6 +47,12 @@ public sealed class CatalogoSstSeeder(NorviaDbContext db, IOptions<CatalogoSstOp
         return new Guid(bytes, bigEndian: true);
     }
 
+    /// <summary>
+    /// Clave del Id de un peligro y sus plantillas: el código en la forma de la primera versión (<c>LOC-CAIDA-NIVEL</c>).
+    /// Así una base ya sembrada conserva sus Id aunque el código haya pasado a minúsculas con guion bajo.
+    /// </summary>
+    private static string ClavePeligro(string codigo) => codigo.ToUpperInvariant().Replace('_', '-');
+
     private async Task<int> SembrarAsync(CancellationToken ct)
     {
         var agregados = 0;
@@ -60,7 +66,7 @@ public sealed class CatalogoSstSeeder(NorviaDbContext db, IOptions<CatalogoSstOp
         var peligroId = new Dictionary<string, Guid>();
         foreach (var p in CatalogoSst.Peligros)
         {
-            var id = IdDe($"peligro:{p.Codigo}");
+            var id = IdDe($"peligro:{ClavePeligro(p.Codigo)}");
             if (!peligrosPorId.Contains(id) && peligrosPorCodigo.TryGetValue(p.Codigo, out var existente))
                 id = existente;
             else if (!peligrosPorId.Contains(id))
@@ -72,7 +78,7 @@ public sealed class CatalogoSstSeeder(NorviaDbContext db, IOptions<CatalogoSstOp
 
             for (var i = 0; i < p.Plantillas.Length; i++)
             {
-                var idPlantilla = IdDe($"plantilla:{p.Codigo}:{i + 1}");
+                var idPlantilla = IdDe($"plantilla:{ClavePeligro(p.Codigo)}:{i + 1}");
                 if (plantillas.Contains(idPlantilla)) continue;
                 var t = p.Plantillas[i];
                 db.PlantillaTarea.Add(new PlantillaTarea
