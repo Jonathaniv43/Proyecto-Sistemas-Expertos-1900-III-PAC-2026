@@ -7,6 +7,7 @@ using Norvia.Domain.Entities.Accidentes;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Encuestas;
+using Norvia.Domain.Entities.Notificaciones;
 using Norvia.Domain.Entities.Plan;
 using Norvia.Domain.Entities.Riesgos;
 
@@ -80,6 +81,9 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
 
     // Plan de trabajo (M5)
     public DbSet<Tarea> Tarea => Set<Tarea>();
+
+    // Notificaciones (M11)
+    public DbSet<Notificacion> Notificacion => Set<Notificacion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

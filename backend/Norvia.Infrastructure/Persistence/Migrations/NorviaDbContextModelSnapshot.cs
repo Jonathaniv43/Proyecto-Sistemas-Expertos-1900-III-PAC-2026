@@ -1489,6 +1489,94 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.ToTable("RespuestaEncuesta");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Notificaciones.Notificacion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CorreoEnviadoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CorreoEstado")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<short>("CorreoIntentos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
+
+                    b.Property<DateTime?>("CorreoProximoIntentoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CorreoUltimoError")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreadaEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("DestinatarioId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("LeidaEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("TareaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid?>("VersionDocumentoId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EmpresaId", "Id");
+
+                    b.HasIndex("CorreoProximoIntentoEn")
+                        .HasFilter("\"CorreoEstado\" = 'pendiente'");
+
+                    b.HasIndex("EmpresaId", "TareaId");
+
+                    b.HasIndex("VersionDocumentoId", "DestinatarioId")
+                        .IsUnique()
+                        .HasFilter("\"VersionDocumentoId\" IS NOT NULL");
+
+                    b.HasIndex("EmpresaId", "DestinatarioId", "LeidaEn");
+
+                    b.ToTable("Notificacion", t =>
+                        {
+                            t.HasCheckConstraint("CK_Notificacion_CorreoEnviadoEn", "(\"CorreoEnviadoEn\" IS NOT NULL) = (\"CorreoEstado\" = 'enviado')");
+
+                            t.HasCheckConstraint("CK_Notificacion_CorreoEstado", "\"CorreoEstado\" IN ('pendiente', 'enviado', 'fallido')");
+
+                            t.HasCheckConstraint("CK_Notificacion_CorreoIntentos", "\"CorreoIntentos\" >= 0");
+
+                            t.HasCheckConstraint("CK_Notificacion_Origen", "(\"Tipo\" = 'politica_publicada' AND \"VersionDocumentoId\" IS NOT NULL AND \"TareaId\" IS NULL) OR (\"Tipo\" = 'tarea_asignada' AND \"TareaId\" IS NOT NULL AND \"VersionDocumentoId\" IS NULL)");
+
+                            t.HasCheckConstraint("CK_Notificacion_Tipo", "\"Tipo\" IN ('politica_publicada', 'tarea_asignada')");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Plan.Tarea", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1549,8 +1637,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
-
-                    b.HasAlternateKey("EmpresaId", "Id");
 
                     b.HasIndex("ControlId")
                         .IsUnique()
@@ -2351,6 +2437,34 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("EncuestaVersion");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Notificaciones.Notificacion", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "Destinatario")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "DestinatarioId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Plan.Tarea", "Tarea")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "TareaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Destinatario");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Tarea");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Plan.Tarea", b =>

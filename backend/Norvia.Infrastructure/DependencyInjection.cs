@@ -9,6 +9,8 @@ using Norvia.Infrastructure.Persistence;
 using Norvia.Infrastructure.Persistence.Interceptores;
 using Norvia.Infrastructure.Persistence.Seed;
 using Norvia.Infrastructure.Correo;
+using Norvia.Application.Common.Notificaciones;
+using Norvia.Infrastructure.Notificaciones;
 using Norvia.Infrastructure.Seguridad;
 using Norvia.Infrastructure.Tiempo;
 
@@ -61,6 +63,15 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(CorreoOpciones.Seccion));
         services.AddScoped<IPlantillasCorreo, PlantillasCorreoDb>();
         services.AddSingleton<IEnvioCorreo, SmtpEnvioCorreo>();
+
+        // Notificaciones (M11): se crean con la operación de origen y el correo sale por la bandeja de salida (HU-118).
+        services.AddOptions<NotificacionesOpciones>()
+            .Bind(configuration.GetSection(NotificacionesOpciones.Seccion))
+            .Validate(o => o.SonValidas(),
+                "Notificaciones__*: intervalo, intentos, esperas y lote deben ser > 0, y la espera máxima >= la base.")
+            .ValidateOnStart();
+        services.AddScoped<IBandejaNotificaciones, BandejaNotificaciones>();
+        services.AddScoped<EnvioNotificacionesPendientes>();
 
         // Repositorios por slice: I<CasoDeUso>Repositorio → <CasoDeUso>Repositorio.
         var repositorios = typeof(DependencyInjection).Assembly.GetTypes()

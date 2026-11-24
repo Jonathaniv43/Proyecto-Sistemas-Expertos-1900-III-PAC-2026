@@ -117,9 +117,9 @@ public sealed class RegistrarEmpresaServicio(
         if (renderizado is null)
             return Errores.PlantillaCorreoNoEncontrada;
 
-        var correoEnviado = await envioCorreo.EnviarAsync(
+        var correoEnviado = (await envioCorreo.EnviarAsync(
             new MensajeCorreo(acceso.Email, renderizado.Asunto, renderizado.CuerpoHtml),
-            cancellationToken);
+            cancellationToken)).Enviado;
 
         return new RegistrarEmpresaResponseDto(
             idEmpresaCifrado,
