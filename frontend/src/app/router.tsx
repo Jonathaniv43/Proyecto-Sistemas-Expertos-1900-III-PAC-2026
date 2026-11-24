@@ -3,6 +3,7 @@ import { CambiarContrasenaPage } from '@/features/auth/pages/CambiarContrasenaPa
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
+import { PerfilEmpresaPage } from '@/features/empresas/pages/PerfilEmpresaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
 import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
           {
             element: <RequiereRol roles={ROLES_GESTION} />,
             children: [
+              { path: 'empresa', element: <PerfilEmpresaPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },

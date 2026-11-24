@@ -294,3 +294,17 @@ useFormulario(esquema, {
 - **`Modal`** (design-system.md § Modal): `<dialog>` nativo de 560px con encabezado y pie fijos; Esc cierra; con cambios sin guardar, el clic fuera no cierra; en celular ocupa toda la pantalla.
 - **CSS:** `.tabla-contenedor` y `.modal-cuerpo` llevan `position: relative`. Sin eso, lo que está posicionado de forma absoluta adentro (un encabezado `sr-only`, los radios ocultos) se escapa del scroll: ensancha la página o desplaza el modal entero.
 
+## Perfil de la empresa (HU-026)
+
+- **`/empresa`:** para `ROLES_GESTION`. Se llega con "Perfil de la empresa" desde el inicio. La administración lo edita y el Responsable SST lo ve en solo lectura (el backend tampoco le deja guardar).
+- **Campos:** razón social, rubro (radios con hasta 5 opciones; si hay más, select), trabajadores permanentes, actividad económica y dirección.
+  - **RTN:** se muestra pero no se edita, porque con él se inicia sesión. Su unicidad se valida al registrar la empresa (HU-017).
+  - **Obligatorios en el front:** razón social, rubro y trabajadores, porque son los que completan el perfil (`perfilCompleto`) y el backend no deja borrarlos una vez guardados.
+  - **Dirección y actividad vacías:** se envían como `""`, y el backend las borra.
+- **Rubro marcado:** el perfil trae `rubroNombre`, no el código. Se marca la opción por nombre, que es único en el catálogo (`GET /empresas/rubros-registro`).
+- **Guardar:** `PATCH /empresas/perfil` con solo lo que cambió; se confirma con un aviso de éxito y el formulario queda con lo guardado. Si cambió la razón social, el encabezado se actualiza (`sesion.actualizarRazonSocial`).
+- **Perfil incompleto:** el inicio de la administración muestra un aviso con el enlace al perfil, y la página también lo indica.
+- **Empresa sin rubro:** la nueva encuesta (HU-029) lleva a la administración al perfil para elegirlo.
+- **Fuera del formulario:** la fecha de inicio de operaciones, que el backend acepta, no está en los criterios de la HU y necesita el campo de fecha del design system, que todavía no existe.
+- **Avisos de resultado** (aquí y en Personas): la región `role="status"` va con `display: contents`. Así no suma un hueco en la grilla cuando está vacía y sigue anunciándose al lector de pantalla.
+
