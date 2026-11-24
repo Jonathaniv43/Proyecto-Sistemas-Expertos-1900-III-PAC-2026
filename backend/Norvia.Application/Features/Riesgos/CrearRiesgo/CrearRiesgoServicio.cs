@@ -27,11 +27,11 @@ public sealed class CrearRiesgoServicio(
     {
         if (sesion.VinculoEmpresaId is not Guid vinculoId) return Errores.RiesgoNoEncontrado;
 
-        string? peligroNombre = null;
+        (string Nombre, ClasificacionPeligro Clasificacion)? peligro = null;
         if (request.PeligroId is Guid peligroId)
         {
-            peligroNombre = await repositorio.NombrePeligroActivoAsync(peligroId, ct);
-            if (peligroNombre is null) return Errores.PeligroInvalido;
+            peligro = await repositorio.PeligroActivoAsync(peligroId, ct);
+            if (peligro is null) return Errores.PeligroInvalido;
         }
         var descripcion = string.IsNullOrWhiteSpace(request.DescripcionPeligro) ? null : request.DescripcionPeligro.Trim();
         var actividad = request.Actividad.Trim();
@@ -51,7 +51,7 @@ public sealed class CrearRiesgoServicio(
         repositorio.Agregar(riesgo);
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
-        return new RiesgoResponseDto(riesgo.Id, riesgo.Estado, riesgo.PeligroId, peligroNombre, riesgo.DescripcionPeligro,
+        return new RiesgoResponseDto(riesgo.Id, riesgo.Estado, riesgo.PeligroId, peligro?.Nombre, peligro?.Clasificacion, riesgo.DescripcionPeligro,
             riesgo.Actividad, null, null, riesgo.CreadoEn, null);
     }
 }

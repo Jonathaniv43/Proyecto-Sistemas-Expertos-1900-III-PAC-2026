@@ -9,8 +9,9 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Riesgos;
 // RiesgoEmpresa es tabla de empresa: el filtro global limita a la empresa de la sesión.
 public sealed class CrearRiesgoRepositorio(NorviaDbContext db) : ICrearRiesgoRepositorio
 {
-    public Task<string?> NombrePeligroActivoAsync(Guid peligroId, CancellationToken ct) =>
-        db.Peligro.AsNoTracking().Where(p => p.Id == peligroId && p.Activo).Select(p => p.Nombre).FirstOrDefaultAsync(ct);
+    public async Task<(string Nombre, ClasificacionPeligro Clasificacion)?> PeligroActivoAsync(Guid peligroId, CancellationToken ct) =>
+        await db.Peligro.AsNoTracking().Where(p => p.Id == peligroId && p.Activo)
+            .Select(p => new { p.Nombre, p.Clasificacion }).FirstOrDefaultAsync(ct) is { } p ? (p.Nombre, p.Clasificacion) : null;
 
     public Task<bool> ExisteEnMatrizAsync(Guid? peligroId, string? descripcionPeligro, string actividad, CancellationToken ct)
     {

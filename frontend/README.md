@@ -361,3 +361,16 @@ useFormulario(esquema, {
 - **Matriz:** la columna Nivel muestra la etiqueta con el cuadrado de color (`--color-riesgo-*`, clases en `CLASES_NIVEL`).
 - **CSS:** `.cuadro-riesgo` y `.mapa-calor*` en `index.css`. La escala de espaciado no tiene 10 ni 44px, y en celular el título "Probabilidad" pasa arriba para que las celdas conserven sus 44px.
 
+## Ver la matriz (HU-038)
+
+- **`/riesgos`:**
+  - **Mapa (`MapaMatriz`, de `GET /riesgos/matriz`):** muestra cuántos riesgos hay en cada celda de probabilidad × severidad.
+    - Una celda con riesgos es un botón que filtra la lista; tocarla otra vez o la X del filtro lo quita.
+    - Al lado van el total, los sin evaluar (enlace que filtra) y la leyenda.
+  - **Lista:** se ordena por nivel, el más alto primero, y cada riesgo abre su detalle.
+- **Filtros:** buscar, clasificación del peligro, nivel (incluye "Sin evaluar") y estado ("En la matriz", "Por revisar", "Descartados"). Se envían al backend como parámetros de `GET /riesgos`.
+  - **Buscar:** espera 300ms después de dejar de escribir; los selects filtran al momento.
+  - **Estado distinto de "En la matriz":** el nivel se desactiva, porque solo los riesgos de la matriz tienen nivel. Elegir una celda del mapa vuelve a "En la matriz".
+  - **Mientras carga:** `usePeticion` conserva la lista anterior, así que la tabla no parpadea.
+- **Búsqueda del backend:** no distingue mayúsculas, pero sí tildes.
+

@@ -209,7 +209,7 @@
   /* Mapa de calor de riesgo (design-system.md § Mapa de calor): celdas de 44px con 2px de separación. */
   .mapa-calor {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto auto;
     gap: var(--space-2);
     justify-content: start;
   }
@@ -252,6 +252,11 @@
     font-variant-numeric: tabular-nums;
     cursor: pointer;
     print-color-adjust: exact;
+  }
+
+  /* Celda sin riesgos en el mapa de la matriz: el color del nivel queda de fondo, sin interacción. */
+  .mapa-calor-vacia {
+    cursor: default;
   }
 
   /* Elegida o con foco: anillo de 2px en texto principal con un halo del fondo, visible sobre cualquier color. */

@@ -40,6 +40,8 @@ public static class CatalogoPermisos
         Empresa("riesgo.peligros", "Ver el catálogo de peligros para agregar riesgos", "GET", "api/riesgos/peligros-disponibles",
             "admin_empresa", "responsable_sst"),
         Empresa("riesgo.crear", "Agregar un riesgo a la matriz", "POST", "api/riesgos", "admin_empresa", "responsable_sst"),
+        // HU-038: mapa de la matriz.
+        Empresa("riesgo.matriz", "Ver el mapa de la matriz de riesgos", "GET", "api/riesgos/matriz", "admin_empresa", "responsable_sst"),
         // HU-037: evaluar un riesgo.
         Empresa("riesgo.evaluar", "Evaluar un riesgo", "POST", "api/riesgos/{id}/evaluaciones", "admin_empresa", "responsable_sst"),
 
