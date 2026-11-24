@@ -10,6 +10,7 @@ using Norvia.Application.Features.Riesgos.EvaluarRiesgo.DTOs;
 using Norvia.Application.Features.Riesgos.EvaluarRiesgoResidual;
 using Norvia.Application.Features.Riesgos.EvaluarRiesgoResidual.DTOs;
 using Norvia.Application.Features.Riesgos.ListarControles;
+using Norvia.Application.Features.Riesgos.ListarEvaluaciones;
 using Norvia.Application.Features.Riesgos.ListarControlesSugeridos;
 using Norvia.Application.Features.Riesgos.ListarControlesSugeridos.DTOs;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles;
@@ -75,6 +76,14 @@ public sealed class RiesgosController : ControllerBase
     public async Task<IActionResult> Evaluar(
         Guid id, EvaluarRiesgoRequestDto request, [FromServices] EvaluarRiesgoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-041: historial de evaluaciones del riesgo (iniciales y residuales), la más reciente primero.</summary>
+    [HttpGet("{id:guid}/evaluaciones")]
+    [ProducesResponseType(typeof(IReadOnlyList<EvaluacionResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarEvaluaciones(
+        Guid id, [FromServices] ListarEvaluacionesServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 
     /// <summary>HU-040: evaluación residual (con los controles aplicados); se guarda aparte de la inicial.</summary>
     [HttpPost("{id:guid}/evaluaciones-residual")]
