@@ -1,5 +1,15 @@
 import { api } from '@/shared/api'
-import type { CrearRiesgoRequest, Evaluacion, FiltrosRiesgos, MatrizRiesgos, PeligroDisponible, Riesgo } from '../types/riesgos'
+import type {
+  Control,
+  ControlSugerido,
+  CrearControlRequest,
+  CrearRiesgoRequest,
+  Evaluacion,
+  FiltrosRiesgos,
+  MatrizRiesgos,
+  PeligroDisponible,
+  Riesgo,
+} from '../types/riesgos'
 
 /** Riesgos con filtros (HU-036, HU-038): nivel más alto primero; sin estado, los de la matriz. */
 export const listarRiesgos = (signal: AbortSignal, filtros: FiltrosRiesgos = {}) =>
@@ -20,3 +30,18 @@ export const obtenerRiesgo = (signal: AbortSignal, id: string) => api.get<Riesgo
 /** Evaluación inicial (HU-037). Se suma al historial: la anterior no se borra. 409 si el riesgo no está en la matriz. */
 export const evaluarRiesgo = (id: string, datos: { probabilidad: number; severidad: number }) =>
   api.post<Evaluacion>(`/riesgos/${id}/evaluaciones`, datos).then((r) => r.data)
+
+/** Controles del riesgo, del más efectivo al menos efectivo (HU-039). */
+export const listarControles = (signal: AbortSignal, riesgoId: string) =>
+  api.get<Control[]>(`/riesgos/${riesgoId}/controles`, { signal }).then((r) => r.data)
+
+/** Controles que sugieren las plantillas del peligro y el riesgo todavía no aceptó (RN-76). */
+export const listarControlesSugeridos = (signal: AbortSignal, riesgoId: string) =>
+  api.get<ControlSugerido[]>(`/riesgos/${riesgoId}/controles/sugeridos`, { signal }).then((r) => r.data)
+
+/**
+ * Agrega un control propio o acepta una sugerencia (HU-039). 409 `riesgos.sugerencia_aceptada` si esa sugerencia
+ * ya es un control; 400 `riesgos.sugerencia_invalida` si ya no está disponible; 409 `riesgos.no_en_matriz`.
+ */
+export const crearControl = (riesgoId: string, datos: CrearControlRequest) =>
+  api.post<Control>(`/riesgos/${riesgoId}/controles`, datos).then((r) => r.data)

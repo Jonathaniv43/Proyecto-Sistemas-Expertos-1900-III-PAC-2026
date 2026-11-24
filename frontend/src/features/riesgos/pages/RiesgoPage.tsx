@@ -12,6 +12,7 @@ import { usePeticion } from '@/shared/hooks/usePeticion'
 import { evaluarRiesgo, obtenerRiesgo } from '../api/riesgos'
 import { EtiquetaRiesgo } from '../components/EtiquetaRiesgo'
 import { MapaCalor } from '../components/MapaCalor'
+import { SeccionControles } from '../components/SeccionControles'
 import { nombrePeligro } from '../etiquetas'
 import { clasificar, ETIQUETAS_CLASIFICACION_RIESGO, PROBABILIDADES, SEVERIDADES } from '../niveles'
 import { evaluacionEsquema } from '../schemas/evaluacion'
@@ -24,7 +25,7 @@ const exigeControl = (c: ClasificacionRiesgo) => c === 'alto' || c === 'critico'
 /**
  * Un riesgo de la matriz: sus datos y su evaluación. HU-037: se elige probabilidad y severidad del 1 al
  * 5 con su explicación a la vista (o tocando una celda del mapa), se ve el nivel calculado y queda quién
- * evaluó y cuándo. Volver a evaluar no borra la evaluación anterior (RN-20).
+ * evaluó y cuándo. Volver a evaluar no borra la evaluación anterior (RN-20). HU-039: sus controles.
  */
 export function RiesgoPage() {
   const { id = '' } = useParams()
@@ -93,10 +94,13 @@ export function RiesgoPage() {
                 : 'Todavía hay que confirmarlo desde los peligros sugeridos de la encuesta; después se puede evaluar.'}
             </Aviso>
           ) : (
-            <SeccionEvaluacion
-              riesgo={riesgo}
-              onEvaluado={(evaluacion) => setRiesgo((r) => r && { ...r, evaluacion })}
-            />
+            <>
+              <SeccionEvaluacion
+                riesgo={riesgo}
+                onEvaluado={(evaluacion) => setRiesgo((r) => r && { ...r, evaluacion })}
+              />
+              <SeccionControles riesgo={riesgo} onCambio={(totalControles) => setRiesgo((r) => r && { ...r, totalControles })} />
+            </>
           )}
         </>
       )}
@@ -166,7 +170,6 @@ function SeccionEvaluacion({ riesgo, onEvaluado }: { riesgo: Riesgo; onEvaluado:
               Evaluado por {actual.evaluadoPorNombre} el {fechaHora(actual.evaluadoEn)}
             </p>
           </div>
-          {exigeControl(actual.clasificacion) && <AvisoControl />}
           <div>
             <Boton
               variante="secundario"

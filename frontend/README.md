@@ -374,3 +374,17 @@ useFormulario(esquema, {
   - **Mientras carga:** `usePeticion` conserva la lista anterior, así que la tabla no parpadea.
 - **Búsqueda del backend:** no distingue mayúsculas, pero sí tildes.
 
+
+## Definir controles (HU-039)
+
+- **Detalle del riesgo (`/riesgos/:id`), sección "Controles" (`SeccionControles`):** solo para riesgos de la matriz.
+  - **Controles del riesgo:** tipo, descripción y estado (Propuesto), del más efectivo al menos efectivo (`controles.ts`).
+  - **Sugeridos por Norvia (`GET /riesgos/:id/controles/sugeridos`):** cada sugerencia se acepta tal cual, se edita antes de aceptarla (tipo y descripción) o se descarta. Nada se guarda sin aceptarlo (RN-76).
+    - **Descartar** solo la quita de la vista mientras el riesgo está abierto; "Mostrarlas" la recupera. Al volver a abrir el riesgo reaparece.
+    - **Aceptada:** deja de sugerirse; el backend responde 409 `riesgos.sugerencia_aceptada` si se intenta dos veces.
+  - **Control propio:** tipo (radios con la explicación de cada nivel de la jerarquía) y descripción (hasta 1000), con el esquema `schemas/control.ts`.
+  - **Alto o crítico sin controles:** aviso de advertencia hasta que tenga uno (RN-19).
+- **Matriz (`/riesgos`):**
+  - Badge de advertencia "Sin control" junto al nivel.
+  - Enlace "N altos o críticos sin control" junto al mapa, y opción "Altos y críticos sin control" en el filtro de nivel (`sinControl=true`).
+- **Plantillas:** las sugerencias salen de `PlantillaTarea` del peligro. Todavía no hay pantalla para cargarlas, así que un catálogo sin plantillas no sugiere nada.
