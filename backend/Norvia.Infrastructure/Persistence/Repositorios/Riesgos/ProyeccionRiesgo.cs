@@ -14,7 +14,8 @@ internal static class ProyeccionRiesgo
         Guid Id, TipoEvaluacion Tipo, short Probabilidad, short Severidad, Guid EvaluadoPorId, Persona Persona, DateTime EvaluadoEn);
 
     private sealed record Fila(
-        Guid Id, EstadoRiesgo Estado, Guid? PeligroId, string? PeligroNombre, string? DescripcionPeligro, string? Actividad,
+        Guid Id, EstadoRiesgo Estado, Guid? PeligroId, string? PeligroNombre, ClasificacionPeligro? PeligroClasificacion,
+        string? DescripcionPeligro, string? Actividad,
         Guid? EncuestaId, string? EncuestaTitulo, DateTime CreadoEn, UltimaEvaluacion? Evaluacion);
 
     /// <summary>
@@ -25,7 +26,8 @@ internal static class ProyeccionRiesgo
     {
         var filas = await riesgos
             .Select(r => new Fila(
-                r.Id, r.Estado, r.PeligroId, r.Peligro != null ? r.Peligro.Nombre : null, r.DescripcionPeligro, r.Actividad,
+                r.Id, r.Estado, r.PeligroId, r.Peligro != null ? r.Peligro.Nombre : null,
+                r.Peligro != null ? r.Peligro.Clasificacion : (ClasificacionPeligro?)null, r.DescripcionPeligro, r.Actividad,
                 r.EncuestaId, db.Encuesta.Where(e => e.Id == r.EncuestaId).Select(e => e.Titulo).FirstOrDefault(), r.CreadoEn,
                 r.Evaluaciones
                     .Where(e => e.Tipo == TipoEvaluacion.Inicial)
@@ -35,7 +37,7 @@ internal static class ProyeccionRiesgo
             .ToListAsync(ct);
 
         return filas.Select(f => new RiesgoResponseDto(
-                f.Id, f.Estado, f.PeligroId, f.PeligroNombre, f.DescripcionPeligro, f.Actividad, f.EncuestaId, f.EncuestaTitulo, f.CreadoEn,
+                f.Id, f.Estado, f.PeligroId, f.PeligroNombre, f.PeligroClasificacion, f.DescripcionPeligro, f.Actividad, f.EncuestaId, f.EncuestaTitulo, f.CreadoEn,
                 f.Evaluacion is { } e
                     ? new EvaluacionResponseDto(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.Probabilidad * e.Severidad,
                         EvaluacionRiesgo.Clasificar(e.Probabilidad * e.Severidad), e.EvaluadoPorId, e.Persona.NombreCompleto, e.EvaluadoEn)

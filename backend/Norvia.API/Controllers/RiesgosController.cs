@@ -8,6 +8,9 @@ using Norvia.Application.Features.Riesgos.EvaluarRiesgo.DTOs;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles.DTOs;
 using Norvia.Application.Features.Riesgos.ListarRiesgos;
+using Norvia.Application.Features.Riesgos.ListarRiesgos.DTOs;
+using Norvia.Application.Features.Riesgos.ObtenerMatriz;
+using Norvia.Application.Features.Riesgos.ObtenerMatriz.DTOs;
 using Norvia.Application.Features.Riesgos.ObtenerRiesgo;
 
 namespace Norvia.API.Controllers;
@@ -17,10 +20,21 @@ namespace Norvia.API.Controllers;
 [Route("api/riesgos")]
 public sealed class RiesgosController : ControllerBase
 {
-    /// <summary>HU-036: riesgos de la matriz (confirmados), los más recientes primero.</summary>
+    /// <summary>
+    /// HU-036, HU-038: riesgos de la empresa con filtros (estado, texto, clasificación del peligro, nivel, celda).
+    /// Sin estado, los de la matriz. Nivel más alto primero.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<RiesgoResponseDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Listar([FromServices] ListarRiesgosServicio servicio, CancellationToken cancellationToken) =>
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Listar(
+        [FromQuery] FiltrosRiesgosDto filtros, [FromServices] ListarRiesgosServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(filtros, cancellationToken));
+
+    /// <summary>HU-038: cuántos riesgos de la matriz hay en cada celda de probabilidad × severidad.</summary>
+    [HttpGet("matriz")]
+    [ProducesResponseType(typeof(MatrizRiesgosResponseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Matriz([FromServices] ObtenerMatrizServicio servicio, CancellationToken cancellationToken) =>
         Ok(await servicio.EjecutarAsync(cancellationToken));
 
     /// <summary>HU-036: peligros activos del catálogo, para elegir al agregar un riesgo.</summary>
