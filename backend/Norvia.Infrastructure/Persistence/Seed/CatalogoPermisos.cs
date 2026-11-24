@@ -144,6 +144,11 @@ public static class CatalogoPermisos
         Plataforma("catalogo.plantilla.crear", "Crear plantilla de documento", "POST", "api/plantillas", "admin_plataforma"),
         Plataforma("catalogo.plantilla.actualizar", "Editar plantilla de documento", "PATCH", "api/plantillas/{id}", "admin_plataforma"),
         Plataforma("catalogo.plantilla.estado", "Activar o desactivar plantilla de documento", "PATCH", "api/plantillas/{id}/estado", "admin_plataforma"),
+        // HU-023: plantillas de tarea de cada peligro (controles sugeridos y tareas modelo).
+        Plataforma("catalogo.plantilla_tarea.listar", "Listar plantillas de tarea", "GET", "api/plantillas-tarea", "admin_plataforma", "soporte_plataforma"),
+        Plataforma("catalogo.plantilla_tarea.crear", "Crear plantilla de tarea", "POST", "api/plantillas-tarea", "admin_plataforma"),
+        Plataforma("catalogo.plantilla_tarea.actualizar", "Editar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}", "admin_plataforma"),
+        Plataforma("catalogo.plantilla_tarea.estado", "Activar o desactivar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}/estado", "admin_plataforma"),
 
         // TEMPORALES para probar el middleware (borrar junto con PruebaController).
         Plataforma("prueba.plataforma", "Prueba plataforma", "GET", "api/prueba/plataforma", "admin_plataforma"),

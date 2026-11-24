@@ -26,6 +26,8 @@ public sealed class CatalogoSstTests(NorviaApiFactory api)
         await SembrarAsync(db); // carga repetida
 
         Assert.Equal(antes, await ContarAsync(db));
+        // Los códigos cumplen la regla de la administración de catálogos (HU-023).
+        Assert.All(await db.Peligro.AsNoTracking().Select(p => p.Codigo).ToListAsync(), c => Assert.Matches("^[a-z0-9_]+$", c));
         Assert.True(antes.Peligros >= 15 && antes.Plantillas >= 60 && antes.Preguntas >= 30, antes.ToString());
 
         // Los cuatro rubros tienen categorías, y cada categoría tiene preguntas.
@@ -76,12 +78,12 @@ public sealed class CatalogoSstTests(NorviaApiFactory api)
     {
         await using var db = await BaseNuevaAsync();
         // Antes de la carga, el staff ya creó un peligro con un código del catálogo.
-        db.Peligro.Add(new Peligro { Codigo = "FIS-RUIDO", Nombre = "Ruido (versión del staff)", Clasificacion = Domain.Enums.ClasificacionPeligro.Fisico });
+        db.Peligro.Add(new Peligro { Codigo = "fis_ruido", Nombre = "Ruido (versión del staff)", Clasificacion = Domain.Enums.ClasificacionPeligro.Fisico });
         await db.SaveChangesAsync();
         await SembrarAsync(db);
 
         // Edita y desactiva elementos cargados.
-        var ruido = await db.Peligro.SingleAsync(p => p.Codigo == "FIS-RUIDO");
+        var ruido = await db.Peligro.SingleAsync(p => p.Codigo == "fis_ruido");
         var pregunta = await db.PreguntaExploratoria.FirstAsync(p => p.PeligroId == ruido.Id);
         pregunta.Texto = "Texto editado por el staff";
         var plantilla = await db.PlantillaTarea.FirstAsync(p => p.PeligroId == ruido.Id);
@@ -91,10 +93,10 @@ public sealed class CatalogoSstTests(NorviaApiFactory api)
 
         await SembrarAsync(db);
 
-        Assert.Equal("Ruido (versión del staff)", (await db.Peligro.SingleAsync(p => p.Codigo == "FIS-RUIDO")).Nombre);
+        Assert.Equal("Ruido (versión del staff)", (await db.Peligro.SingleAsync(p => p.Codigo == "fis_ruido")).Nombre);
         Assert.Equal("Texto editado por el staff", (await db.PreguntaExploratoria.SingleAsync(p => p.Id == pregunta.Id)).Texto);
         Assert.False((await db.PlantillaTarea.SingleAsync(p => p.Id == plantilla.Id)).Activa);
-        Assert.Equal(1, await db.Peligro.CountAsync(p => p.Codigo == "FIS-RUIDO"));
+        Assert.Equal(1, await db.Peligro.CountAsync(p => p.Codigo == "fis_ruido"));
     }
 
     // ---------- Apoyo ----------
