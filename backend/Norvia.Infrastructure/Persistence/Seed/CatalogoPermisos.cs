@@ -48,6 +48,12 @@ public static class CatalogoPermisos
         Empresa("plan.propuesta", "Ver el plan de trabajo propuesto", "GET", "api/plan-trabajo/propuesta", "admin_empresa", "responsable_sst"),
         Empresa("plan.generar", "Confirmar el plan de trabajo", "POST", "api/plan-trabajo/generacion", "admin_empresa", "responsable_sst"),
         Empresa("tarea.listar", "Ver las tareas del plan", "GET", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
+        // HU-043: asignar tareas y crear tareas manuales.
+        Empresa("tarea.crear", "Crear una tarea manual", "POST", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
+        Empresa("tarea.asignar", "Asignar responsable y fecha límite a una tarea", "PUT", "api/plan-trabajo/tareas/{id}/asignacion",
+            "admin_empresa", "responsable_sst"),
+        Empresa("tarea.responsables", "Ver a quién se le puede asignar una tarea", "GET", "api/plan-trabajo/responsables",
+            "admin_empresa", "responsable_sst"),
         // HU-040: evaluación residual.
         Empresa("riesgo.evaluar_residual", "Evaluar el riesgo residual", "POST", "api/riesgos/{id}/evaluaciones-residual",
             "admin_empresa", "responsable_sst"),
