@@ -15,6 +15,8 @@ interface CampoFechaProps {
   ayuda?: ReactNode
   /** Primer día que se puede elegir en el calendario (aaaa-mm-dd); los anteriores se ven deshabilitados. */
   minimo?: string
+  /** Último día que se puede elegir (aaaa-mm-dd), p. ej. hoy para un accidente; los posteriores se ven deshabilitados. */
+  maximo?: string
 }
 
 const SEMANA = [
@@ -61,11 +63,11 @@ function semanasDelMes(texto: string) {
 
 /**
  * Campo de fecha (design-system.md § Campo de fecha): se escribe en dd/mm/aaaa (las barras se ponen solas) o se
- * elige en el calendario, que empieza el domingo, marca hoy con un borde y deshabilita los días antes de `minimo`.
+ * elige en el calendario, que empieza el domingo, marca hoy con un borde y deshabilita los días fuera de `minimo`–`maximo`.
  * Teclado en el calendario: flechas (día y semana), Inicio/Fin (semana), RePág/AvPág (mes), Enter elige y Esc
  * cierra devolviendo el foco al botón. En celular el calendario se abre como hoja inferior.
  */
-export function CampoFecha({ etiqueta, required, valor, onChange, onBlur, error, ayuda, minimo }: CampoFechaProps) {
+export function CampoFecha({ etiqueta, required, valor, onChange, onBlur, error, ayuda, minimo, maximo }: CampoFechaProps) {
   const id = useId()
   const idMensaje = `${id}-mensaje`
   const idTitulo = `${id}-mes`
@@ -80,10 +82,10 @@ export function CampoFecha({ etiqueta, required, valor, onChange, onBlur, error,
 
   const elegido = textoAIso(valor)
   const hoy = hoyHonduras()
-  const deshabilitado = (dia: string) => minimo !== undefined && dia < minimo
+  const deshabilitado = (dia: string) => (minimo !== undefined && dia < minimo) || (maximo !== undefined && dia > maximo)
 
   const abrir = () => {
-    setEnfocado(elegido ?? (minimo && minimo > hoy ? minimo : hoy))
+    setEnfocado(elegido ?? (minimo && minimo > hoy ? minimo : maximo && maximo < hoy ? maximo : hoy))
     setAbierto(true)
   }
   const cerrar = (devolverFoco = true) => {

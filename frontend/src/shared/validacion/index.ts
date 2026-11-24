@@ -11,4 +11,4 @@ export {
   textoOpcional,
   textoRequerido,
 } from './reglas'
-export { conBarras, fechaCorta, fechaLimite, hoyHonduras, isoATexto, textoAIso } from './fechas'
+export { conBarras, fechaCorta, fechaLimite, horaATexto, hoyHonduras, isoATexto, leerHora, minutosAhoraHonduras, textoAIso } from './fechas'
