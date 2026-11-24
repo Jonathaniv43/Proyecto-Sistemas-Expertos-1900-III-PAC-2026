@@ -311,3 +311,15 @@ useFormulario(esquema, {
 - **Fuera del formulario:** la fecha de inicio de operaciones, que el backend acepta, no está en los criterios de la HU y necesita el campo de fecha del design system, que todavía no existe.
 - **Avisos de resultado** (aquí y en Personas): la región `role="status"` va con `display: contents`. Así no suma un hueco en la grilla cuando está vacía y sigue anunciándose al lector de pantalla.
 
+## Cambiar la contraseña (HU-022)
+
+- **Por qué un enlace:** antes de cambiar la contraseña se confirma que la persona puede entrar a su correo. Se le envía un enlace, y el cambio se hace desde ahí.
+- **Pedir el enlace** (`SolicitarCambioContrasenaPage`, `POST /auth/contrasena/solicitud`):
+  - **Con sesión** (`/cuenta/contrasena`, "Cambiar contraseña" en el encabezado): va al correo de la cuenta, que viene en el claim `email` del JWT (`usuario.email`).
+  - **Sin sesión** (`/recuperar-contrasena`, "¿Olvidaste tu contraseña?" en los dos logins): se escribe el correo. La respuesta es la misma exista o no la cuenta.
+- **El enlace** (`/restablecer-contrasena?token=…`, `RestablecerContrasenaPage`): funciona con o sin sesión. Pide la contraseña nueva con los requisitos de HU-114 a la vista.
+  - **Errores:** "igual a la actual" se marca en el campo. Un enlace vencido, usado o incompleto (410 `auth.enlace_invalido`, o sin token) muestra "El enlace ya no sirve" y ofrece pedir otro.
+  - **Al guardar:** la contraseña vale en todas las empresas y el backend cierra todas las sesiones de la cuenta. Si este navegador tenía una sesión de esa cuenta, se cierra (se comprueba renovando: si el refresh fue rechazado, termina con `contrasena_cambiada`).
+- **Motivo del cierre entre pestañas:** al terminar una sesión se guarda el motivo (`norvia.motivoFin`) antes de borrar el refresh. Así las otras pestañas también explican por qué se cerró: contraseña cambiada, sesión vencida, etc.
+- **Primer ingreso con contraseña temporal** (`/cambiar-contrasena`): no cambia. Se cambia con la contraseña actual, sin correo.
+

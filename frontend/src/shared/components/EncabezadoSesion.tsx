@@ -1,12 +1,14 @@
-import { LogOut } from 'lucide-react'
+import { KeyRound, LogOut } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { UsuarioSesion } from '@/shared/api'
 import { Boton } from '@/shared/components/ui/Boton'
+import { clasesBoton } from '@/shared/components/ui/clases'
 import { cerrarSesion, etiquetaRol } from '@/shared/sesion'
 
 /**
  * Encabezado del área privada: en qué empresa y con qué rol se está trabajando (HU-019: una sesión
- * por empresa) y el botón para cerrar sesión. El menú de cada módulo se agrega con su HU.
+ * por empresa), el enlace para cambiar la contraseña (HU-022) y el botón para cerrar sesión. El menú de cada módulo se agrega con su HU.
  */
 export function EncabezadoSesion({ usuario }: { usuario: UsuarioSesion }) {
   const [cerrando, setCerrando] = useState(false)
@@ -21,18 +23,26 @@ export function EncabezadoSesion({ usuario }: { usuario: UsuarioSesion }) {
         </span>
         <span className="text-xs text-text-secondary">{etiquetaRol(usuario.rol)}</span>
       </div>
-      <Boton
-        variante="secundario"
-        cargando={cerrando}
-        textoCargando="Cerrando sesión…"
-        onClick={async () => {
-          setCerrando(true)
-          await cerrarSesion()
-        }}
-      >
-        <LogOut aria-hidden size={16} strokeWidth={1.5} />
-        Cerrar sesión
-      </Boton>
+      <div className="flex flex-wrap gap-2">
+        {!usuario.debeCambiarPassword && (
+          <Link to="/cuenta/contrasena" className={clasesBoton('secundario')}>
+            <KeyRound aria-hidden size={16} strokeWidth={1.5} />
+            Cambiar contraseña
+          </Link>
+        )}
+        <Boton
+          variante="secundario"
+          cargando={cerrando}
+          textoCargando="Cerrando sesión…"
+          onClick={async () => {
+            setCerrando(true)
+            await cerrarSesion()
+          }}
+        >
+          <LogOut aria-hidden size={16} strokeWidth={1.5} />
+          Cerrar sesión
+        </Boton>
+      </div>
     </header>
   )
 }

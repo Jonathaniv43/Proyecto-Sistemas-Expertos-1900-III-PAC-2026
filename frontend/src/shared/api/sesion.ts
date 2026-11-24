@@ -47,6 +47,8 @@ export interface UsuarioSesion {
   /** VinculoEmpresa de la sesión; solo en sesiones de empresa. */
   vinculoId: string | null
   debeCambiarPassword: boolean
+  /** Correo de la cuenta (claim `email`): a dónde se envía el enlace para cambiar la contraseña (HU-022). */
+  email: string | null
   /** Solo en sesiones de empresa iniciadas desde este navegador. */
   empresa: EmpresaSesion | null
 }
@@ -55,6 +57,9 @@ const CLAVE_REFRESH = 'norvia.refreshToken'
 /** Identifica cada inicio de sesión: cambia al iniciar sesión, no al renovar. */
 const CLAVE_SESION_ID = 'norvia.sesionId'
 const CLAVE_EMPRESA = 'norvia.empresa'
+/** Por qué terminó la última sesión: las otras pestañas lo leen para explicar el cierre. */
+const CLAVE_MOTIVO_FIN = 'norvia.motivoFin'
+const MOTIVOS_FIN: readonly MotivoFinSesion[] = ['cerrada', 'expirada', 'reemplazada', 'contrasena_cambiada']
 const CLAIM_ROL_LARGO = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
 
 let accessToken: string | null = null
@@ -123,6 +128,7 @@ function usuarioDe(token: string, debeCambiarPassword: boolean): UsuarioSesion |
     rol: texto(claims.role) ?? texto(claims[CLAIM_ROL_LARGO]),
     vinculoId: texto(claims.vinculo_id),
     debeCambiarPassword,
+    email: texto(claims.email),
     empresa: claims.tipo_sesion === 'plataforma' ? null : leerEmpresa(),
   }
 }
@@ -141,6 +147,7 @@ export const sesion = {
   /** Inicio de sesión: guarda los tokens y marca un inicio nuevo (las demás pestañas lo notan). */
   iniciar(respuesta: SesionResponse, empresa: EmpresaSesion | null) {
     empresaTerminada = null
+    escribir(CLAVE_MOTIVO_FIN, null)
     sesionIdPropio = crypto.randomUUID()
     escribir(CLAVE_SESION_ID, sesionIdPropio)
     escribir(CLAVE_EMPRESA, empresa ? JSON.stringify(empresa) : null)
@@ -199,6 +206,8 @@ export const sesion = {
     accessToken = null
     usuario = null
     if (!conservarAlmacenamiento) {
+      // Antes de borrar el refresh: al notarlo, las otras pestañas leen el motivo (p. ej. contraseña cambiada).
+      escribir(CLAVE_MOTIVO_FIN, motivo)
       escribirRefresh(null)
       escribir(CLAVE_SESION_ID, null)
       escribir(CLAVE_EMPRESA, null)
@@ -229,14 +238,15 @@ export const sesion = {
 }
 
 // Lo que hacen otras pestañas:
-// - cierran sesión (borran el refresh): esta pestaña también la cierra;
+// - cierran sesión (borran el refresh): esta pestaña también la cierra, con el mismo motivo;
 // - inician sesión (cambia el id de sesión): esta pestaña cierra la suya sin borrar la nueva.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (evento) => {
     if (accessToken === null) return
     const borrado = evento.key === null || (evento.key === CLAVE_REFRESH && evento.newValue === null)
     if (borrado) {
-      sesion.terminar('cerrada', { conservarAlmacenamiento: true })
+      const motivo = leer(CLAVE_MOTIVO_FIN) as MotivoFinSesion | null
+      sesion.terminar(motivo && MOTIVOS_FIN.includes(motivo) ? motivo : 'cerrada', { conservarAlmacenamiento: true })
       return
     }
     if (evento.key === CLAVE_SESION_ID && evento.newValue !== null && evento.newValue !== sesionIdPropio) {
