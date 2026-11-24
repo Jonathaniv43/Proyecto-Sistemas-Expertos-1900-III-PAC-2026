@@ -182,6 +182,23 @@
     white-space: nowrap;
   }
 
+  /* Etiqueta de riesgo (design-system.md § Etiqueta de riesgo): chip neutro; solo el cuadrado lleva el color. */
+  .etiqueta-riesgo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 22px;
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-subtle);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    font-variant-numeric: tabular-nums;
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
   /* Botón de solo ícono (design-system.css § icon-btn): mismo alto que los controles. */
   .boton-icono {
     display: inline-grid;
@@ -297,6 +314,57 @@
       height: 100dvh;
       max-height: 100dvh;
       border-radius: 0;
+    }
+  }
+
+  /* Select con búsqueda (design-system.md § Select, lista abierta): a 4px del campo y con su ancho;
+     ~8 opciones y luego desplaza. En celular, hoja inferior con el fondo oscurecido. */
+  .lista-busqueda {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    z-index: 30;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-2);
+  }
+
+  .lista-busqueda-opciones {
+    max-height: calc(8 * var(--control-height));
+    overflow-y: auto;
+    padding-bottom: var(--space-1);
+  }
+
+  .lista-busqueda-fondo {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    .lista-busqueda {
+      position: fixed;
+      top: auto;
+      bottom: 0;
+      border-radius: 16px 16px 0 0;
+      max-height: 80dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lista-busqueda-opciones {
+      max-height: none;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .lista-busqueda-fondo {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: var(--color-overlay);
     }
   }
 

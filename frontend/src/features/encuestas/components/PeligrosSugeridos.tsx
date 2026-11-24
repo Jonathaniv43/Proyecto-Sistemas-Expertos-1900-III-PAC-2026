@@ -1,5 +1,6 @@
 import { SearchCheck, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { extraerError, type ErrorApi } from '@/shared/api'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -77,8 +78,8 @@ export function PeligrosSugeridos({ encuestaId }: { encuestaId: string }) {
           Peligros sugeridos
         </h2>
         <p className="text-text-secondary">
-          Salen de las respuestas que indican exposición a un peligro, en todas las versiones de la encuesta. Te sirven de
-          punto de partida para la matriz de riesgos.
+          Salen de las respuestas que indican exposición a un peligro, en todas las versiones de la encuesta. Los que
+          confirmes pasan a la <Link to="/riesgos">matriz de riesgos</Link>.
         </p>
       </header>
       <div role="status" className="contents">

@@ -15,6 +15,8 @@ import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncue
 import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
+import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
+import { RiesgosPage } from '@/features/riesgos/pages/RiesgosPage'
 import { AgregarEncuestadosPage } from '@/features/vinculos/pages/AgregarEncuestadosPage'
 import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage'
 import { PersonasPage } from '@/features/vinculos/pages/PersonasPage'
@@ -78,6 +80,8 @@ export const router = createBrowserRouter([
             element: <RequiereRol roles={ROLES_GESTION} />,
             children: [
               { path: 'empresa', element: <PerfilEmpresaPage /> },
+              { path: 'riesgos', element: <RiesgosPage /> },
+              { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },

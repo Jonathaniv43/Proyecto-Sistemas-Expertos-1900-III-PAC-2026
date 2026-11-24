@@ -331,3 +331,22 @@ useFormulario(esquema, {
 - **Una sola vez:** `PATCH /encuestas/{id}/peligros-sugeridos/{riesgoId}` con `estado` y `actividad`. Si otra persona ya la revisó (409 `encuestas.sugerencia_ya_revisada`), se avisa y la lista se recarga con su decisión.
 - **Al recargar:** las decisiones vienen en la misma lista de HU-033 (`estado` y `actividad`).
 
+## Matriz de riesgos: agregar riesgos (HU-036)
+
+- **`/riesgos`** (`ROLES_GESTION`, "Matriz de riesgos" en el inicio): lista los riesgos confirmados con el peligro, la actividad, la etiqueta de riesgo, el origen y la fecha.
+  - **Origen:** "Encuesta …", con enlace a sus resultados, o "Agregado a mano".
+  - **Nivel:** por ahora todos son "Sin evaluar"; la evaluación llega con HU-037.
+  - **Celular:** la actividad y el origen bajan debajo del peligro.
+- **`/riesgos/nuevo`:** el peligro se elige del catálogo o se describe (hasta 300 caracteres); la actividad es obligatoria (hasta 200).
+  - **Al guardar:** vuelve a la matriz con un aviso.
+  - **Duplicado:** si ya está en la matriz con la misma actividad (409 `riesgos.duplicado`), el error va junto a la actividad.
+- **`SelectBusqueda`** (`shared/components/ui`): el select con búsqueda de design-system.md § Select, para listas largas (peligros y, después, responsables).
+  - **Cerrado:** igual que el input.
+  - **Abierto:**
+    - el foco va al buscador, que filtra sin tildes ni mayúsculas;
+    - las flechas recorren las opciones, Enter elige y Esc cierra;
+    - en los dos últimos casos, el foco vuelve al campo.
+  - **Celular:** hoja inferior con el fondo oscurecido.
+- **`EtiquetaRiesgo`:** el chip neutro de design-system.md § Etiqueta de riesgo. Los colores de nivel (`--color-riesgo-*` en `theme.css`) se usan desde HU-037.
+- Los peligros sugeridos (HU-035) enlazan a la matriz.
+

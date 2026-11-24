@@ -105,6 +105,18 @@
   --color-dato-serie: #2a78d6;
   --color-dato-pista: #cde2fb;
 
+  /* --- Color: riesgo (RN-16, design-system.md § Semánticas: riesgo). Semáforo de 4 niveles, iguales
+         en claro y en oscuro (no se redefinen en [data-theme="dark"]); el texto encima también es fijo.
+         Nunca va solo: siempre con el nombre del nivel y el número. --- */
+  --color-riesgo-bajo: #22c55e;
+  --color-riesgo-bajo-texto: #1d1d27;
+  --color-riesgo-medio: #facc15;
+  --color-riesgo-medio-texto: #1d1d27;
+  --color-riesgo-alto: #f97316;
+  --color-riesgo-alto-texto: #1d1d27;
+  --color-riesgo-critico: #dc2645;
+  --color-riesgo-critico-texto: #ffffff;
+
   /* --- Tipografía (font-sans, font-regular|medium|semibold, text-xs…2xl) --- */
   --font-sans: var(--font-family-sans);
   --font-weight-regular: 400;
