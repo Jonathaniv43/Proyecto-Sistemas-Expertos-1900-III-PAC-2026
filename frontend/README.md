@@ -388,3 +388,11 @@ useFormulario(esquema, {
   - Badge de advertencia "Sin control" junto al nivel.
   - Enlace "N altos o críticos sin control" junto al mapa, y opción "Altos y críticos sin control" en el filtro de nivel (`sinControl=true`).
 - **Plantillas:** las sugerencias salen de `PlantillaTarea` del peligro. Todavía no hay pantalla para cargarlas, así que un catálogo sin plantillas no sugiere nada.
+
+## Evaluar el riesgo residual (HU-040)
+
+- **Detalle del riesgo, sección "Evaluación":** con la inicial hecha, muestra dos paneles lado a lado (`PanelEvaluacion`): "Inicial" y "Residual". En celular se apilan.
+  - **Residual:** se evalúa con el mismo formulario (`FormularioEvaluacion` con `tipo="residual"`, que llama a `POST /riesgos/:id/evaluaciones-residual`). Necesita al menos un control: sin controles el panel lo explica y no muestra el botón.
+  - **Comparación:** debajo de los paneles, una frase dice si el riesgo bajó, siguió igual o subió.
+  - **Volver a evaluar** cualquiera de las dos parte de la vigente del mismo tipo; la otra no cambia.
+- **Matriz (`/riesgos`):** columna "Residual" (`evaluacionResidual`); en celular va bajo el nivel. El mapa y el orden siguen usando la inicial.

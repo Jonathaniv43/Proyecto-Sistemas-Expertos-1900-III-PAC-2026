@@ -45,6 +45,8 @@ export interface Riesgo {
   creadoEn: string
   /** Última evaluación inicial (HU-037); null si todavía no se evaluó. */
   evaluacion: Evaluacion | null
+  /** Última evaluación residual, con los controles aplicados (HU-040); null si no hay. */
+  evaluacionResidual: Evaluacion | null
   /** Cuántos controles tiene (HU-039). Un riesgo alto o crítico sin controles se señala (RN-19). */
   totalControles: number
 }

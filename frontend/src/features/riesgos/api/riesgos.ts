@@ -31,6 +31,13 @@ export const obtenerRiesgo = (signal: AbortSignal, id: string) => api.get<Riesgo
 export const evaluarRiesgo = (id: string, datos: { probabilidad: number; severidad: number }) =>
   api.post<Evaluacion>(`/riesgos/${id}/evaluaciones`, datos).then((r) => r.data)
 
+/**
+ * Evaluación residual, con los controles aplicados (HU-040). Se guarda aparte de la inicial. 409 `riesgos.sin_evaluacion_inicial`,
+ * `riesgos.sin_controles` o `riesgos.no_en_matriz`.
+ */
+export const evaluarRiesgoResidual = (id: string, datos: { probabilidad: number; severidad: number }) =>
+  api.post<Evaluacion>(`/riesgos/${id}/evaluaciones-residual`, datos).then((r) => r.data)
+
 /** Controles del riesgo, del más efectivo al menos efectivo (HU-039). */
 export const listarControles = (signal: AbortSignal, riesgoId: string) =>
   api.get<Control[]>(`/riesgos/${riesgoId}/controles`, { signal }).then((r) => r.data)
