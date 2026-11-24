@@ -58,6 +58,9 @@ public static class CatalogoPermisos
             "admin_empresa", "responsable_sst"),
         Empresa("tarea.responsables", "Ver a quién se le puede asignar una tarea", "GET", "api/plan-trabajo/responsables",
             "admin_empresa", "responsable_sst"),
+        // HU-041: historial de evaluaciones.
+        Empresa("riesgo.historial", "Ver el historial de evaluaciones de un riesgo", "GET", "api/riesgos/{id}/evaluaciones",
+            "admin_empresa", "responsable_sst"),
         // HU-040: evaluación residual.
         Empresa("riesgo.evaluar_residual", "Evaluar el riesgo residual", "POST", "api/riesgos/{id}/evaluaciones-residual",
             "admin_empresa", "responsable_sst"),
