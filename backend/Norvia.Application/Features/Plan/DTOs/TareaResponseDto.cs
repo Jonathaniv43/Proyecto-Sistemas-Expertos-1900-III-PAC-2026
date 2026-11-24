@@ -1,6 +1,6 @@
 using Norvia.Domain.Enums;
 
-namespace Norvia.Application.Features.Plan.ListarTareas.DTOs;
+namespace Norvia.Application.Features.Plan.DTOs;
 
 /// <summary>Origen de una tarea (RN-23): se deduce de qué columna de origen tiene valor.</summary>
 public enum OrigenTarea

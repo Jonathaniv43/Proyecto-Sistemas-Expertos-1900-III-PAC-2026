@@ -1,5 +1,5 @@
 using Norvia.Application.Common.CasosDeUso;
-using Norvia.Application.Features.Plan.ListarTareas.DTOs;
+using Norvia.Application.Features.Plan.DTOs;
 
 namespace Norvia.Application.Features.Plan.ListarTareas;
 

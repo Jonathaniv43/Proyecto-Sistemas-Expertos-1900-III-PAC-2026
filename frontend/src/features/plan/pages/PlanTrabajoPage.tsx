@@ -1,20 +1,31 @@
-import { ListChecks, TriangleAlert } from 'lucide-react'
+import { ListChecks, Plus, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { extraerError } from '@/shared/api/errores'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
+import { clasesBoton } from '@/shared/components/ui/clases'
 import { GrupoCasillas } from '@/shared/components/ui/GrupoCasillas'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
-import { generarPlan, listarTareas, obtenerPropuesta } from '../api/plan'
+import { fechaCorta, hoyHonduras } from '@/shared/validacion'
+import { generarPlan, listarResponsables, listarTareas, obtenerPropuesta } from '../api/plan'
+import { AsignarTareaModal } from '../components/AsignarTareaModal'
+import { PRIORIDADES } from '../etiquetas'
 import type { EstadoTarea, Tarea, TareaPropuesta, TipoControl } from '../types/plan'
 
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
 
-const PRIORIDADES = { 1: 'Alta', 2: 'Media', 3: 'Baja' } as const
+/** Lo que /plan-de-trabajo/nueva deja en el estado de la navegación al crear una tarea. */
+export interface EstadoPlanNavegacion {
+  creada?: string
+}
+
+/** Pendiente o en progreso con la fecha límite pasada (design-system.md § Badges: no es un estado guardado). */
+const vencida = (t: Tarea) => (t.estado === 'pendiente' || t.estado === 'en_progreso') && t.fechaLimite !== null && t.fechaLimite < hoyHonduras()
+const cerrada = (t: Tarea) => t.estado === 'completada' || t.estado === 'cancelada'
 
 const TIPOS_CONTROL: Record<TipoControl, string> = {
   eliminacion: 'Eliminación',
@@ -39,32 +50,48 @@ const origenPropuesta = (t: TareaPropuesta) =>
  * HU-042: plan de trabajo. Norvia propone tareas a partir de los controles de cada riesgo evaluado y de las tareas
  * modelo de su peligro, de la prioridad más alta a la más baja. Se revisan, se desmarcan las que no se quieran
  * y se confirman; lo que ya tiene tarea no se vuelve a proponer, así que generarlo dos veces no duplica.
+ * HU-043: cada tarea se asigna (responsable y fecha límite) y se crean tareas manuales.
  */
 export function PlanTrabajoPage() {
   const propuesta = usePeticion(obtenerPropuesta)
   const tareas = usePeticion(listarTareas)
   const cargandoVisible = useCargaVisible(!propuesta.datos || !tareas.datos)
+  const responsables = usePeticion(listarResponsables)
   const [agregadas, setAgregadas] = useState<number>()
+  const [asignando, setAsignando] = useState<Tarea>()
+  const [asignada, setAsignada] = useState<string>()
+  const { state } = useLocation()
+  const creada = (state as EstadoPlanNavegacion | null)?.creada
 
   const { ejecutar: cargarPropuesta } = propuesta
   const { ejecutar: cargarTareas } = tareas
+  const { ejecutar: cargarResponsables } = responsables
   const cargar = useCallback(() => {
     void cargarPropuesta()
     void cargarTareas()
-  }, [cargarPropuesta, cargarTareas])
+    void cargarResponsables()
+  }, [cargarPropuesta, cargarTareas, cargarResponsables])
   useEffect(cargar, [cargar])
 
   const error = propuesta.error ?? tareas.error
 
   return (
     <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
-      <header className="grid gap-1">
-        <h1 className="text-xl font-semibold">Plan de trabajo</h1>
-        <p className="text-text-secondary">Las tareas para reducir los riesgos de la empresa, empezando por las más urgentes.</p>
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div className="grid gap-1">
+          <h1 className="text-xl font-semibold">Plan de trabajo</h1>
+          <p className="text-text-secondary">Las tareas para reducir los riesgos de la empresa, empezando por las más urgentes.</p>
+        </div>
+        <Link to="/plan-de-trabajo/nueva" className={clasesBoton('secundario')}>
+          <Plus aria-hidden size={16} strokeWidth={1.5} />
+          Nueva tarea
+        </Link>
       </header>
 
       <div role="status" className="contents">
-        {agregadas !== undefined && (
+        {asignada && <Aviso tipo="exito">{asignada}</Aviso>}
+        {creada && !asignada && agregadas === undefined && <Aviso tipo="exito">{`La tarea «${creada}» quedó en el plan.`}</Aviso>}
+        {agregadas !== undefined && !asignada && (
           <Aviso tipo="exito">
             {agregadas === 0
               ? 'Esas tareas ya estaban en el plan.'
@@ -95,11 +122,30 @@ export function PlanTrabajoPage() {
             riesgosSinEvaluar={propuesta.datos.riesgosSinEvaluar}
             hayPlan={tareas.datos.length > 0}
             onConfirmado={(n) => {
+              setAsignada(undefined)
               setAgregadas(n)
               cargar()
             }}
           />
-          <SeccionTareas tareas={tareas.datos} />
+          <SeccionTareas
+            tareas={tareas.datos}
+            puedeAsignar={responsables.datos !== undefined}
+            onAsignar={(t) => {
+              setAsignada(undefined)
+              setAsignando(t)
+            }}
+          />
+          <AsignarTareaModal
+            tarea={asignando}
+            responsables={responsables.datos ?? []}
+            onCerrar={() => setAsignando(undefined)}
+            onGuardada={(t) => {
+              setAsignando(undefined)
+              setAgregadas(undefined)
+              setAsignada(`«${t.titulo}» quedó a cargo de ${t.responsableNombre ?? 'la persona elegida'}, para el ${fechaCorta(t.fechaLimite ?? '')}.`)
+              void cargarTareas()
+            }}
+          />
         </>
       )}
     </div>
@@ -225,7 +271,13 @@ function AvisoSinEvaluar({ cantidad }: { cantidad: number }) {
   )
 }
 
-function SeccionTareas({ tareas }: { tareas: Tarea[] }) {
+interface SeccionTareasProps {
+  tareas: Tarea[]
+  puedeAsignar: boolean
+  onAsignar: (tarea: Tarea) => void
+}
+
+function SeccionTareas({ tareas, puedeAsignar, onAsignar }: SeccionTareasProps) {
   return (
     <section aria-labelledby="titulo-tareas" className="grid gap-4">
       <h2 id="titulo-tareas" className="text-md font-semibold">
@@ -235,7 +287,9 @@ function SeccionTareas({ tareas }: { tareas: Tarea[] }) {
         <div className="flex flex-col items-center gap-2 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <ListChecks aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
           <h3 className="text-md font-semibold">Todavía no hay tareas en el plan</h3>
-          <p className="max-w-layout-narrow text-text-secondary">Confirma las tareas propuestas para empezar el plan.</p>
+          <p className="max-w-layout-narrow text-text-secondary">
+            Confirma las tareas propuestas o crea una tarea nueva para empezar el plan.
+          </p>
         </div>
       ) : (
         <div className="grid gap-2">
@@ -253,15 +307,23 @@ function SeccionTareas({ tareas }: { tareas: Tarea[] }) {
                   <th scope="col" className="max-sm:hidden">
                     Riesgo
                   </th>
-                  <th scope="col">Estado</th>
+                  <th scope="col" className="max-sm:hidden">
+                    Estado
+                  </th>
                   <th scope="col" className="max-sm:hidden">
                     Responsable
+                  </th>
+                  <th scope="col" className="max-sm:hidden">
+                    Fecha límite
+                  </th>
+                  <th scope="col">
+                    <span className="sr-only">Acciones</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {tareas.map((t) => (
-                  <FilaTarea key={t.id} tarea={t} />
+                  <FilaTarea key={t.id} tarea={t} puedeAsignar={puedeAsignar} onAsignar={onAsignar} />
                 ))}
               </tbody>
             </table>
@@ -283,20 +345,33 @@ function OrigenTarea({ tarea }: { tarea: Tarea }) {
   return <span className="text-xs text-text-secondary">{tarea.origen === 'accidente' ? 'Accidente' : 'Manual'}</span>
 }
 
-function FilaTarea({ tarea }: { tarea: Tarea }) {
+function Estado({ tarea }: { tarea: Tarea }) {
   const estado = ESTADOS[tarea.estado]
+  return (
+    <span className="inline-flex flex-wrap gap-1">
+      <Insignia tipo={estado.tipo}>{estado.texto}</Insignia>
+      {vencida(tarea) && <Insignia tipo="error">Vencida</Insignia>}
+    </span>
+  )
+}
+
+function FilaTarea({ tarea, puedeAsignar, onAsignar }: { tarea: Tarea } & Omit<SeccionTareasProps, 'tareas'>) {
   return (
     <tr>
       <td className="envolver">
         <div className="font-medium">{tarea.titulo}</div>
         <OrigenTarea tarea={tarea} />
-        {/* En celular, prioridad, nivel y responsable van aquí (design-system.md § Fila de tabla). */}
+        {/* En celular, prioridad, nivel, responsable, fecha y estado van aquí: así la acción queda a la vista (design-system.md § Fila de tabla). */}
         <div className="mt-1 grid justify-items-start gap-1 text-sm sm:hidden">
           <span>Prioridad {PRIORIDADES[tarea.prioridad].toLowerCase()}</span>
           {tarea.riesgoClasificacion && tarea.riesgoNivel !== null && (
             <EtiquetaRiesgo nivel={{ nivel: tarea.riesgoNivel, clasificacion: tarea.riesgoClasificacion }} />
           )}
-          <span className="text-text-secondary">{tarea.responsableNombre ?? 'Sin responsable'}</span>
+          <span className="text-text-secondary">
+            {tarea.responsableNombre ?? 'Sin responsable'}
+            {tarea.fechaLimite && ` · hasta el ${fechaCorta(tarea.fechaLimite)}`}
+          </span>
+          <Estado tarea={tarea} />
         </div>
       </td>
       <td className="max-sm:hidden">{PRIORIDADES[tarea.prioridad]}</td>
@@ -307,11 +382,21 @@ function FilaTarea({ tarea }: { tarea: Tarea }) {
           <span className="text-text-tertiary">—</span>
         )}
       </td>
-      <td>
-        <Insignia tipo={estado.tipo}>{estado.texto}</Insignia>
+      <td className="max-sm:hidden">
+        <Estado tarea={tarea} />
       </td>
       <td className="max-sm:hidden">
         {tarea.responsableNombre ?? <span className="text-text-secondary">Sin responsable</span>}
+      </td>
+      <td className="tabular-nums max-sm:hidden">
+        {tarea.fechaLimite ? fechaCorta(tarea.fechaLimite) : <span className="text-text-tertiary">—</span>}
+      </td>
+      <td className="text-right">
+        {!cerrada(tarea) && puedeAsignar && (
+          <Boton variante="secundario" aria-label={`${tarea.responsableId ? 'Reasignar' : 'Asignar'} «${tarea.titulo}»`} onClick={() => onAsignar(tarea)}>
+            {tarea.responsableId ? 'Reasignar' : 'Asignar'}
+          </Boton>
+        )}
       </td>
     </tr>
   )
