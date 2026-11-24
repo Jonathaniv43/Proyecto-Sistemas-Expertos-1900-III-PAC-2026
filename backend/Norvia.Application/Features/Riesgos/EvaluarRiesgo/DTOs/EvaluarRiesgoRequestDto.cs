@@ -5,4 +5,7 @@ public sealed record EvaluarRiesgoRequestDto
 {
     public short? Probabilidad { get; init; }
     public short? Severidad { get; init; }
+
+    /// <summary>HU-051: el evento a raíz del cual se reevalúa, si lo hay.</summary>
+    public Guid? AccidenteId { get; init; }
 }

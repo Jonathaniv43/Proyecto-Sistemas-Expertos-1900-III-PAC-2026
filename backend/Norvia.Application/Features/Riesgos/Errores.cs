@@ -23,6 +23,9 @@ public static class Errores
     public static readonly Error SugerenciaYaAceptada = new("riesgos.sugerencia_aceptada",
         "Esa sugerencia ya es un control de este riesgo.", TipoError.Conflicto);
 
+    public static readonly Error EventoInvalido = new("riesgos.evento_invalido",
+        "El evento no existe en esta empresa o se descartó: no se puede enlazar con un riesgo.", TipoError.Validacion);
+
     public static readonly Error SinEvaluacionInicial = new("riesgos.sin_evaluacion_inicial",
         "Primero hay que hacer la evaluación inicial del riesgo.", TipoError.Conflicto);
 

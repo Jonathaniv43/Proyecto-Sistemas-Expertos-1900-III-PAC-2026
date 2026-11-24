@@ -1650,6 +1650,9 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AccidenteId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("EmpresaId")
                         .HasColumnType("uuid");
 
@@ -1679,6 +1682,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.HasAlternateKey("EmpresaId", "Id");
 
+                    b.HasIndex("EmpresaId", "AccidenteId");
+
                     b.HasIndex("EmpresaId", "EvaluadoPorId");
 
                     b.HasIndex("EmpresaId", "RiesgoEmpresaId");
@@ -1688,6 +1693,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.ToTable("EvaluacionRiesgo", t =>
                         {
+                            t.HasCheckConstraint("CK_EvaluacionRiesgo_AccidenteSoloInicial", "\"AccidenteId\" IS NULL OR \"Tipo\" = 'inicial'");
+
                             t.HasCheckConstraint("CK_EvaluacionRiesgo_Probabilidad", "\"Probabilidad\" BETWEEN 1 AND 5");
 
                             t.HasCheckConstraint("CK_EvaluacionRiesgo_Severidad", "\"Severidad\" BETWEEN 1 AND 5");
@@ -1700,6 +1707,9 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AccidenteId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Actividad")
@@ -1739,6 +1749,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("PeligroId");
 
+                    b.HasIndex("EmpresaId", "AccidenteId");
+
                     b.HasIndex("EmpresaId", "EncuestaId");
 
                     b.HasIndex("EmpresaId", "Estado");
@@ -1756,6 +1768,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                             t.HasCheckConstraint("CK_RiesgoEmpresa_PeligroODescripcion", "\"PeligroId\" IS NOT NULL OR \"DescripcionPeligro\" IS NOT NULL");
 
                             t.HasCheckConstraint("CK_RiesgoEmpresa_SugeridoConOrigen", "\"Estado\" <> 'sugerido' OR (\"EncuestaId\" IS NOT NULL AND \"PeligroId\" IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_RiesgoEmpresa_UnSoloOrigen", "\"EncuestaId\" IS NULL OR \"AccidenteId\" IS NULL");
                         });
                 });
 
@@ -2433,6 +2447,12 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Norvia.Domain.Entities.Accidentes.Accidente", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "AccidenteId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "EvaluadoPor")
                         .WithMany()
                         .HasForeignKey("EmpresaId", "EvaluadoPorId")
@@ -2465,6 +2485,12 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.HasOne("Norvia.Domain.Entities.Catalogos.Peligro", "Peligro")
                         .WithMany()
                         .HasForeignKey("PeligroId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Accidentes.Accidente", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "AccidenteId")
+                        .HasPrincipalKey("EmpresaId", "Id")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Norvia.Domain.Entities.Encuestas.Encuesta", null)

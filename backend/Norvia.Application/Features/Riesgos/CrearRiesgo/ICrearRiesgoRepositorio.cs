@@ -14,5 +14,8 @@ public interface ICrearRiesgoRepositorio
     /// </summary>
     Task<bool> ExisteEnMatrizAsync(Guid? peligroId, string? descripcionPeligro, string actividad, CancellationToken ct);
 
+    /// <summary>true si el evento es de la empresa de la sesión y no está descartado (HU-051).</summary>
+    Task<bool> EventoEnlazableAsync(Guid accidenteId, CancellationToken ct);
+
     void Agregar(RiesgoEmpresa riesgo);
 }

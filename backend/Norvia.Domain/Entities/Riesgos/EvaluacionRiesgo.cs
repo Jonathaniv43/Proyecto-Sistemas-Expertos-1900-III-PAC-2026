@@ -16,6 +16,9 @@ public class EvaluacionRiesgo : ITieneEmpresa
     public Guid EvaluadoPorId { get; set; }
     public DateTime EvaluadoEn { get; set; }
 
+    /// <summary>Evento a raíz del cual se hizo la evaluación (HU-051); solo en evaluaciones iniciales.</summary>
+    public Guid? AccidenteId { get; set; }
+
     /// <summary>Probabilidad × Severidad; se calcula y no se guarda (RN-15).</summary>
     public int Nivel => Probabilidad * Severidad;
 

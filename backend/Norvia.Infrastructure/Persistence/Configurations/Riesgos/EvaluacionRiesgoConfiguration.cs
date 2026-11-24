@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Entities.Accidentes;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Riesgos;
@@ -32,6 +33,13 @@ public class EvaluacionRiesgoConfiguration : IEntityTypeConfiguration<Evaluacion
             .WithMany()
             .HasForeignKey(e => new { e.EmpresaId, e.EvaluadoPorId })
             .HasPrincipalKey(v => new { v.EmpresaId, v.Id });
+
+        // Evento a raíz del cual se reevaluó (HU-051): de la misma empresa y solo en evaluaciones iniciales.
+        b.HasOne<Accidente>()
+            .WithMany()
+            .HasForeignKey(e => new { e.EmpresaId, e.AccidenteId })
+            .HasPrincipalKey(a => new { a.EmpresaId, a.Id });
+        b.Check("AccidenteSoloInicial", "\"AccidenteId\" IS NULL OR \"Tipo\" = 'inicial'");
 
         // Última evaluación de cada riesgo (§7).
         b.HasIndex(e => new { e.RiesgoEmpresaId, e.EvaluadoEn }).IsDescending(false, true);

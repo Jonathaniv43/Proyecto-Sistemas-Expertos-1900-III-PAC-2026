@@ -22,5 +22,9 @@ public sealed class CrearRiesgoRepositorio(NorviaDbContext db) : ICrearRiesgoRep
         return enMatriz.AnyAsync(r => r.PeligroId == null && r.DescripcionPeligro!.ToLower() == descripcionMin, ct);
     }
 
+    // Accidente es tabla de empresa: el filtro global limita a la sesión.
+    public Task<bool> EventoEnlazableAsync(Guid accidenteId, CancellationToken ct) =>
+        db.Accidente.AnyAsync(a => a.Id == accidenteId && a.Estado != EstadoAccidente.Descartado, ct);
+
     public void Agregar(RiesgoEmpresa riesgo) => db.RiesgoEmpresa.Add(riesgo);
 }
