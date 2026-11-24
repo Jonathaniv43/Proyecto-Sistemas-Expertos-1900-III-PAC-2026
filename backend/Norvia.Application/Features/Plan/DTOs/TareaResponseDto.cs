@@ -12,7 +12,7 @@ public enum OrigenTarea
 
 /// <summary>
 /// Tarea del plan (HU-042). Con origen riesgo trae su nombre y su nivel inicial actual; si implementa un control, su tipo.
-/// Responsable y fecha límite se asignan en HU-043.
+/// Responsable y fecha límite se asignan en HU-043. Con origen accidente (medida correctiva, HU-050) trae el evento.
 /// </summary>
 public sealed record TareaResponseDto(
     Guid Id,
@@ -30,5 +30,6 @@ public sealed record TareaResponseDto(
     int? RiesgoNivel,
     ClasificacionRiesgo? RiesgoClasificacion,
     TipoControl? ControlTipo,
+    Guid? AccidenteId,
     DateTime CreadaEn,
     DateTime? CompletadaEn);

@@ -29,6 +29,15 @@ public static class Errores
     public static readonly Error SinInvestigacion = new("eventos.sin_investigacion",
         "Para cerrar el evento hay que registrar su investigación (RN-28).", TipoError.Conflicto);
 
+    public static readonly Error SinVinculo = new("eventos.sin_vinculo",
+        "Las medidas correctivas son de una empresa: inicie sesión con su vínculo.", TipoError.Prohibido);
+
+    public static readonly Error ResponsableInvalido = new("eventos.responsable_invalido",
+        "El responsable tiene que ser una persona activa de la empresa (no un encuestado).", TipoError.Validacion);
+
+    public static readonly Error FechaLimitePasada = new("eventos.fecha_pasada",
+        "La fecha límite no puede ser anterior a hoy.", TipoError.Validacion);
+
     public static readonly Error SinMedidas = new("eventos.sin_medidas",
         "Para cerrar el evento hace falta al menos una medida correctiva (RN-28).", TipoError.Conflicto);
 }
