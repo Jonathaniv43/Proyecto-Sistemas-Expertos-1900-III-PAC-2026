@@ -1,7 +1,8 @@
 import { ArrowLeft, ChartColumn, ShieldCheck, TriangleAlert } from 'lucide-react'
-import { useCallback, useEffect, type ReactNode } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
+import { Indicador } from '@/shared/components/datos/Indicador'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
@@ -86,16 +87,6 @@ function SinPublicar({ titulo }: { titulo: string }) {
         <p className="text-text-secondary">La encuesta no se ha publicado. Cuando los encuestados respondan, verás aquí sus resultados.</p>
       </section>
     </>
-  )
-}
-
-function Indicador({ etiqueta, valor, detalle }: { etiqueta: string; valor: ReactNode; detalle?: string }) {
-  return (
-    <div className="grid content-start gap-1 rounded-lg border border-border-default bg-bg-surface p-4">
-      <dt className="text-xs text-text-secondary">{etiqueta}</dt>
-      <dd className="text-2xl font-semibold tabular-nums">{valor}</dd>
-      {detalle && <dd className="text-xs text-text-secondary">{detalle}</dd>}
-    </div>
   )
 }
 

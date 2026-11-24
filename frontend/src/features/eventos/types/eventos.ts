@@ -129,3 +129,16 @@ export interface RiesgoDeMatriz {
   actividad: string | null
   evaluacion: { nivel: number; clasificacion: ClasificacionRiesgo } | null
 }
+
+/** GET /api/eventos/estadisticas (HU-052): solo cifras, sin descartados ni datos de personas. */
+export interface EstadisticasEventos {
+  /** aaaa-mm-dd, incluidas. */
+  desde: string
+  hasta: string
+  total: number
+  graves: number
+  /** Los cuatro tipos, en orden fijo, también con 0. */
+  porTipo: { tipo: TipoEvento; cantidad: number; graves: number }[]
+  /** Todos los meses del periodo (de Honduras), también con 0. */
+  porMes: { anio: number; mes: number; cantidad: number; graves: number }[]
+}

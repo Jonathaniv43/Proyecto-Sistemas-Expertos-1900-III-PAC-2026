@@ -1,6 +1,7 @@
 import { api } from '@/shared/api'
 import type {
   CrearMedidaRequest,
+  EstadisticasEventos,
   Evento,
   EventoDetalle,
   FiltrosEventos,
@@ -59,3 +60,7 @@ export const listarRiesgosDelEvento = (signal: AbortSignal, id: string) =>
 
 /** Riesgos de la matriz (confirmados), para elegir cuál reevaluar tras el evento. */
 export const listarRiesgosDeMatriz = (signal: AbortSignal) => api.get<RiesgoDeMatriz[]>('/riesgos', { signal }).then((r) => r.data)
+
+/** Cuántos eventos hubo entre dos fechas (aaaa-mm-dd, incluidas), por tipo, gravedad y mes (HU-052). */
+export const obtenerEstadisticas = (signal: AbortSignal, periodo: { desde: string; hasta: string }) =>
+  api.get<EstadisticasEventos>('/eventos/estadisticas', { signal, params: periodo }).then((r) => r.data)

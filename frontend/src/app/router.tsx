@@ -24,6 +24,7 @@ import { PeligrosPage } from '@/features/catalogos/pages/PeligrosPage'
 import { PreguntaPage } from '@/features/catalogos/pages/PreguntaPage'
 import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
 import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
+import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
 import { EventoPage } from '@/features/eventos/pages/EventoPage'
 import { EventosPage } from '@/features/eventos/pages/EventosPage'
 import { ReportarEventoPage } from '@/features/eventos/pages/ReportarEventoPage'
@@ -130,6 +131,7 @@ export const router = createBrowserRouter([
               { path: 'riesgos/:id', element: <RiesgoPage /> },
               { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
               { path: 'eventos', element: <EventosPage /> },
+              { path: 'eventos/estadisticas', element: <EstadisticasEventosPage /> },
               { path: 'eventos/:id', element: <EventoPage /> },
               { path: 'plan-de-trabajo/nueva', element: <NuevaTareaPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },

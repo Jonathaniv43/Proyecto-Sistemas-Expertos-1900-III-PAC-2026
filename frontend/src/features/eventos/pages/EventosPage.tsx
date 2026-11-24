@@ -1,4 +1,4 @@
-import { Megaphone, Search, TriangleAlert } from 'lucide-react'
+import { ChartColumn, Megaphone, Search, TriangleAlert } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
@@ -17,7 +17,8 @@ const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno
 
 /**
  * HU-047: los eventos reportados en la empresa, el último recibido primero, con filtros por tipo, estado y gravedad.
- * Son anónimos: ninguna pantalla muestra quién los reportó (RN-27). Investigarlos y cerrarlos es HU-049.
+ * Son anónimos: ninguna pantalla muestra quién los reportó (RN-27). Investigarlos y cerrarlos es HU-049; sus
+ * estadísticas, HU-052.
  */
 export function EventosPage() {
   const peticion = usePeticion(listarEventos)
@@ -47,10 +48,16 @@ export function EventosPage() {
           <h1 className="text-xl font-semibold">Eventos reportados</h1>
           <p className="text-text-secondary">Accidentes, incidentes, enfermedades y condiciones inseguras. Los reportes son anónimos.</p>
         </div>
-        <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
-          <Megaphone aria-hidden size={16} strokeWidth={1.5} />
-          Reportar un evento
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/eventos/estadisticas" className={clasesBoton('secundario')}>
+            <ChartColumn aria-hidden size={16} strokeWidth={1.5} />
+            Estadísticas
+          </Link>
+          <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
+            <Megaphone aria-hidden size={16} strokeWidth={1.5} />
+            Reportar un evento
+          </Link>
+        </div>
       </header>
 
       <form role="search" aria-label="Filtrar eventos" className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => e.preventDefault()}>
