@@ -1,3 +1,8 @@
+import type { ClasificacionRiesgo } from '@/shared/riesgo/niveles'
+
+/** Clasificación del nivel de riesgo (RN-16); definida en shared porque también la usa el plan de trabajo. */
+export type { ClasificacionRiesgo }
+
 /** Estado de un riesgo de la empresa (RN-18). La matriz solo muestra los confirmados. */
 export type EstadoRiesgo = 'sugerido' | 'confirmado' | 'descartado'
 
@@ -12,8 +17,6 @@ export type ClasificacionPeligro =
   | 'locativo'
   | 'otro'
 
-/** Clasificación del nivel de riesgo (RN-16): 1–4 bajo, 5–9 medio, 10–14 alto, 15–25 crítico. */
-export type ClasificacionRiesgo = 'bajo' | 'medio' | 'alto' | 'critico'
 
 /** Evaluación de un riesgo (HU-037). Nivel y clasificación los calcula el backend; no se guardan. */
 export interface Evaluacion {
@@ -26,6 +29,8 @@ export interface Evaluacion {
   evaluadoPorId: string
   evaluadoPorNombre: string
   evaluadoEn: string
+  /** Evento a raíz del cual se hizo (HU-051); null si no. Solo en evaluaciones iniciales. */
+  accidenteId: string | null
 }
 
 /** GET /api/riesgos y /api/riesgos/{id}, y respuesta de POST /api/riesgos (HU-036). */
@@ -42,9 +47,13 @@ export interface Riesgo {
   /** Encuesta que lo sugirió (HU-035); null si se agregó a mano. */
   encuestaId: string | null
   encuestaTitulo: string | null
+  /** Evento que lo reveló (HU-051); null si no salió de un evento. */
+  accidenteId: string | null
   creadoEn: string
   /** Última evaluación inicial (HU-037); null si todavía no se evaluó. */
   evaluacion: Evaluacion | null
+  /** Última evaluación residual, con los controles aplicados (HU-040); null si no hay. */
+  evaluacionResidual: Evaluacion | null
   /** Cuántos controles tiene (HU-039). Un riesgo alto o crítico sin controles se señala (RN-19). */
   totalControles: number
 }
@@ -62,6 +71,8 @@ export interface CrearRiesgoRequest {
   peligroId?: string
   descripcionPeligro?: string
   actividad: string
+  /** HU-051: el evento que lo reveló, si se agrega a raíz de uno. */
+  accidenteId?: string
 }
 
 /** GET /api/riesgos/matriz (HU-038): solo las celdas con riesgos, por la última evaluación inicial. */

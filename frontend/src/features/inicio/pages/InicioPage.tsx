@@ -1,10 +1,10 @@
-import { Building2, ClipboardCheck, ClipboardList, Contact, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { BookOpen, Building2, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
+import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_PLATAFORMA, ROLES_TAREAS, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
 import { obtenerPerfilCompleto } from '../api/perfil'
 
 /** Primera pantalla después de iniciar sesión. Las funciones de cada módulo se agregan con su HU. */
@@ -35,16 +35,34 @@ export function InicioPage() {
           Falta el rubro o el número de trabajadores permanentes. <Link to="/empresa">Completar el perfil</Link>
         </Aviso>
       )}
+      <SiRol roles={ROLES_PLATAFORMA}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link to="/catalogos" className={clasesBoton('secundario')}>
+            <BookOpen aria-hidden size={16} strokeWidth={1.5} />
+            Catálogos
+          </Link>
+        </div>
+      </SiRol>
       <SiRol roles={ROLES_EMPRESA}>
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/mis-encuestas" className={clasesBoton('secundario')}>
             <ClipboardCheck aria-hidden size={16} strokeWidth={1.5} />
             Mis encuestas
           </Link>
+          <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
+            <Megaphone aria-hidden size={16} strokeWidth={1.5} />
+            Reportar un evento
+          </Link>
+          <SiRol roles={ROLES_TAREAS}>
+            <Link to="/mis-tareas" className={clasesBoton('secundario')}>
+              <ListTodo aria-hidden size={16} strokeWidth={1.5} />
+              Mis tareas
+            </Link>
+          </SiRol>
         </div>
       </SiRol>
       <SiRol roles={ROLES_GESTION}>
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/encuestas" className={clasesBoton('secundario')}>
             <ClipboardList aria-hidden size={16} strokeWidth={1.5} />
             Encuestas
@@ -53,6 +71,14 @@ export function InicioPage() {
             <ShieldAlert aria-hidden size={16} strokeWidth={1.5} />
             Matriz de riesgos
           </Link>
+          <Link to="/eventos" className={clasesBoton('secundario')}>
+            <Siren aria-hidden size={16} strokeWidth={1.5} />
+            Eventos
+          </Link>
+          <Link to="/plan-de-trabajo" className={clasesBoton('secundario')}>
+            <ListChecks aria-hidden size={16} strokeWidth={1.5} />
+            Plan de trabajo
+          </Link>
           <Link to="/empresa" className={clasesBoton('secundario')}>
             <Building2 aria-hidden size={16} strokeWidth={1.5} />
             Perfil de la empresa
@@ -60,7 +86,7 @@ export function InicioPage() {
         </div>
       </SiRol>
       <SiRol roles={[ROLES.adminEmpresa]}>
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/personas" className={clasesBoton('secundario')}>
             <Contact aria-hidden size={16} strokeWidth={1.5} />
             Ver las personas

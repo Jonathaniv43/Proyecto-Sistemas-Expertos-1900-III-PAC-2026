@@ -1,7 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useWatch } from 'react-hook-form'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -12,8 +12,9 @@ import { useFormulario } from '@/shared/forms'
 import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { evaluarRiesgo, obtenerRiesgo } from '../api/riesgos'
-import { EtiquetaRiesgo } from '../components/EtiquetaRiesgo'
+import { evaluarRiesgo, evaluarRiesgoResidual, obtenerRiesgo } from '../api/riesgos'
+import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
+import { HistorialEvaluaciones } from '../components/HistorialEvaluaciones'
 import { MapaCalor } from '../components/MapaCalor'
 import { SeccionControles } from '../components/SeccionControles'
 import { nombrePeligro } from '../etiquetas'
@@ -28,7 +29,9 @@ const exigeControl = (c: ClasificacionRiesgo) => c === 'alto' || c === 'critico'
 /**
  * Un riesgo de la matriz: sus datos y su evaluación. HU-037: se elige probabilidad y severidad del 1 al
  * 5 con su explicación a la vista (o tocando una celda del mapa), se ve el nivel calculado y queda quién
- * evaluó y cuándo. Volver a evaluar no borra la evaluación anterior (RN-20). HU-039: sus controles.
+ * evaluó y cuándo. Volver a evaluar no borra la evaluación anterior (RN-20). HU-039: sus controles. HU-040:
+ * la evaluación residual, al lado de la inicial. HU-041: el historial de todas las evaluaciones.
+ * HU-051: con `?evento=<id>` se llega desde un evento para reevaluarlo; la evaluación inicial queda enlazada con él.
  */
 export function RiesgoPage() {
   const { id = '' } = useParams()
@@ -36,6 +39,7 @@ export function RiesgoPage() {
   const cargandoVisible = useCargaVisible(peticion.cargando)
   const [riesgo, setRiesgo] = useState<Riesgo>()
   useScrollRecordado(Boolean(riesgo))
+  const eventoId = useSearchParams()[0].get('evento') ?? undefined
 
   const { ejecutar } = peticion
   const cargar = useCallback(() => {
@@ -73,7 +77,11 @@ export function RiesgoPage() {
             <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-3">
               <Dato etiqueta="Actividad">{riesgo.actividad ?? '—'}</Dato>
               <Dato etiqueta="Origen">
-                {riesgo.encuestaId ? (
+                {riesgo.accidenteId ? (
+                  <>
+                    Revelado por un <Link to={`/eventos/${riesgo.accidenteId}`}>evento</Link>
+                  </>
+                ) : riesgo.encuestaId ? (
                   <>
                     Encuesta{' '}
                     <Link to={`/encuestas/${riesgo.encuestaId}/resultados`} state={estadoVolver(`/riesgos/${riesgo.id}`, 'Volver al riesgo')}>{riesgo.encuestaTitulo ?? 'sin título'}</Link>
@@ -94,11 +102,24 @@ export function RiesgoPage() {
             </Aviso>
           ) : (
             <>
+              {eventoId && (
+                <Aviso tipo="info" titulo="Revisión tras un evento">
+                  <>
+                    La evaluación inicial que guardes quedará enlazada con el evento.{' '}
+                    <Link to={`/eventos/${eventoId}`}>Volver al evento</Link>
+                  </>
+                </Aviso>
+              )}
               <SeccionEvaluacion
                 riesgo={riesgo}
-                onEvaluado={(evaluacion) => setRiesgo((r) => r && { ...r, evaluacion })}
+                eventoId={eventoId}
+                onEvaluado={(e) => setRiesgo((r) => r && (e.tipo === 'residual' ? { ...r, evaluacionResidual: e } : { ...r, evaluacion: e }))}
               />
               <SeccionControles riesgo={riesgo} onCambio={(totalControles) => setRiesgo((r) => r && { ...r, totalControles })} />
+              <HistorialEvaluaciones
+                riesgoId={riesgo.id}
+                version={`${riesgo.evaluacion?.id ?? ''}|${riesgo.evaluacionResidual?.id ?? ''}`}
+              />
             </>
           )}
         </>
@@ -116,10 +137,40 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: ReactNode })
   )
 }
 
-function SeccionEvaluacion({ riesgo, onEvaluado }: { riesgo: Riesgo; onEvaluado: (e: Evaluacion) => void }) {
-  const [evaluando, setEvaluando] = useState(!riesgo.evaluacion)
+type TipoEvaluacion = Evaluacion['tipo']
+
+/** Qué pasó del nivel inicial al residual. */
+function comparar(inicial: Evaluacion, residual: Evaluacion) {
+  const de = `${ETIQUETAS_CLASIFICACION_RIESGO[inicial.clasificacion]} · ${inicial.nivel}`
+  const a = `${ETIQUETAS_CLASIFICACION_RIESGO[residual.clasificacion]} · ${residual.nivel}`
+  if (residual.nivel < inicial.nivel) return `Con los controles, el riesgo bajó de ${de} a ${a}.`
+  if (residual.nivel > inicial.nivel) return `Con los controles, el riesgo subió de ${de} a ${a}. Revisa los controles.`
+  return `Con los controles, el riesgo sigue en ${a}. Revisa los controles.`
+}
+
+/**
+ * Evaluación del riesgo. HU-037: la inicial. HU-040: la residual, con los controles aplicados, separada de la
+ * inicial y a su lado para ver si el riesgo bajó. La residual pide la inicial y al menos un control.
+ */
+function SeccionEvaluacion({
+  riesgo,
+  eventoId,
+  onEvaluado,
+}: {
+  riesgo: Riesgo
+  /** HU-051: se llegó desde un evento; la reevaluación inicial se abre de una vez y se enlaza con él. */
+  eventoId?: string
+  onEvaluado: (e: Evaluacion) => void
+}) {
+  const [evaluando, setEvaluando] = useState<TipoEvaluacion | null>(riesgo.evaluacion && !eventoId ? null : 'inicial')
   const [guardada, setGuardada] = useState<Evaluacion>()
-  const actual = riesgo.evaluacion
+  const inicial = riesgo.evaluacion
+  const residual = riesgo.evaluacionResidual
+
+  const abrir = (tipo: TipoEvaluacion) => {
+    setGuardada(undefined)
+    setEvaluando(tipo)
+  }
 
   return (
     <section
@@ -139,49 +190,82 @@ function SeccionEvaluacion({ riesgo, onEvaluado }: { riesgo: Riesgo; onEvaluado:
       <div role="status" className="contents">
         {guardada && !evaluando && (
           <Aviso tipo="exito">
-            {`Evaluación guardada: ${ETIQUETAS_CLASIFICACION_RIESGO[guardada.clasificacion]} · ${guardada.nivel}.`}
+            {`Evaluación ${guardada.tipo === 'residual' ? 'residual ' : ''}guardada: ${ETIQUETAS_CLASIFICACION_RIESGO[guardada.clasificacion]} · ${guardada.nivel}.`}
+            {guardada.accidenteId && ' Quedó enlazada con el evento.'}
           </Aviso>
         )}
       </div>
 
-      {evaluando || !actual ? (
+      {evaluando || !inicial ? (
         <FormularioEvaluacion
           riesgoId={riesgo.id}
-          actual={actual}
-          onCancelar={actual ? () => setEvaluando(false) : undefined}
+          eventoId={eventoId}
+          tipo={evaluando ?? 'inicial'}
+          actual={(evaluando === 'residual' ? residual : inicial) ?? null}
+          onCancelar={inicial ? () => setEvaluando(null) : undefined}
           onGuardada={(evaluacion) => {
             onEvaluado(evaluacion)
             setGuardada(evaluacion)
-            setEvaluando(false)
+            setEvaluando(null)
           }}
         />
       ) : (
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <div>
-              <EtiquetaRiesgo nivel={actual} />
-            </div>
-            <p>
-              Probabilidad {actual.probabilidad} · {PROBABILIDADES[actual.probabilidad - 1].nombre} — Severidad {actual.severidad} ·{' '}
-              {SEVERIDADES[actual.severidad - 1].nombre}
-            </p>
-            <p className="text-xs text-text-secondary">
-              Evaluado por {actual.evaluadoPorNombre} el {fechaHora(actual.evaluadoEn)}
-            </p>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <PanelEvaluacion titulo="Inicial" descripcion="Antes de los controles." evaluacion={inicial}>
+              <Boton variante="secundario" onClick={() => abrir('inicial')}>
+                Volver a evaluar
+              </Boton>
+            </PanelEvaluacion>
+            <PanelEvaluacion titulo="Residual" descripcion="Con los controles aplicados." evaluacion={residual}>
+              {riesgo.totalControles === 0 ? (
+                <p className="text-sm text-text-secondary">Agrega al menos un control para evaluar el riesgo residual.</p>
+              ) : (
+                <Boton variante="secundario" onClick={() => abrir('residual')}>
+                  {residual ? 'Volver a evaluar' : 'Evaluar el residual'}
+                </Boton>
+              )}
+            </PanelEvaluacion>
           </div>
-          <div>
-            <Boton
-              variante="secundario"
-              onClick={() => {
-                setGuardada(undefined)
-                setEvaluando(true)
-              }}
-            >
-              Volver a evaluar
-            </Boton>
-          </div>
-        </div>
+          {residual && <p>{comparar(inicial, residual)}</p>}
+        </>
       )}
+    </section>
+  )
+}
+
+interface PanelEvaluacionProps {
+  titulo: string
+  descripcion: string
+  evaluacion: Evaluacion | null
+  children: ReactNode
+}
+
+function PanelEvaluacion({ titulo, descripcion, evaluacion, children }: PanelEvaluacionProps) {
+  return (
+    <section aria-label={`Evaluación ${titulo.toLowerCase()}`} className="grid content-start gap-3 rounded-md border border-border-default p-4">
+      <div className="grid gap-1">
+        <h3 className="font-semibold">{titulo}</h3>
+        <p className="text-xs text-text-secondary">{descripcion}</p>
+      </div>
+      {evaluacion ? (
+        <div className="grid gap-2">
+          <div>
+            <EtiquetaRiesgo nivel={evaluacion} />
+          </div>
+          <p className="text-sm">
+            Probabilidad {evaluacion.probabilidad} · {PROBABILIDADES[evaluacion.probabilidad - 1].nombre}
+            <br />
+            Severidad {evaluacion.severidad} · {SEVERIDADES[evaluacion.severidad - 1].nombre}
+          </p>
+          <p className="text-xs text-text-secondary">
+            Evaluado por {evaluacion.evaluadoPorNombre} el {fechaHora(evaluacion.evaluadoEn)}
+          </p>
+        </div>
+      ) : (
+        <p className="text-sm text-text-secondary">Todavía no se evalúa.</p>
+      )}
+      <div>{children}</div>
     </section>
   )
 }
@@ -196,12 +280,16 @@ function AvisoControl() {
 
 interface FormularioEvaluacionProps {
   riesgoId: string
+  /** HU-051: la evaluación inicial se enlaza con este evento. */
+  eventoId?: string
+  tipo: TipoEvaluacion
   actual: Evaluacion | null
   onCancelar?: () => void
   onGuardada: (evaluacion: Evaluacion) => void
 }
 
-function FormularioEvaluacion({ riesgoId, actual, onCancelar, onGuardada }: FormularioEvaluacionProps) {
+function FormularioEvaluacion({ riesgoId, eventoId, tipo, actual, onCancelar, onGuardada }: FormularioEvaluacionProps) {
+  const residual = tipo === 'residual'
   const {
     register,
     control,
@@ -210,13 +298,16 @@ function FormularioEvaluacion({ riesgoId, actual, onCancelar, onGuardada }: Form
     enviar,
     errorGeneral,
   } = useFormulario(evaluacionEsquema, {
-    // Al volver a evaluar se parte de la evaluación vigente.
+    // Al volver a evaluar se parte de la evaluación vigente del mismo tipo.
     defaultValues: {
       probabilidad: (actual ? String(actual.probabilidad) : '') as '1',
       severidad: (actual ? String(actual.severidad) : '') as '1',
     },
     erroresPorCodigo: {
       'riesgos.no_en_matriz': { mensaje: 'Este riesgo ya no está en la matriz. Vuelve a la matriz para ver su estado.' },
+      'riesgos.sin_controles': { mensaje: 'El riesgo ya no tiene controles. Agrega uno para evaluar el residual.' },
+      'riesgos.sin_evaluacion_inicial': { mensaje: 'Primero hay que hacer la evaluación inicial.' },
+      'riesgos.evento_invalido': { mensaje: 'El evento ya no existe o se descartó, así que la evaluación no se puede enlazar con él.' },
     },
   })
   const p = Number(useWatch({ control, name: 'probabilidad' })) || null
@@ -226,9 +317,21 @@ function FormularioEvaluacion({ riesgoId, actual, onCancelar, onGuardada }: Form
   return (
     <form
       noValidate
+      aria-label={residual ? 'Evaluación residual' : 'Evaluación inicial'}
       className="grid gap-6"
-      onSubmit={enviar(async (datos) => onGuardada(await evaluarRiesgo(riesgoId, datos)))}
+      onSubmit={enviar(async (datos) =>
+        onGuardada(await (residual ? evaluarRiesgoResidual(riesgoId, datos) : evaluarRiesgo(riesgoId, { ...datos, accidenteId: eventoId }))),
+      )}
     >
+      {residual && (
+        <div className="grid gap-1">
+          <h3 className="font-semibold">Evaluación residual</h3>
+          <p className="text-text-secondary">
+            Con los controles aplicados, ¿qué tan probable es ahora que el daño ocurra y qué tan grave sería? Se guarda
+            aparte de la inicial.
+          </p>
+        </div>
+      )}
       {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}
       {actual && (
         <p className="text-text-secondary">La evaluación anterior se conserva en el historial del riesgo.</p>
@@ -274,7 +377,7 @@ function FormularioEvaluacion({ riesgoId, actual, onCancelar, onGuardada }: Form
             <p className="text-text-secondary">
               {p} × {s} = {nivel.nivel}
             </p>
-            {exigeControl(nivel.clasificacion) && <AvisoControl />}
+            {!residual && exigeControl(nivel.clasificacion) && <AvisoControl />}
           </>
         ) : (
           <p className="text-text-secondary">Elige la probabilidad y la severidad para ver el nivel.</p>
@@ -288,7 +391,7 @@ function FormularioEvaluacion({ riesgoId, actual, onCancelar, onGuardada }: Form
           </Boton>
         )}
         <Boton type="submit" cargando={isSubmitting} textoCargando="Guardando…">
-          Guardar evaluación
+          {residual ? 'Guardar evaluación residual' : 'Guardar evaluación'}
         </Boton>
       </div>
     </form>

@@ -36,6 +36,13 @@ using Norvia.Application.Features.Catalogos.ListarPeligros;
 using Norvia.Application.Features.Catalogos.ListarPlantillasDocumento;
 using Norvia.Application.Features.Catalogos.ListarPreguntas;
 using Norvia.Application.Features.Catalogos.ListarRubros;
+using Norvia.Application.Features.Catalogos.ActualizarPlantillaTarea;
+using Norvia.Application.Features.Catalogos.ActualizarPlantillaTarea.DTOs;
+using Norvia.Application.Features.Catalogos.CambiarEstadoPlantillaTarea;
+using Norvia.Application.Features.Catalogos.CambiarEstadoPlantillaTarea.DTOs;
+using Norvia.Application.Features.Catalogos.CrearPlantillaTarea;
+using Norvia.Application.Features.Catalogos.CrearPlantillaTarea.DTOs;
+using Norvia.Application.Features.Catalogos.ListarPlantillasTarea;
 
 namespace Norvia.API.Controllers;
 
@@ -220,6 +227,39 @@ public sealed class CatalogosController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CambiarEstadoPlantillaDocumento(
         Guid id, CambiarEstadoPlantillaDocumentoRequestDto request, [FromServices] CambiarEstadoPlantillaDocumentoServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    // ---- api/plantillas-tarea (controles sugeridos y tareas modelo de cada peligro) ----
+
+    [HttpGet("plantillas-tarea")]
+    [ProducesResponseType(typeof(IReadOnlyList<PlantillaTareaResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListarPlantillasTarea(
+        [FromQuery] Guid? peligroId, [FromServices] ListarPlantillasTareaServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(peligroId, cancellationToken));
+
+    [HttpPost("plantillas-tarea")]
+    [ProducesResponseType(typeof(PlantillaTareaResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CrearPlantillaTarea(
+        CrearPlantillaTareaRequestDto request, [FromServices] CrearPlantillaTareaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
+
+    [HttpPatch("plantillas-tarea/{id:guid}")]
+    [ProducesResponseType(typeof(PlantillaTareaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ActualizarPlantillaTarea(
+        Guid id, ActualizarPlantillaTareaRequestDto request, [FromServices] ActualizarPlantillaTareaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    [HttpPatch("plantillas-tarea/{id:guid}/estado")]
+    [ProducesResponseType(typeof(PlantillaTareaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CambiarEstadoPlantillaTarea(
+        Guid id, CambiarEstadoPlantillaTareaRequestDto request, [FromServices] CambiarEstadoPlantillaTareaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
 }

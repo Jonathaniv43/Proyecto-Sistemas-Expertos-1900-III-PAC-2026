@@ -63,7 +63,7 @@ export function Modal({ abierto, titulo, children, onCerrar, hayCambios = false,
 
 /** Parte desplazable del modal. */
 export function CuerpoModal({ children }: { children: ReactNode }) {
-  return <div className="modal-cuerpo grid gap-6">{children}</div>
+  return <div className="modal-cuerpo grid content-start gap-6">{children}</div>
 }
 
 /** Acciones a la derecha (secundaria y luego principal); en celular, apiladas con la principal arriba. */

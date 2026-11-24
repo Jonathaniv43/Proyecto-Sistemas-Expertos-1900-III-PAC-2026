@@ -44,6 +44,26 @@ public static class CatalogoPermisos
         Empresa("riesgo.matriz", "Ver el mapa de la matriz de riesgos", "GET", "api/riesgos/matriz", "admin_empresa", "responsable_sst"),
         // HU-037: evaluar un riesgo.
         Empresa("riesgo.evaluar", "Evaluar un riesgo", "POST", "api/riesgos/{id}/evaluaciones", "admin_empresa", "responsable_sst"),
+        // HU-042: plan de trabajo.
+        Empresa("plan.propuesta", "Ver el plan de trabajo propuesto", "GET", "api/plan-trabajo/propuesta", "admin_empresa", "responsable_sst"),
+        Empresa("plan.generar", "Confirmar el plan de trabajo", "POST", "api/plan-trabajo/generacion", "admin_empresa", "responsable_sst"),
+        Empresa("tarea.listar", "Ver las tareas del plan", "GET", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
+        // HU-044: atender mis tareas. Quién cambia el estado lo decide además la aplicación (RN-24).
+        Empresa("tarea.mias", "Ver mis tareas", "GET", "api/plan-trabajo/tareas/mias", "admin_empresa", "responsable_sst", "colaborador"),
+        Empresa("tarea.estado", "Cambiar el estado de una tarea", "PATCH", "api/plan-trabajo/tareas/{id}/estado",
+            "admin_empresa", "responsable_sst", "colaborador"),
+        // HU-043: asignar tareas y crear tareas manuales.
+        Empresa("tarea.crear", "Crear una tarea manual", "POST", "api/plan-trabajo/tareas", "admin_empresa", "responsable_sst"),
+        Empresa("tarea.asignar", "Asignar responsable y fecha límite a una tarea", "PUT", "api/plan-trabajo/tareas/{id}/asignacion",
+            "admin_empresa", "responsable_sst"),
+        Empresa("tarea.responsables", "Ver a quién se le puede asignar una tarea", "GET", "api/plan-trabajo/responsables",
+            "admin_empresa", "responsable_sst"),
+        // HU-041: historial de evaluaciones.
+        Empresa("riesgo.historial", "Ver el historial de evaluaciones de un riesgo", "GET", "api/riesgos/{id}/evaluaciones",
+            "admin_empresa", "responsable_sst"),
+        // HU-040: evaluación residual.
+        Empresa("riesgo.evaluar_residual", "Evaluar el riesgo residual", "POST", "api/riesgos/{id}/evaluaciones-residual",
+            "admin_empresa", "responsable_sst"),
         // HU-039: controles de un riesgo.
         Empresa("riesgo.control.listar", "Ver los controles de un riesgo", "GET", "api/riesgos/{id}/controles",
             "admin_empresa", "responsable_sst"),
@@ -102,6 +122,19 @@ public static class CatalogoPermisos
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
         Empresa("evento.listar", "Listar eventos reportados", "GET", "api/eventos", "admin_empresa", "responsable_sst"),
         Empresa("evento.ver", "Ver detalle de evento", "GET", "api/eventos/{id}", "admin_empresa", "responsable_sst"),
+        // HU-049: investigar, cerrar y descartar eventos (Responsable SST).
+        Empresa("evento.investigar", "Registrar la investigación de un evento", "PUT", "api/eventos/{id}/investigacion", "responsable_sst"),
+        Empresa("evento.cerrar", "Cerrar un evento", "POST", "api/eventos/{id}/cierre", "responsable_sst"),
+        Empresa("evento.descartar", "Descartar un evento", "PATCH", "api/eventos/{id}/descarte", "responsable_sst"),
+        // HU-052: estadísticas de eventos, solo cifras (art. 47.e).
+        Empresa("evento.estadisticas", "Ver las estadísticas de eventos", "GET", "api/eventos/estadisticas", "admin_empresa", "responsable_sst"),
+        // HU-051: los riesgos de la matriz que el evento reveló o hizo reevaluar.
+        Empresa("evento.riesgos", "Ver los riesgos enlazados con un evento", "GET", "api/eventos/{id}/riesgos", "admin_empresa", "responsable_sst"),
+        // HU-050: medidas correctivas, que son tareas del plan con origen en el evento.
+        Empresa("evento.medida.listar", "Ver las medidas correctivas de un evento", "GET", "api/eventos/{id}/medidas-correctivas",
+            "admin_empresa", "responsable_sst"),
+        Empresa("evento.medida.crear", "Agregar una medida correctiva a un evento", "POST", "api/eventos/{id}/medidas-correctivas",
+            "responsable_sst"),
 
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),
@@ -124,6 +157,11 @@ public static class CatalogoPermisos
         Plataforma("catalogo.plantilla.crear", "Crear plantilla de documento", "POST", "api/plantillas", "admin_plataforma"),
         Plataforma("catalogo.plantilla.actualizar", "Editar plantilla de documento", "PATCH", "api/plantillas/{id}", "admin_plataforma"),
         Plataforma("catalogo.plantilla.estado", "Activar o desactivar plantilla de documento", "PATCH", "api/plantillas/{id}/estado", "admin_plataforma"),
+        // HU-023: plantillas de tarea de cada peligro (controles sugeridos y tareas modelo).
+        Plataforma("catalogo.plantilla_tarea.listar", "Listar plantillas de tarea", "GET", "api/plantillas-tarea", "admin_plataforma", "soporte_plataforma"),
+        Plataforma("catalogo.plantilla_tarea.crear", "Crear plantilla de tarea", "POST", "api/plantillas-tarea", "admin_plataforma"),
+        Plataforma("catalogo.plantilla_tarea.actualizar", "Editar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}", "admin_plataforma"),
+        Plataforma("catalogo.plantilla_tarea.estado", "Activar o desactivar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}/estado", "admin_plataforma"),
 
         // TEMPORALES para probar el middleware (borrar junto con PruebaController).
         Plataforma("prueba.plataforma", "Prueba plataforma", "GET", "api/prueba/plataforma", "admin_plataforma"),

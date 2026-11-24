@@ -16,4 +16,28 @@ public static class Errores
     public static Error FiltroInvalido(string campo, string valor) => new("eventos.filtro_invalido",
         $"El filtro '{campo}' no acepta el valor '{valor}'.",
         TipoError.Validacion);
+
+    public static readonly Error EventoTerminado = new("eventos.terminado",
+        "El evento ya está cerrado o descartado.", TipoError.Conflicto);
+
+    public static readonly Error InvestigadorInvalido = new("eventos.investigador_invalido",
+        "Quien investiga tiene que ser una persona activa de la empresa (no un encuestado).", TipoError.Validacion);
+
+    public static readonly Error FechaInvestigacionInvalida = new("eventos.fecha_investigacion_invalida",
+        "La fecha de la investigación no puede ser futura ni anterior al evento.", TipoError.Validacion);
+
+    public static readonly Error SinInvestigacion = new("eventos.sin_investigacion",
+        "Para cerrar el evento hay que registrar su investigación (RN-28).", TipoError.Conflicto);
+
+    public static readonly Error SinVinculo = new("eventos.sin_vinculo",
+        "Las medidas correctivas son de una empresa: inicie sesión con su vínculo.", TipoError.Prohibido);
+
+    public static readonly Error ResponsableInvalido = new("eventos.responsable_invalido",
+        "El responsable tiene que ser una persona activa de la empresa (no un encuestado).", TipoError.Validacion);
+
+    public static readonly Error FechaLimitePasada = new("eventos.fecha_pasada",
+        "La fecha límite no puede ser anterior a hoy.", TipoError.Validacion);
+
+    public static readonly Error SinMedidas = new("eventos.sin_medidas",
+        "Para cerrar el evento hace falta al menos una medida correctiva (RN-28).", TipoError.Conflicto);
 }

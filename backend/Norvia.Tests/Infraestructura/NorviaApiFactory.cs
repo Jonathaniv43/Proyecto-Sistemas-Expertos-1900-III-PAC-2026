@@ -57,6 +57,8 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting("Cors:Origenes", OrigenFrontend);
         builder.UseSetting("StaffSeed:Email", StaffEmail);
         builder.UseSetting("StaffSeed:Password", StaffPassword);
+        // Catálogos vacíos: cada prueba crea lo que necesita. La carga de HU-097 se prueba aparte (CatalogoSstTests).
+        builder.UseSetting("CatalogoSst:Cargar", "false");
         builder.ConfigureTestServices(servicios => servicios.AddSingleton<IEnvioCorreo>(Correos));
     }
 

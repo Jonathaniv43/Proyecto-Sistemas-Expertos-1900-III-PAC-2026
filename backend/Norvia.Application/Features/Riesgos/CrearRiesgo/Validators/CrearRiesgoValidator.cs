@@ -8,6 +8,7 @@ public sealed class CrearRiesgoValidator : AbstractValidator<CrearRiesgoRequestD
     public CrearRiesgoValidator()
     {
         RuleFor(x => x.PeligroId).NotEqual(Guid.Empty).When(x => x.PeligroId is not null);
+        RuleFor(x => x.AccidenteId).NotEqual(Guid.Empty).When(x => x.AccidenteId is not null);
         RuleFor(x => x.DescripcionPeligro)
             .MaximumLength(300).WithMessage("La descripción del peligro no puede exceder 300 caracteres.");
         RuleFor(x => x)

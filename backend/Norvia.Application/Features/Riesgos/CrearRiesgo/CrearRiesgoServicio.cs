@@ -14,6 +14,7 @@ namespace Norvia.Application.Features.Riesgos.CrearRiesgo;
 /// <item>Un peligro del catálogo (activo) o uno descrito, más la actividad donde se presenta.</item>
 /// <item>Entra directo como <c>confirmado</c>: lo decide quien lo agrega, así que queda como su revisor.</item>
 /// <item>No se repite el mismo peligro con la misma actividad en la matriz.</item>
+/// <item>HU-051: puede quedar enlazado al evento que lo reveló, si es de la empresa y no está descartado.</item>
 /// <item>Es de la empresa de la sesión (D4): EmpresaId lo asigna el interceptor, nunca el cliente.</item>
 /// </list>
 /// </summary>
@@ -33,6 +34,8 @@ public sealed class CrearRiesgoServicio(
             peligro = await repositorio.PeligroActivoAsync(peligroId, ct);
             if (peligro is null) return Errores.PeligroInvalido;
         }
+        if (request.AccidenteId is Guid accidenteId && !await repositorio.EventoEnlazableAsync(accidenteId, ct))
+            return Errores.EventoInvalido;
         var descripcion = string.IsNullOrWhiteSpace(request.DescripcionPeligro) ? null : request.DescripcionPeligro.Trim();
         var actividad = request.Actividad.Trim();
 
@@ -44,6 +47,7 @@ public sealed class CrearRiesgoServicio(
             PeligroId = request.PeligroId,
             DescripcionPeligro = request.PeligroId is null ? descripcion : null,
             Actividad = actividad,
+            AccidenteId = request.AccidenteId,
             Estado = EstadoRiesgo.Confirmado,
             RevisadoPorId = vinculoId,
             RevisadoEn = await reloj.AhoraAsync(ct)
@@ -52,6 +56,6 @@ public sealed class CrearRiesgoServicio(
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return new RiesgoResponseDto(riesgo.Id, riesgo.Estado, riesgo.PeligroId, peligro?.Nombre, peligro?.Clasificacion, riesgo.DescripcionPeligro,
-            riesgo.Actividad, null, null, riesgo.CreadoEn, null, 0);
+            riesgo.Actividad, null, null, riesgo.AccidenteId, riesgo.CreadoEn, null, null, 0);
     }
 }

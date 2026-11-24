@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { CambiarContrasenaPage } from '@/features/auth/pages/CambiarContrasenaPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
@@ -15,6 +15,22 @@ import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncue
 import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
 import { NuevaEncuestaPage } from '@/features/encuestas/pages/NuevaEncuestaPage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
+import { CatalogosLayout } from '@/features/catalogos/components/CatalogosLayout'
+import { CategoriasPage } from '@/features/catalogos/pages/CategoriasPage'
+import { DocumentoPage } from '@/features/catalogos/pages/DocumentoPage'
+import { DocumentosPage } from '@/features/catalogos/pages/DocumentosPage'
+import { PeligroPage } from '@/features/catalogos/pages/PeligroPage'
+import { PeligrosPage } from '@/features/catalogos/pages/PeligrosPage'
+import { PreguntaPage } from '@/features/catalogos/pages/PreguntaPage'
+import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
+import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
+import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
+import { EventoPage } from '@/features/eventos/pages/EventoPage'
+import { EventosPage } from '@/features/eventos/pages/EventosPage'
+import { ReportarEventoPage } from '@/features/eventos/pages/ReportarEventoPage'
+import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
+import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
+import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
 import { RiesgoPage } from '@/features/riesgos/pages/RiesgoPage'
 import { RiesgosPage } from '@/features/riesgos/pages/RiesgosPage'
@@ -25,7 +41,7 @@ import { AppLayout } from '@/shared/components/AppLayout'
 import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { registrarHistorial } from '@/shared/components/ui/historialVolver'
-import { ROLES, ROLES_EMPRESA, ROLES_GESTION } from '@/shared/sesion'
+import { ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_PLATAFORMA, ROLES_TAREAS } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
 import { RutaPrivada } from './rutas/RutaPrivada'
 import { SoloSinSesion } from './rutas/SoloSinSesion'
@@ -76,7 +92,36 @@ export const router = createBrowserRouter([
             children: [
               { path: 'mis-encuestas', element: <MisEncuestasPage /> },
               { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
+              // HU-047: cualquier persona de la empresa reporta, de forma anónima.
+              { path: 'eventos/reportar', element: <ReportarEventoPage /> },
             ],
+          },
+          {
+            // HU-023: catálogos de la plataforma (staff de Norvia; soporte solo consulta).
+            element: <RequiereRol roles={ROLES_PLATAFORMA} />,
+            children: [
+              {
+                path: 'catalogos',
+                element: <CatalogosLayout />,
+                children: [
+                  { index: true, element: <Navigate to="categorias" replace /> },
+                  { path: 'categorias', element: <CategoriasPage /> },
+                  { path: 'preguntas', element: <PreguntasPage /> },
+                  { path: 'preguntas/nueva', element: <PreguntaPage /> },
+                  { path: 'preguntas/:id', element: <PreguntaPage /> },
+                  { path: 'peligros', element: <PeligrosPage /> },
+                  { path: 'peligros/:id', element: <PeligroPage /> },
+                  { path: 'rubros', element: <RubrosPage /> },
+                  { path: 'documentos', element: <DocumentosPage /> },
+                  { path: 'documentos/nuevo', element: <DocumentoPage /> },
+                  { path: 'documentos/:id', element: <DocumentoPage /> },
+                ],
+              },
+            ],
+          },
+          {
+            element: <RequiereRol roles={ROLES_TAREAS} />,
+            children: [{ path: 'mis-tareas', element: <MisTareasPage /> }],
           },
           {
             element: <RequiereRol roles={ROLES_GESTION} />,
@@ -85,6 +130,11 @@ export const router = createBrowserRouter([
               { path: 'riesgos', element: <RiesgosPage /> },
               { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
               { path: 'riesgos/:id', element: <RiesgoPage /> },
+              { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
+              { path: 'eventos', element: <EventosPage /> },
+              { path: 'eventos/estadisticas', element: <EstadisticasEventosPage /> },
+              { path: 'eventos/:id', element: <EventoPage /> },
+              { path: 'plan-de-trabajo/nueva', element: <NuevaTareaPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },

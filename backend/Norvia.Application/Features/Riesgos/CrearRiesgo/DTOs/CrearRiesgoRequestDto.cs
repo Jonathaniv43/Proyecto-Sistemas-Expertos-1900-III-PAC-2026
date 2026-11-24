@@ -11,4 +11,7 @@ public sealed record CrearRiesgoRequestDto
 
     /// <summary>Actividad o lugar donde se presenta el riesgo.</summary>
     public string Actividad { get; init; } = string.Empty;
+
+    /// <summary>HU-051: el evento que reveló el riesgo, si se agrega a raíz de uno.</summary>
+    public Guid? AccidenteId { get; init; }
 }

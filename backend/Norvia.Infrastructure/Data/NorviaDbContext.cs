@@ -7,6 +7,7 @@ using Norvia.Domain.Entities.Accidentes;
 using Norvia.Domain.Entities.Catalogos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Encuestas;
+using Norvia.Domain.Entities.Plan;
 using Norvia.Domain.Entities.Riesgos;
 
 namespace Norvia.Infrastructure.Data;
@@ -73,8 +74,12 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<EvaluacionRiesgo> EvaluacionRiesgo => Set<EvaluacionRiesgo>();
     public DbSet<Control> Control => Set<Control>();
 
-    // Accidentes / Eventos (M6; pendiente HU-049: InvestigacionAccidente)
+    // Accidentes / Eventos (M6)
     public DbSet<Accidente> Accidente => Set<Accidente>();
+    public DbSet<InvestigacionAccidente> InvestigacionAccidente => Set<InvestigacionAccidente>();
+
+    // Plan de trabajo (M5)
+    public DbSet<Tarea> Tarea => Set<Tarea>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

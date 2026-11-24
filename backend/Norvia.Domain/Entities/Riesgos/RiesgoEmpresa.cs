@@ -14,6 +14,9 @@ public class RiesgoEmpresa : ITieneEmpresa
 
     /// <summary>Encuesta que lo sugirió. Sin navegación hasta implementar M3.</summary>
     public Guid? EncuestaId { get; set; }
+
+    /// <summary>Evento (accidente, incidente…) que lo reveló (HU-051). Un riesgo tiene como máximo un origen: encuesta o evento.</summary>
+    public Guid? AccidenteId { get; set; }
     public DateTime CreadoEn { get; set; }
     public Guid? RevisadoPorId { get; set; }
     public DateTime? RevisadoEn { get; set; }

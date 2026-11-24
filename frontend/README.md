@@ -388,3 +388,117 @@ useFormulario(esquema, {
   - Badge de advertencia "Sin control" junto al nivel.
   - Enlace "N altos o críticos sin control" junto al mapa, y opción "Altos y críticos sin control" en el filtro de nivel (`sinControl=true`).
 - **Plantillas:** las sugerencias salen de `PlantillaTarea` del peligro. Todavía no hay pantalla para cargarlas, así que un catálogo sin plantillas no sugiere nada.
+
+## Evaluar el riesgo residual (HU-040)
+
+- **Detalle del riesgo, sección "Evaluación":** con la inicial hecha, muestra dos paneles lado a lado (`PanelEvaluacion`): "Inicial" y "Residual". En celular se apilan.
+  - **Residual:** se evalúa con el mismo formulario (`FormularioEvaluacion` con `tipo="residual"`, que llama a `POST /riesgos/:id/evaluaciones-residual`). Necesita al menos un control: sin controles el panel lo explica y no muestra el botón.
+  - **Comparación:** debajo de los paneles, una frase dice si el riesgo bajó, siguió igual o subió.
+  - **Volver a evaluar** cualquiera de las dos parte de la vigente del mismo tipo; la otra no cambia.
+- **Matriz (`/riesgos`):** columna "Residual" (`evaluacionResidual`); en celular va bajo el nivel. El mapa y el orden siguen usando la inicial.
+
+## Plan de trabajo (HU-042)
+
+- **`/plan-de-trabajo`** (feature `plan`, enlace en Inicio para `admin_empresa` y `responsable_sst`):
+  - **Tareas propuestas (`GET /plan-trabajo/propuesta`):** agrupadas por riesgo, con su nivel y prioridad; cada tarea dice si sale de un control (y su tipo) o de una tarea modelo del peligro, y si pide evidencia. Todas empiezan marcadas (`GrupoCasillas`).
+  - **Confirmar (`POST /plan-trabajo/generacion`)** envía las claves marcadas; lo desmarcado se vuelve a proponer. Al terminar recarga la propuesta y la lista.
+  - **Riesgos sin evaluar:** no entran; un aviso dice cuántos y enlaza a la matriz.
+  - **Tareas del plan (`GET /plan-trabajo/tareas`):** tabla por prioridad con el nivel del riesgo, estado y responsable. En celular, prioridad, nivel y responsable van en la primera celda.
+- **`shared/riesgo/`:** `EtiquetaRiesgo` y la clasificación de niveles (`niveles.ts`) pasaron aquí desde `features/riesgos`, porque el plan también las usa (las features no se importan entre sí). `features/riesgos/niveles.ts` reexporta lo compartido.
+- `GrupoCasillas` acepta una leyenda con más que texto (`etiqueta: ReactNode`).
+
+## Asignar tareas (HU-043)
+
+- **Plan de trabajo:** cada tarea pendiente o en progreso tiene "Asignar" o "Reasignar", que abre `AsignarTareaModal`: responsable (`SelectBusqueda` con `GET /plan-trabajo/responsables`) y fecha límite (`CampoFecha`); guarda con `PUT /plan-trabajo/tareas/:id/asignacion`.
+  - La tabla muestra la fecha límite y el badge "Vencida": pendiente o en progreso con la fecha pasada. Se calcula, no se guarda.
+  - **En celular,** prioridad, nivel, responsable, fecha y estado van en la primera celda; la acción queda a la vista.
+- **`/plan-de-trabajo/nueva` (`NuevaTareaPage`):** tarea manual con título, detalle, prioridad, responsable, fecha límite y si pide evidencia. Al crearla vuelve al plan con un aviso.
+- **`shared/components/ui/CampoFecha`** (design-system § Campo de fecha):
+  - **Escribir:** dd/mm/aaaa, con las barras puestas solas.
+  - **Calendario:** botón con ícono; empieza el domingo, marca hoy y deshabilita los días antes de `minimo`.
+  - **Teclado:** flechas, Inicio/Fin, RePág/AvPág, Enter y Esc, que cierra solo el calendario.
+  - **Posición:** fija junto al campo, debajo o encima, así el cuerpo de un modal no lo recorta. En celular es una hoja inferior.
+- **`shared/validacion/fechas.ts`:**
+  - conversiones entre dd/mm/aaaa y aaaa-mm-dd, y `hoyHonduras()` (zona `America/Tegucigalpa`);
+  - la regla Zod `fechaLimite(actual)`: obligatoria y no anterior a hoy, salvo la que ya tenía.
+
+## Mis tareas (HU-044)
+
+- **`/mis-tareas` (`MisTareasPage`):** para admin, Responsable SST y colaborador (`ROLES_TAREAS`); enlace en Inicio junto a "Mis encuestas".
+  - **Por hacer** (en progreso y pendientes) y **Terminadas** (completadas y canceladas), en el orden de `GET /plan-trabajo/tareas/mias`.
+  - **Cada tarea** muestra su prioridad, fecha límite, "Vencida", de dónde sale y si pide evidencia.
+  - **Botones:** "Empezar", "Marcar como completada", "Volver a pendiente" y "Reabrir", con `PATCH /plan-trabajo/tareas/:id/estado`. Después se recarga la lista para conservar el orden del servidor.
+  - **Si pide evidencia,** "Marcar como completada" queda deshabilitado (RN-25): adjuntarla es HU-045.
+  - **Errores:** van junto a la tarea. Si ya no es suya (403) o no existe (404), el aviso va arriba y la lista se recarga.
+- `features/plan/etiquetas.ts` reúne prioridades, tipos de control, badges de estado y `vencida()`, que usan el plan y "Mis tareas".
+
+## Filtrar el plan (HU-046)
+
+- **Plan de trabajo, "Tareas del plan":** `FiltrosPlan` con estado ("Vencidas" incluida), responsable ("Sin responsable" incluido), origen, prioridad, y "Vence desde" y "Vence hasta" (`CampoFecha`).
+  - **El formulario es de la página** (React Hook Form): el enlace "N vencidas" y "Quitar filtros" lo cambian desde fuera.
+  - **`filtros.ts`** convierte lo elegido en parámetros de `GET /plan-trabajo/tareas`. Una fecha a medio escribir no filtra; si no existe, o si el rango es imposible, se avisa y no se filtra.
+  - **La lista se vuelve a pedir** solo cuando cambian los parámetros (la clave es el JSON de los filtros).
+- **Vencidas:** badge en cada fila y, junto al total, "N vencidas" en rojo, que las filtra.
+
+## Historial de un riesgo (HU-041)
+
+- **Detalle del riesgo, `HistorialEvaluaciones`:** con `GET /riesgos/:id/evaluaciones`, debajo de los controles.
+  - **Columnas:** fecha y quién evaluó, tipo con "Vigente" (la más reciente de cada tipo), nivel, y probabilidad × severidad con los nombres de RN-80.
+  - **Cuándo aparece:** solo si el riesgo tiene evaluaciones.
+  - **Recarga:** se vuelve a pedir cuando cambia una de las evaluaciones vigentes (prop `version`), o sea, al guardar una nueva.
+
+## Catálogos de la plataforma (HU-023)
+
+- **`/catalogos` (feature `catalogos`):** para el staff (`ROLES_PLATAFORMA`), con enlace "Catálogos" en Inicio. `CatalogosLayout` muestra la navegación de sección (`.nav-seccion`, design-system § Navegación de sección).
+  - **Categorías:** filtro por rubro; enlace a sus preguntas (`/catalogos/preguntas?categoria=`).
+  - **Preguntas:** lista por categoría (la categoría va en la URL). El editor (`/catalogos/preguntas/nueva` y `/:id`, `PreguntaPage`) tiene:
+    - tipo, "Es obligatoria" y peligro (`SelectBusqueda` con "Ninguno");
+    - opciones con `useFieldArray` (subir, bajar, quitar, "Indica exposición" solo si hay peligro);
+    - las reglas de RN-68 en `schemas/catalogos.ts`;
+    - al editar, el bloque tipo, peligro y opciones solo se envía si cambió.
+  - **Peligros y plantillas:** búsqueda sin tildes y filtro por clasificación. El detalle (`/catalogos/peligros/:id`) administra sus plantillas de tarea: controles por efectividad y tareas modelo.
+  - **Rubros y plantillas de documento:** el editor del documento va en su propia página.
+- **Componentes de la feature:**
+  - `ModalFormulario` y `CuerpoFormulario`: modal con formulario, que no se cierra con cambios ni mientras guarda;
+  - `EstadoActivo` y `BotonEstado`: badge y activar o desactivar sin confirmación, porque no se borra nada;
+  - `EstadoCarga`: error con reintento o esqueleto;
+  - `useCambioEstado`: aviso de la acción y recarga.
+- **Soporte de plataforma** (`usePuedeEditar` falso): ve todo, con un aviso de solo consulta y sin botones de cambio.
+
+## Reportar eventos (HU-047)
+
+- **`/eventos/reportar` (`ReportarEventoPage`):** para los cuatro roles de empresa, con enlace en Inicio. Reporte anónimo con tipo, estado de la enfermedad (si aplica), fecha, hora, lugar, descripción y "Es grave".
+  - **Esquema `schemas/reporte.ts`:** espejo del validador del backend. Fecha y hora no futuras en la hora de Honduras (margen de 5 min), y envía `fechaHoraEvento` con `-06:00`.
+  - **Al cambiar la fecha** se revalida la hora, porque "todavía no llega" depende de las dos.
+  - **Al enviar** muestra la confirmación con la hora de recepción; "Reportar otro evento" monta un formulario nuevo.
+- **`/eventos` y `/eventos/:id`:** para admin y Responsable SST. Lista con filtros por tipo, estado y gravedad, el último recibido primero, y detalle. No hay dato de quién reportó (RN-27).
+- **`shared/components/ui/CampoHora`:** hora escrita en 12 horas. `leerHora` acepta "2:30 pm", "230p" o "14:30", y al salir del campo queda "02:30 p. m.".
+- **`CampoFecha`:** tiene `maximo` para no admitir fechas futuras.
+- **`shared/validacion/fechas.ts`:** `leerHora`, `horaATexto` y `minutosAhoraHonduras`.
+
+## Investigar, cerrar y descartar eventos (HU-049)
+
+- **`components/SeccionInvestigacion.tsx`**, dentro de `/eventos/:id`:
+  - **Investigación:** se ve como texto y, para el Responsable SST, se registra o se corrige con un formulario (`schemas/investigacion.ts`). Pide causas inmediatas y de fondo, conclusiones opcionales, quién investigó (por defecto quien registra; la lista sale de `/plan-trabajo/responsables`) y la fecha, entre el día del evento y hoy en Honduras.
+  - **Cierre:** muestra cuántas medidas correctivas hay. "Cerrar el evento" se deshabilita y dice qué falta mientras no haya investigación y al menos una medida (RN-28). "Descartar el reporte" pide motivo opcional. Ambos usan `DialogoConfirmacion`.
+- **`EventoPage`:** lo que devuelven investigar, cerrar y descartar reemplaza el evento cargado, sin volver a pedirlo. Muestra un aviso cuando el evento está cerrado o descartado (quién, cuándo y por qué). El admin solo consulta (`useTieneRol([ROLES.responsableSst])`).
+
+## Medidas correctivas (HU-050)
+
+- **`components/SeccionMedidas.tsx`**, en `/eventos/:id` entre la investigación y el cierre: avance ("1 de 2 completadas · 1 vencida", sin contar las canceladas) y lista de medidas, primero las abiertas. El Responsable SST agrega una con un modal mientras el evento siga abierto. Al crearla, recarga la lista y suma uno a `totalMedidas` del evento, lo que habilita "Cerrar el evento".
+- **`components/SeccionCierre.tsx`:** cierre y descarte, separados de `SeccionInvestigacion`.
+- **`shared/tareas`:** estados de tarea, prioridades, `vencida` y `tareaAsignadaEsquema`, compartidos por `plan` (tarea manual) y `eventos` (medida). `plan/etiquetas.ts` y `plan/schemas/tareaManual.ts` los reexportan.
+- **Plan de trabajo:** una tarea con origen accidente enlaza al evento (`accidenteId`) con "Medida de un evento".
+
+## Riesgos tras un evento (HU-051)
+
+- **`eventos/components/SeccionRiesgos.tsx`**, en `/eventos/:id`: los riesgos que el evento reveló y los que se reevaluaron por él (`GET /eventos/{id}/riesgos`), con el nivel de antes y el de después. El Responsable SST tiene dos acciones:
+  - "Agregar un riesgo" lleva a `/riesgos/nuevo?evento=…`;
+  - "Reevaluar un riesgo" abre un modal para elegirlo de la matriz y lleva a `/riesgos/:id?evento=…`.
+- **`riesgos`:** el parámetro `evento` hace que `NuevoRiesgoPage` envíe `accidenteId` y que, al guardar, lleve a evaluar el riesgo. En `RiesgoPage`, abre la reevaluación inicial y la envía con `accidenteId`. El origen "Revelado por un evento" y "Tras un evento" en `HistorialEvaluaciones` enlazan al evento.
+- **`Modal`:** `CuerpoModal` alinea su contenido arriba (`content-start`); en celular, el modal ocupa la pantalla y antes repartía las filas.
+
+## Estadísticas de eventos (HU-052)
+
+- **`/eventos/estadisticas` (`EstadisticasEventosPage`):** periodo con Desde y Hasta (`schemas/periodo.ts`, espejo del validador: como máximo 24 meses), que se aplica al cambiar si es válido. Tiene atajos de periodo. Muestra indicadores y medidores por tipo, gravedad y mes. Solo cifras.
+- **`shared/components/datos`:** `Indicador` y `ListaMedidores` (barra con `--color-dato-serie`), que antes eran de los resultados de encuesta y ahora también usan las estadísticas.

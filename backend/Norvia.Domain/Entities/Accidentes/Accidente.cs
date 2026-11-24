@@ -5,7 +5,6 @@ namespace Norvia.Domain.Entities.Accidentes;
 /// Por diseño no almacena quién lo reportó.
 /// <para>
 /// Pendiente de futuras HUs:
-/// - HU-049: entidad <c>InvestigacionAccidente</c> y flujo de cierre/descarte sobre este registro.
 /// - HU-050: derivación a medidas correctivas (<c>Tarea</c>).
 /// - HU-051: vinculación con <c>RiesgoEmpresa.AccidenteId</c>.
 /// - HU-100: adjuntos de evidencia en <c>Archivo</c>.
@@ -32,4 +31,5 @@ public class Accidente : ITieneEmpresa
 
     public Empresa Empresa { get; set; } = null!;
     public VinculoEmpresa? DescartadoPor { get; set; }
+    public InvestigacionAccidente? Investigacion { get; set; }
 }
