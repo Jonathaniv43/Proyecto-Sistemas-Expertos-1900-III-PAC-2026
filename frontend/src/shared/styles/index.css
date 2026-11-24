@@ -199,6 +199,86 @@
     white-space: nowrap;
   }
 
+  .cuadro-riesgo {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Mapa de calor de riesgo (design-system.md § Mapa de calor): celdas de 44px con 2px de separación. */
+  .mapa-calor {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-2);
+    justify-content: start;
+  }
+
+  .mapa-calor-titulo-y {
+    align-self: center;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .mapa-calor-titulo-x {
+    grid-column: 2;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .mapa-calor-celdas {
+    display: grid;
+    grid-template-columns: 16px repeat(5, 44px);
+    grid-auto-rows: 44px;
+    gap: 2px;
+  }
+
+  .mapa-calor-eje {
+    display: grid;
+    place-items: center;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mapa-calor-celda {
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    print-color-adjust: exact;
+  }
+
+  /* Elegida o con foco: anillo de 2px en texto principal con un halo del fondo, visible sobre cualquier color. */
+  .mapa-calor-celda[aria-pressed='true'],
+  .mapa-calor-celda:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 2px var(--color-text-primary),
+      inset 0 0 0 4px var(--color-bg-surface);
+  }
+
+  @media (max-width: 639px) {
+    .mapa-calor {
+      grid-template-columns: auto;
+    }
+
+    .mapa-calor-titulo-y {
+      justify-self: start;
+      writing-mode: horizontal-tb;
+      transform: none;
+    }
+
+    .mapa-calor-titulo-x {
+      grid-column: 1;
+    }
+  }
+
   /* Botón de solo ícono (design-system.css § icon-btn): mismo alto que los controles. */
   .boton-icono {
     display: inline-grid;

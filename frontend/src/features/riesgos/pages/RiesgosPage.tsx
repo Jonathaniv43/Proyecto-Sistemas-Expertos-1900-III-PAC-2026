@@ -21,8 +21,8 @@ export interface EstadoRiesgoAgregado {
 
 /**
  * Matriz de riesgos de la empresa (M4). HU-036: lista los riesgos confirmados, vengan de una encuesta
- * (HU-035) o agregados a mano, y lleva a agregar uno. La evaluación y el mapa de calor llegan con
- * HU-037 y HU-038.
+ * (HU-035) o agregados a mano, con su nivel (HU-037), y lleva a agregar uno y a evaluarlos. El mapa
+ * de calor de la matriz llega con HU-038.
  */
 export function RiesgosPage() {
   const riesgos = usePeticion(listarRiesgos)
@@ -127,7 +127,9 @@ function FilaRiesgo({ riesgo }: { riesgo: Riesgo }) {
   return (
     <tr>
       <td className="envolver">
-        <div className="font-medium">{nombrePeligro(riesgo)}</div>
+        <Link to={`/riesgos/${riesgo.id}`} className="font-medium">
+          {nombrePeligro(riesgo)}
+        </Link>
         {!riesgo.peligroId && <div className="text-xs text-text-secondary">Descrito por la empresa</div>}
         {/* En celular, actividad y origen van aquí (design-system.md § Fila de tabla). */}
         <div className="mt-1 grid gap-1 text-sm sm:hidden">
@@ -137,7 +139,7 @@ function FilaRiesgo({ riesgo }: { riesgo: Riesgo }) {
       </td>
       <td className="envolver max-sm:hidden">{riesgo.actividad ?? '—'}</td>
       <td>
-        <EtiquetaRiesgo />
+        <EtiquetaRiesgo nivel={riesgo.evaluacion} />
       </td>
       <td className="envolver max-sm:hidden">
         <Origen riesgo={riesgo} />
