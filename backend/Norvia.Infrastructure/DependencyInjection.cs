@@ -46,6 +46,8 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddOptions<StaffSeedOpciones>()
             .Bind(configuration.GetSection(StaffSeedOpciones.Seccion));
+        services.AddOptions<CatalogoSstOpciones>()
+            .Bind(configuration.GetSection(CatalogoSstOpciones.Seccion));
 
         // Servicios transversales.
         services.AddScoped<IReloj, RelojBaseDatos>();
@@ -75,6 +77,7 @@ public static class DependencyInjection
         services.AddScoped<PlantillasCorreoSeeder>();
         services.AddScoped<TiposDocumentoIdentidadSeeder>();
         services.AddScoped<TiposRespuestaPreguntaSeeder>();
+        services.AddScoped<CatalogoSstSeeder>();
 
         return services;
     }
