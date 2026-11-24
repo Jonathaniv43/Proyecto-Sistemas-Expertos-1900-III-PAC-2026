@@ -35,6 +35,8 @@ export interface Riesgo {
   peligroId: string | null
   /** Del catálogo; si es null, el peligro lo describió la empresa (`descripcionPeligro`). */
   peligroNombre: string | null
+  /** Clasificación del peligro del catálogo; null si lo describió la empresa. */
+  peligroClasificacion: ClasificacionPeligro | null
   descripcionPeligro: string | null
   actividad: string | null
   /** Encuesta que lo sugirió (HU-035); null si se agregó a mano. */
@@ -58,4 +60,22 @@ export interface CrearRiesgoRequest {
   peligroId?: string
   descripcionPeligro?: string
   actividad: string
+}
+
+/** GET /api/riesgos/matriz (HU-038): solo las celdas con riesgos, por la última evaluación inicial. */
+export interface MatrizRiesgos {
+  total: number
+  sinEvaluar: number
+  celdas: { probabilidad: number; severidad: number; nivel: number; clasificacion: ClasificacionRiesgo; cantidad: number }[]
+}
+
+/** Filtros de GET /api/riesgos (HU-038). Sin estado, los de la matriz (confirmados). */
+export interface FiltrosRiesgos {
+  estado?: EstadoRiesgo
+  buscar?: string
+  clasificacionPeligro?: ClasificacionPeligro
+  nivel?: ClasificacionRiesgo
+  sinEvaluar?: boolean
+  probabilidad?: number
+  severidad?: number
 }

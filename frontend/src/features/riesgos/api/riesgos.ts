@@ -1,8 +1,12 @@
 import { api } from '@/shared/api'
-import type { CrearRiesgoRequest, Evaluacion, PeligroDisponible, Riesgo } from '../types/riesgos'
+import type { CrearRiesgoRequest, Evaluacion, FiltrosRiesgos, MatrizRiesgos, PeligroDisponible, Riesgo } from '../types/riesgos'
 
-/** Riesgos de la matriz (confirmados), los más recientes primero (HU-036). */
-export const listarRiesgos = (signal: AbortSignal) => api.get<Riesgo[]>('/riesgos', { signal }).then((r) => r.data)
+/** Riesgos con filtros (HU-036, HU-038): nivel más alto primero; sin estado, los de la matriz. */
+export const listarRiesgos = (signal: AbortSignal, filtros: FiltrosRiesgos = {}) =>
+  api.get<Riesgo[]>('/riesgos', { signal, params: filtros }).then((r) => r.data)
+
+/** Cuántos riesgos de la matriz hay en cada celda de probabilidad × severidad (HU-038). */
+export const obtenerMatriz = (signal: AbortSignal) => api.get<MatrizRiesgos>('/riesgos/matriz', { signal }).then((r) => r.data)
 
 export const listarPeligrosDisponibles = (signal: AbortSignal) =>
   api.get<PeligroDisponible[]>('/riesgos/peligros-disponibles', { signal }).then((r) => r.data)
