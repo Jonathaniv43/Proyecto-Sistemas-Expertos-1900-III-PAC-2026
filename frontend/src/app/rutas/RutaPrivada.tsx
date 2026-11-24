@@ -22,7 +22,7 @@ export function RutaPrivada() {
       // nunca hubo). Tras cerrar sesión o cambiar la contraseña, el próximo ingreso empieza en el inicio:
       // puede entrar otra persona, con otro rol.
       const volver = sesion.motivo !== 'cerrada' && sesion.motivo !== 'contrasena_cambiada'
-      const estado: EstadoLogin = { desde: volver ? rutaActual(location) : undefined, motivo: sesion.motivo }
+      const estado: EstadoLogin = { desde: volver ? rutaActual(location) : undefined, motivo: sesion.motivo, rtn: sesion.rtn }
       return <Navigate to={RUTA_LOGIN} replace state={estado} />
     }
     case 'activa': {

@@ -8,6 +8,7 @@ export function SoloSinSesion() {
   const location = useLocation()
 
   if (sesion.estado === 'verificando') return <VerificandoSesion />
-  if (sesion.estado === 'activa') return <Navigate to={destinoSeguro(location.state)} replace />
+  if (sesion.estado === 'activa')
+    return <Navigate to={destinoSeguro(location.state, sesion.usuario.empresa?.rtn)} replace />
   return <Outlet />
 }
