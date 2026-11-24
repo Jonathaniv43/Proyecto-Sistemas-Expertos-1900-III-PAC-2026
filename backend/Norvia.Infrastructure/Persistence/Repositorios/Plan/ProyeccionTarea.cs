@@ -48,7 +48,7 @@ internal static class ProyeccionTarea
                 var origen = f.RiesgoEmpresaId is not null ? OrigenTarea.Riesgo : f.AccidenteId is not null ? OrigenTarea.Accidente : OrigenTarea.Manual;
                 return new TareaResponseDto(f.Id, f.Titulo, f.Descripcion, f.Estado, f.Prioridad, f.ResponsableId, f.Responsable?.NombreCompleto,
                     f.FechaLimite, f.RequiereEvidencia, origen, f.RiesgoEmpresaId, f.RiesgoNombre, nivel,
-                    nivel is int n ? EvaluacionRiesgo.Clasificar(n) : null, f.ControlTipo, f.CreadaEn, f.CompletadaEn);
+                    nivel is int n ? EvaluacionRiesgo.Clasificar(n) : null, f.ControlTipo, f.AccidenteId, f.CreadaEn, f.CompletadaEn);
             })
             .OrderBy(t => t.Prioridad).ThenByDescending(t => t.RiesgoNivel ?? 0).ThenBy(t => t.RiesgoId)
             .ThenBy(t => t.ControlTipo is null).ThenBy(t => t.ControlTipo)

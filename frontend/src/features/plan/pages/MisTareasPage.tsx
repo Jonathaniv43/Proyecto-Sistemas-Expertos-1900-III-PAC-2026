@@ -151,7 +151,7 @@ function ItemTarea({ tarea, ocupada, cargando, error, onCambiar }: ItemTareaProp
     tarea.origen === 'riesgo'
       ? `Riesgo: ${tarea.riesgoNombre ?? 'sin nombre'}${tarea.controlTipo ? ` · Control: ${TIPOS_CONTROL[tarea.controlTipo].toLowerCase()}` : ''}`
       : tarea.origen === 'accidente'
-        ? 'Medida de un accidente'
+        ? 'Medida de un evento'
         : 'Tarea manual'
   const faltaEvidencia = tarea.requiereEvidencia
 

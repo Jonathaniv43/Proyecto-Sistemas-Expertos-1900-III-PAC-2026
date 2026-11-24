@@ -126,6 +126,11 @@ public static class CatalogoPermisos
         Empresa("evento.investigar", "Registrar la investigación de un evento", "PUT", "api/eventos/{id}/investigacion", "responsable_sst"),
         Empresa("evento.cerrar", "Cerrar un evento", "POST", "api/eventos/{id}/cierre", "responsable_sst"),
         Empresa("evento.descartar", "Descartar un evento", "PATCH", "api/eventos/{id}/descarte", "responsable_sst"),
+        // HU-050: medidas correctivas, que son tareas del plan con origen en el evento.
+        Empresa("evento.medida.listar", "Ver las medidas correctivas de un evento", "GET", "api/eventos/{id}/medidas-correctivas",
+            "admin_empresa", "responsable_sst"),
+        Empresa("evento.medida.crear", "Agregar una medida correctiva a un evento", "POST", "api/eventos/{id}/medidas-correctivas",
+            "responsable_sst"),
 
         // HU-023: catálogos globales (alcance plataforma). Soporte solo consulta; el administrador los mantiene.
         Plataforma("catalogo.rubro.listar", "Listar rubros", "GET", "api/rubros", "admin_plataforma", "soporte_plataforma"),

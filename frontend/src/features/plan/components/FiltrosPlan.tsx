@@ -14,7 +14,7 @@ const ESTADOS = [
 ]
 const ORIGENES = [
   { valor: 'riesgo', texto: 'De un riesgo' },
-  { valor: 'accidente', texto: 'De un accidente' },
+  { valor: 'accidente', texto: 'De un evento' },
   { valor: 'manual', texto: 'Manual' },
 ]
 

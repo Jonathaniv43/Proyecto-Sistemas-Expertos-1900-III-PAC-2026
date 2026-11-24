@@ -482,3 +482,10 @@ useFormulario(esquema, {
   - **Investigación:** se ve como texto y, para el Responsable SST, se registra o se corrige con un formulario (`schemas/investigacion.ts`). Pide causas inmediatas y de fondo, conclusiones opcionales, quién investigó (por defecto quien registra; la lista sale de `/plan-trabajo/responsables`) y la fecha, entre el día del evento y hoy en Honduras.
   - **Cierre:** muestra cuántas medidas correctivas hay. "Cerrar el evento" se deshabilita y dice qué falta mientras no haya investigación y al menos una medida (RN-28). "Descartar el reporte" pide motivo opcional. Ambos usan `DialogoConfirmacion`.
 - **`EventoPage`:** lo que devuelven investigar, cerrar y descartar reemplaza el evento cargado, sin volver a pedirlo. Muestra un aviso cuando el evento está cerrado o descartado (quién, cuándo y por qué). El admin solo consulta (`useTieneRol([ROLES.responsableSst])`).
+
+## Medidas correctivas (HU-050)
+
+- **`components/SeccionMedidas.tsx`**, en `/eventos/:id` entre la investigación y el cierre: avance ("1 de 2 completadas · 1 vencida", sin contar las canceladas) y lista de medidas, primero las abiertas. El Responsable SST agrega una con un modal mientras el evento siga abierto. Al crearla, recarga la lista y suma uno a `totalMedidas` del evento, lo que habilita "Cerrar el evento".
+- **`components/SeccionCierre.tsx`:** cierre y descarte, separados de `SeccionInvestigacion`.
+- **`shared/tareas`:** estados de tarea, prioridades, `vencida` y `tareaAsignadaEsquema`, compartidos por `plan` (tarea manual) y `eventos` (medida). `plan/etiquetas.ts` y `plan/schemas/tareaManual.ts` los reexportan.
+- **Plan de trabajo:** una tarea con origen accidente enlaza al evento (`accidenteId`) con "Medida de un evento".

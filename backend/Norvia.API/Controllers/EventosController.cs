@@ -7,6 +7,9 @@ using Norvia.Application.Features.Eventos.DTOs;
 using Norvia.Application.Features.Eventos.ReportarEvento;
 using Norvia.Application.Features.Eventos.ReportarEvento.DTOs;
 using Norvia.Application.Features.Eventos.CerrarEvento;
+using Norvia.Application.Features.Eventos.CrearMedidaCorrectiva;
+using Norvia.Application.Features.Eventos.CrearMedidaCorrectiva.DTOs;
+using Norvia.Application.Features.Eventos.ListarMedidasCorrectivas;
 using Norvia.Application.Features.Eventos.DescartarEvento;
 using Norvia.Application.Features.Eventos.DescartarEvento.DTOs;
 using Norvia.Application.Features.Eventos.RegistrarInvestigacion;
@@ -19,8 +22,6 @@ namespace Norvia.API.Controllers;
 /// <para>
 /// Pendiente de futuras HUs en este controlador:
 /// - HU-100: <c>POST /api/eventos/{id}/evidencias</c> (adjuntos en almacenamiento externo).
-/// - HU-049: <c>PATCH /api/eventos/{id}/investigacion</c> y <c>PATCH /api/eventos/{id}/descarte</c>.
-/// - HU-050: <c>POST /api/eventos/{id}/medidas-correctivas</c>.
 /// - HU-052: <c>GET /api/eventos/estadisticas</c>.
 /// </para>
 /// </summary>
@@ -80,4 +81,22 @@ public sealed class EventosController : ControllerBase
     public async Task<IActionResult> Descartar(
         Guid id, DescartarEventoRequestDto request, [FromServices] DescartarEventoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-050: las medidas correctivas del evento (tareas del plan con origen en él) con su avance.</summary>
+    [HttpGet("{id:guid}/medidas-correctivas")]
+    [ProducesResponseType(typeof(IReadOnlyList<MedidaCorrectivaResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarMedidas(
+        Guid id, [FromServices] ListarMedidasCorrectivasServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-050: agrega una medida correctiva, que queda como tarea del plan con origen en el evento (RN-23).</summary>
+    [HttpPost("{id:guid}/medidas-correctivas")]
+    [ProducesResponseType(typeof(MedidaCorrectivaResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CrearMedida(
+        Guid id, CrearMedidaCorrectivaRequestDto request, [FromServices] CrearMedidaCorrectivaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttpCreado(this);
 }

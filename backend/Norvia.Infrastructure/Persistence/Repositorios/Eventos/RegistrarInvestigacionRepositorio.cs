@@ -14,7 +14,7 @@ public sealed class RegistrarInvestigacionRepositorio(NorviaDbContext db) : IReg
         db.Accidente.Include(a => a.Investigacion).FirstOrDefaultAsync(a => a.Id == id, ct);
 
     public Task<bool> EsInvestigadorValidoAsync(Guid vinculoId, CancellationToken ct) =>
-        db.VinculoEmpresa.AnyAsync(v => v.Id == vinculoId && v.Estado == EstadoVinculo.Activo && Reglas.RolesInvestigadores.Contains(v.RolId), ct);
+        db.VinculoEmpresa.AnyAsync(v => v.Id == vinculoId && v.Estado == EstadoVinculo.Activo && Reglas.RolesGestion.Contains(v.RolId), ct);
 
     public void Agregar(InvestigacionAccidente investigacion) => db.InvestigacionAccidente.Add(investigacion);
 

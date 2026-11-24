@@ -1,3 +1,5 @@
+import type { EstadoTarea } from '@/shared/tareas'
+
 /** Tipo de evento (RN-26). */
 export type TipoEvento = 'accidente' | 'incidente' | 'enfermedad_profesional' | 'condicion_insegura'
 
@@ -69,9 +71,35 @@ export interface RegistrarInvestigacionRequest {
   fechaInvestigacion: string
 }
 
-/** Personas que pueden investigar: vínculos activos de la empresa, sin encuestados. */
+/** Personas que pueden investigar o ser responsables de una medida: vínculos activos de la empresa, sin encuestados. */
 export interface Persona {
   id: string
   nombreCompleto: string
   rolCodigo: string
+}
+
+/** GET y POST /api/eventos/{id}/medidas-correctivas (HU-050): una tarea del plan con origen en el evento. */
+export interface MedidaCorrectiva {
+  id: string
+  titulo: string
+  descripcion: string | null
+  estado: EstadoTarea
+  prioridad: 1 | 2 | 3
+  responsableId: string | null
+  responsableNombre: string | null
+  /** aaaa-mm-dd */
+  fechaLimite: string | null
+  requiereEvidencia: boolean
+  creadaEn: string
+  completadaEn: string | null
+}
+
+/** POST /api/eventos/{id}/medidas-correctivas: nace asignada, como una tarea manual. */
+export interface CrearMedidaRequest {
+  titulo: string
+  descripcion?: string
+  prioridad: 1 | 2 | 3
+  responsableId: string
+  fechaLimite: string
+  requiereEvidencia: boolean
 }

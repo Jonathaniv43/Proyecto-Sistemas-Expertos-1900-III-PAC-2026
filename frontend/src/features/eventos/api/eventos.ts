@@ -1,5 +1,14 @@
 import { api } from '@/shared/api'
-import type { Evento, EventoDetalle, FiltrosEventos, Persona, RegistrarInvestigacionRequest, ReportarEventoRequest } from '../types/eventos'
+import type {
+  CrearMedidaRequest,
+  Evento,
+  EventoDetalle,
+  FiltrosEventos,
+  MedidaCorrectiva,
+  Persona,
+  RegistrarInvestigacionRequest,
+  ReportarEventoRequest,
+} from '../types/eventos'
 
 /** Reporta un evento de forma anónima (HU-047). 400 `eventos.fecha_futura` si la fecha y hora todavía no llegan. */
 export const reportarEvento = (datos: ReportarEventoRequest) => api.post<Evento>('/eventos', datos).then((r) => r.data)
@@ -24,6 +33,20 @@ export const cerrarEvento = (id: string) => api.post<EventoDetalle>(`/eventos/${
 export const descartarEvento = (id: string, motivo: string) =>
   api.patch<EventoDetalle>(`/eventos/${id}/descarte`, { motivo: motivo.trim() || undefined }).then((r) => r.data)
 
-/** Quiénes pueden investigar: las mismas personas que pueden tener tareas (vínculos activos, sin encuestados). */
-export const listarInvestigadores = (signal: AbortSignal) =>
+/**
+ * Quiénes pueden investigar o ser responsables de una medida: las mismas personas que pueden tener tareas del plan
+ * (vínculos activos, sin encuestados).
+ */
+export const listarPersonas = (signal: AbortSignal) =>
   api.get<Persona[]>('/plan-trabajo/responsables', { signal }).then((r) => r.data)
+
+/** Medidas correctivas del evento con su avance (HU-050): las abiertas primero, por fecha límite. */
+export const listarMedidas = (signal: AbortSignal, id: string) =>
+  api.get<MedidaCorrectiva[]>(`/eventos/${id}/medidas-correctivas`, { signal }).then((r) => r.data)
+
+/**
+ * Agrega una medida, que queda como tarea del plan con origen en el evento. 400 `eventos.responsable_invalido` o
+ * `eventos.fecha_pasada`; 409 `eventos.terminado`.
+ */
+export const crearMedida = (id: string, datos: CrearMedidaRequest) =>
+  api.post<MedidaCorrectiva>(`/eventos/${id}/medidas-correctivas`, datos).then((r) => r.data)
