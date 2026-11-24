@@ -16,11 +16,11 @@ internal static class ProyeccionRiesgo
     private sealed record Fila(
         Guid Id, EstadoRiesgo Estado, Guid? PeligroId, string? PeligroNombre, ClasificacionPeligro? PeligroClasificacion,
         string? DescripcionPeligro, string? Actividad,
-        Guid? EncuestaId, string? EncuestaTitulo, DateTime CreadoEn, UltimaEvaluacion? Evaluacion);
+        Guid? EncuestaId, string? EncuestaTitulo, DateTime CreadoEn, UltimaEvaluacion? Evaluacion, int TotalControles);
 
     /// <summary>
     /// Nombre del peligro (catálogo global), título de la encuesta que lo sugirió y la última evaluación inicial
-    /// con su evaluador (todo de la misma empresa). El nivel, la clasificación y el nombre completo se calculan en memoria.
+    /// con su evaluador y cuántos controles tiene (todo de la misma empresa). El nivel, la clasificación y el nombre completo se calculan en memoria.
     /// </summary>
     internal static async Task<List<RiesgoResponseDto>> ListarAsync(NorviaDbContext db, IQueryable<RiesgoEmpresa> riesgos, CancellationToken ct)
     {
@@ -33,7 +33,8 @@ internal static class ProyeccionRiesgo
                     .Where(e => e.Tipo == TipoEvaluacion.Inicial)
                     .OrderByDescending(e => e.EvaluadoEn).ThenByDescending(e => e.Id)
                     .Select(e => new UltimaEvaluacion(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.EvaluadoPorId, e.EvaluadoPor.Persona, e.EvaluadoEn))
-                    .FirstOrDefault()))
+                    .FirstOrDefault(),
+                r.Controles.Count))
             .ToListAsync(ct);
 
         return filas.Select(f => new RiesgoResponseDto(
@@ -41,7 +42,8 @@ internal static class ProyeccionRiesgo
                 f.Evaluacion is { } e
                     ? new EvaluacionResponseDto(e.Id, e.Tipo, e.Probabilidad, e.Severidad, e.Probabilidad * e.Severidad,
                         EvaluacionRiesgo.Clasificar(e.Probabilidad * e.Severidad), e.EvaluadoPorId, e.Persona.NombreCompleto, e.EvaluadoEn)
-                    : null))
+                    : null,
+                f.TotalControles))
             .ToList();
     }
 }

@@ -16,6 +16,8 @@ public sealed class ObtenerMatrizServicio(IObtenerMatrizRepositorio repositorio)
             .Select(g => new CeldaMatrizDto(g.Key.P, g.Key.S, g.Key.P * g.Key.S, EvaluacionRiesgo.Clasificar(g.Key.P * g.Key.S), g.Count()))
             .OrderByDescending(c => c.Probabilidad).ThenBy(c => c.Severidad)
             .ToList();
-        return new MatrizRiesgosResponseDto(ubicaciones.Count, ubicaciones.Count(u => u.Probabilidad is null), celdas);
+        // RN-19: los altos y críticos sin controles se señalan.
+        var altosSinControl = ubicaciones.Count(u => u.Probabilidad * u.Severidad >= 10 && !u.TieneControles);
+        return new MatrizRiesgosResponseDto(ubicaciones.Count, ubicaciones.Count(u => u.Probabilidad is null), altosSinControl, celdas);
     }
 }

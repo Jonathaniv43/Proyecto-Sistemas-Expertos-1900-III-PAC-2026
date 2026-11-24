@@ -8,5 +8,6 @@ public sealed record CeldaMatrizDto(short Probabilidad, short Severidad, int Niv
 /// <summary>
 /// Mapa de la matriz (HU-038): los riesgos confirmados ubicados por su última evaluación inicial.
 /// <paramref name="Celdas"/> solo trae las celdas con riesgos; <paramref name="SinEvaluar"/> cuenta los que no se ubican.
+/// <paramref name="AltosSinControl"/> cuenta los altos o críticos que todavía no tienen controles (RN-19, HU-039).
 /// </summary>
-public sealed record MatrizRiesgosResponseDto(int Total, int SinEvaluar, IReadOnlyList<CeldaMatrizDto> Celdas);
+public sealed record MatrizRiesgosResponseDto(int Total, int SinEvaluar, int AltosSinControl, IReadOnlyList<CeldaMatrizDto> Celdas);

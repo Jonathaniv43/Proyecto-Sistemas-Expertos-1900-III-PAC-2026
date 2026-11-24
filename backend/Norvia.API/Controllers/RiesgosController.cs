@@ -1,10 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
+using Norvia.Application.Features.Riesgos.CrearControl;
+using Norvia.Application.Features.Riesgos.CrearControl.DTOs;
 using Norvia.Application.Features.Riesgos.CrearRiesgo;
 using Norvia.Application.Features.Riesgos.CrearRiesgo.DTOs;
 using Norvia.Application.Features.Riesgos.DTOs;
 using Norvia.Application.Features.Riesgos.EvaluarRiesgo;
 using Norvia.Application.Features.Riesgos.EvaluarRiesgo.DTOs;
+using Norvia.Application.Features.Riesgos.ListarControles;
+using Norvia.Application.Features.Riesgos.ListarControlesSugeridos;
+using Norvia.Application.Features.Riesgos.ListarControlesSugeridos.DTOs;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles;
 using Norvia.Application.Features.Riesgos.ListarPeligrosDisponibles.DTOs;
 using Norvia.Application.Features.Riesgos.ListarRiesgos;
@@ -67,5 +72,31 @@ public sealed class RiesgosController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Evaluar(
         Guid id, EvaluarRiesgoRequestDto request, [FromServices] EvaluarRiesgoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-039: controles del riesgo, del más efectivo al menos efectivo (RN-21).</summary>
+    [HttpGet("{id:guid}/controles")]
+    [ProducesResponseType(typeof(IReadOnlyList<ControlResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarControles(
+        Guid id, [FromServices] ListarControlesServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-039: controles sugeridos por las plantillas del peligro, todavía sin aceptar (RN-76).</summary>
+    [HttpGet("{id:guid}/controles/sugeridos")]
+    [ProducesResponseType(typeof(IReadOnlyList<ControlSugeridoResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarControlesSugeridos(
+        Guid id, [FromServices] ListarControlesSugeridosServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-039: agrega un control propio o una sugerencia aceptada (tal cual o editada).</summary>
+    [HttpPost("{id:guid}/controles")]
+    [ProducesResponseType(typeof(ControlResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CrearControl(
+        Guid id, CrearControlRequestDto request, [FromServices] CrearControlServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttpCreado(this);
 }

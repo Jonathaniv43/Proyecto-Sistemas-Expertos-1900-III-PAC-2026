@@ -52,6 +52,6 @@ public sealed class CrearRiesgoServicio(
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return new RiesgoResponseDto(riesgo.Id, riesgo.Estado, riesgo.PeligroId, peligro?.Nombre, peligro?.Clasificacion, riesgo.DescripcionPeligro,
-            riesgo.Actividad, null, null, riesgo.CreadoEn, null);
+            riesgo.Actividad, null, null, riesgo.CreadoEn, null, 0);
     }
 }

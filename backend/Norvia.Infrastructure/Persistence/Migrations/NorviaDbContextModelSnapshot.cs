@@ -1473,6 +1473,9 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)");
 
+                    b.Property<Guid?>("PlantillaTareaId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("RiesgoEmpresaId")
                         .HasColumnType("uuid");
 
@@ -1487,7 +1490,13 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.HasAlternateKey("RiesgoEmpresaId", "Id");
 
+                    b.HasIndex("PlantillaTareaId");
+
                     b.HasIndex("EmpresaId", "RiesgoEmpresaId");
+
+                    b.HasIndex("RiesgoEmpresaId", "PlantillaTareaId")
+                        .IsUnique()
+                        .HasFilter("\"PlantillaTareaId\" IS NOT NULL");
 
                     b.ToTable("Control", t =>
                         {
@@ -2171,6 +2180,11 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Norvia.Domain.Entities.Catalogos.PlantillaTarea", "PlantillaTarea")
+                        .WithMany()
+                        .HasForeignKey("PlantillaTareaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Norvia.Domain.Entities.Riesgos.RiesgoEmpresa", "RiesgoEmpresa")
                         .WithMany("Controles")
                         .HasForeignKey("EmpresaId", "RiesgoEmpresaId")
@@ -2179,6 +2193,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Empresa");
+
+                    b.Navigation("PlantillaTarea");
 
                     b.Navigation("RiesgoEmpresa");
                 });
