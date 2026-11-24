@@ -38,7 +38,7 @@ public static class CatalogoPlantillasCorreo
             Id: 2,
             Codigo: "cambio_contrasena",
             Nombre: "Solicitud de cambio de contraseña",
-            Descripcion: "Flujo de olvidé mi contraseña o cambio obligatorio tras contraseña temporal (pendiente de endpoint).",
+            Descripcion: "HU-022: enlace para cambiar la contraseña (POST api/auth/contrasena/solicitud). El enlace vence a los 30 minutos y sirve una sola vez.",
             Asunto: "Norvia — cambiá tu contraseña",
             CuerpoHtml: """
                 <!DOCTYPE html>
@@ -48,6 +48,7 @@ public static class CatalogoPlantillasCorreo
                   <p>Hola <strong>{{Nombre}}</strong>,</p>
                   <p>Recibimos una solicitud para cambiar la contraseña de tu cuenta Norvia.</p>
                   <p><a href="{{UrlCambio}}" style="color: #4f46e5;">Establecer nueva contraseña</a></p>
+                  <p>El enlace vence en {{Minutos}} minutos y sirve una sola vez. La contraseña nueva valdrá en todas las empresas donde tenés acceso, y se cerrarán las sesiones abiertas.</p>
                   <p style="font-size: 0.875rem; color: #666;">Si no fuiste vos, ignorá este mensaje.</p>
                 </body>
                 </html>

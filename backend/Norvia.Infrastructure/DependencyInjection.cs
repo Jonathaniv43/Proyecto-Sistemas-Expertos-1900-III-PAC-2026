@@ -51,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IReloj, RelojBaseDatos>();
         services.AddSingleton<ICifradorEmpresaId, CifradorEmpresaId>();
         services.AddSingleton<ITokenServicio, JwtTokenServicio>();
+        services.AddSingleton<ITokenCambioContrasena, TokenCambioContrasena>();
         services.AddSingleton<IHasherPassword, HasherPassword>();
         services.AddSingleton<IGeneradorContrasenaTemporal, GeneradorContrasenaTemporal>();
 

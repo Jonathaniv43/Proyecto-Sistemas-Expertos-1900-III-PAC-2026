@@ -15,6 +15,11 @@ public static class Errores
     public static readonly Error ContrasenaActualIncorrecta =
         new("auth.contrasena_actual_incorrecta", "La contraseña actual no es correcta.", TipoError.Validacion);
 
+    /// <summary>HU-022: el enlace del correo venció, ya se usó (la contraseña cambió) o fue alterado.</summary>
+    public static readonly Error EnlaceCambioContrasenaInvalido =
+        new("auth.enlace_invalido", "El enlace para cambiar la contraseña venció o ya se usó. Pide uno nuevo.", TipoError.Expirado);
+    public static readonly Error ContrasenaIgualActual =
+        new("auth.contrasena_igual_actual", "La contraseña nueva debe ser distinta de la actual.", TipoError.Validacion);
     public static readonly Error CuentaYaVerificada =
         new("auth.cuenta_ya_verificada", "Esta cuenta ya está verificada.", TipoError.Conflicto);
 }

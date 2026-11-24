@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Norvia.Application.Common.Correo;
 using Microsoft.EntityFrameworkCore;
 using Norvia.Infrastructure.Data;
 using Norvia.Infrastructure.Persistence.Interceptores;
@@ -22,6 +25,9 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:16-alpine").Build();
 
     public string CadenaConexion => _postgres.GetConnectionString();
+
+    /// <summary>Correos que la API "envió" durante las pruebas (no se usa SMTP).</summary>
+    public CorreosCapturados Correos { get; } = new();
 
     public async Task InitializeAsync()
     {
@@ -51,6 +57,7 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
         builder.UseSetting("Cors:Origenes", OrigenFrontend);
         builder.UseSetting("StaffSeed:Email", StaffEmail);
         builder.UseSetting("StaffSeed:Password", StaffPassword);
+        builder.ConfigureTestServices(servicios => servicios.AddSingleton<IEnvioCorreo>(Correos));
     }
 
     /// <summary>
