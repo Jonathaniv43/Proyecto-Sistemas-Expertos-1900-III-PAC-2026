@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { sesion } from '@/shared/api'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -45,6 +46,9 @@ export function LoginPlataformaPage() {
           Iniciar sesión
         </Boton>
       </form>
+      <p>
+        <Link to="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
+      </p>
     </div>
   )
 }

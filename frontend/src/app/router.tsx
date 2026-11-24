@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom'
 import { CambiarContrasenaPage } from '@/features/auth/pages/CambiarContrasenaPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
+import { RestablecerContrasenaPage } from '@/features/auth/pages/RestablecerContrasenaPage'
+import { SolicitarCambioContrasenaPage } from '@/features/auth/pages/SolicitarCambioContrasenaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { PerfilEmpresaPage } from '@/features/empresas/pages/PerfilEmpresaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
@@ -39,6 +41,8 @@ export const router = createBrowserRouter([
     errorElement: <ErrorInesperado />,
     children: [
       { index: true, element: <LandingPage /> },
+      // HU-022: el enlace del correo; funciona con o sin sesión.
+      { path: 'restablecer-contrasena', element: <RestablecerContrasenaPage /> },
       {
         element: <SoloSinSesion />,
         children: [
@@ -46,6 +50,7 @@ export const router = createBrowserRouter([
           { path: 'plataforma', element: <LoginPlataformaPage /> },
           { path: 'registro', element: <RegistroEmpresaPage /> },
           { path: 'verificar-cuenta', element: <VerificarCuentaPage /> },
+          { path: 'recuperar-contrasena', element: <SolicitarCambioContrasenaPage /> },
         ],
       },
       {
@@ -53,6 +58,7 @@ export const router = createBrowserRouter([
         children: [
           { path: 'inicio', element: <InicioPage /> },
           { path: 'cambiar-contrasena', element: <CambiarContrasenaPage /> },
+          { path: 'cuenta/contrasena', element: <SolicitarCambioContrasenaPage /> },
           {
             element: <RequiereRol roles={[ROLES.adminEmpresa]} />,
             children: [

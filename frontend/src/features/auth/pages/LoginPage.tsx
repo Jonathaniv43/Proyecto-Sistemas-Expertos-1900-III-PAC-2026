@@ -87,6 +87,9 @@ export function LoginPage() {
 
       <div className="grid gap-2 text-text-secondary">
         <p>
+          <Link to="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
+        </p>
+        <p>
           ¿Recibiste una contraseña temporal? <Link to="/verificar-cuenta">Activa tu cuenta</Link>
         </p>
         <p>
