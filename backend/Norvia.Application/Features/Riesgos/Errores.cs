@@ -16,4 +16,10 @@ public static class Errores
 
     public static readonly Error RiesgoDuplicado = new("riesgos.duplicado",
         "Ese riesgo ya está en la matriz con la misma actividad.", TipoError.Conflicto);
+
+    public static readonly Error SugerenciaInvalida = new("riesgos.sugerencia_invalida",
+        "La sugerencia no corresponde al peligro de este riesgo o ya no está disponible.", TipoError.Validacion);
+
+    public static readonly Error SugerenciaYaAceptada = new("riesgos.sugerencia_aceptada",
+        "Esa sugerencia ya es un control de este riesgo.", TipoError.Conflicto);
 }

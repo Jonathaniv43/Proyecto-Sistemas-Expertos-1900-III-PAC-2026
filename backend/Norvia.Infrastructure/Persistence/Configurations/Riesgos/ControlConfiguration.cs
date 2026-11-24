@@ -27,6 +27,12 @@ public class ControlConfiguration : IEntityTypeConfiguration<Control>
             .HasForeignKey(c => new { c.EmpresaId, c.RiesgoEmpresaId })
             .HasPrincipalKey(r => new { r.EmpresaId, r.Id });
 
+        // Plantilla del peligro aceptada como control (RN-76; catálogo global). Aceptarla dos veces no la duplica.
+        b.HasOne(c => c.PlantillaTarea).WithMany().HasForeignKey(c => c.PlantillaTareaId);
+        b.HasIndex(c => new { c.RiesgoEmpresaId, c.PlantillaTareaId })
+            .IsUnique()
+            .HasFilter("\"PlantillaTareaId\" IS NOT NULL");
+
         // UQ (RiesgoEmpresaId, Id): Tarea lo usará para verificar que su control es del mismo riesgo.
         b.HasAlternateKey(c => new { c.RiesgoEmpresaId, c.Id });
     }

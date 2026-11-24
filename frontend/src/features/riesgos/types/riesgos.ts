@@ -45,6 +45,8 @@ export interface Riesgo {
   creadoEn: string
   /** Última evaluación inicial (HU-037); null si todavía no se evaluó. */
   evaluacion: Evaluacion | null
+  /** Cuántos controles tiene (HU-039). Un riesgo alto o crítico sin controles se señala (RN-19). */
+  totalControles: number
 }
 
 /** GET /api/riesgos/peligros-disponibles: peligros activos del catálogo. */
@@ -66,6 +68,8 @@ export interface CrearRiesgoRequest {
 export interface MatrizRiesgos {
   total: number
   sinEvaluar: number
+  /** Altos o críticos que todavía no tienen controles (RN-19, HU-039). */
+  altosSinControl: number
   celdas: { probabilidad: number; severidad: number; nivel: number; clasificacion: ClasificacionRiesgo; cantidad: number }[]
 }
 
@@ -76,6 +80,38 @@ export interface FiltrosRiesgos {
   clasificacionPeligro?: ClasificacionPeligro
   nivel?: ClasificacionRiesgo
   sinEvaluar?: boolean
+  /** Solo los altos o críticos sin controles (HU-039). */
+  sinControl?: boolean
   probabilidad?: number
   severidad?: number
+}
+
+/** Jerarquía de controles (RN-21), del más efectivo al menos efectivo. */
+export type TipoControl = 'eliminacion' | 'sustitucion' | 'ingenieria' | 'administrativo' | 'epp'
+
+/** GET /api/riesgos/{id}/controles y respuesta de POST (HU-039). */
+export interface Control {
+  id: string
+  riesgoId: string
+  tipo: TipoControl
+  descripcion: string
+  estado: 'propuesto' | 'implementado'
+  /** Plantilla del peligro de la que salió, si se aceptó una sugerencia (RN-76); null si es propio. */
+  plantillaId: string | null
+  creadoEn: string
+}
+
+/** GET /api/riesgos/{id}/controles/sugeridos: plantillas del peligro todavía sin aceptar. No se guardan hasta aceptarlas. */
+export interface ControlSugerido {
+  plantillaId: string
+  tipo: TipoControl
+  titulo: string
+  descripcion: string | null
+}
+
+/** POST /api/riesgos/{id}/controles: propio o sugerencia aceptada (con `plantillaId`), tal cual o editada. */
+export interface CrearControlRequest {
+  tipo: TipoControl
+  descripcion: string
+  plantillaId?: string
 }

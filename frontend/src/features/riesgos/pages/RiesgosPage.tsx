@@ -13,6 +13,7 @@ import { usePeticion } from '@/shared/hooks/usePeticion'
 import { listarRiesgos, obtenerMatriz } from '../api/riesgos'
 import { EtiquetaRiesgo } from '../components/EtiquetaRiesgo'
 import { MapaMatriz } from '../components/MapaMatriz'
+import { faltaControl } from '../controles'
 import { ETIQUETAS_CLASIFICACION, nombrePeligro } from '../etiquetas'
 import { CLASES_NIVEL, ETIQUETAS_CLASIFICACION_RIESGO } from '../niveles'
 import type { ClasificacionPeligro, ClasificacionRiesgo, EstadoRiesgo, FiltrosRiesgos, Riesgo } from '../types/riesgos'
@@ -39,7 +40,7 @@ const ESTADOS: { valor: EstadoRiesgo; texto: string }[] = [
  * - HU-038: mapa de probabilidad × severidad con cuántos riesgos hay en cada celda (tocar una filtra la
  *   lista) y lista filtrable por peligro, clasificación del peligro, nivel y estado, con el nivel más
  *   alto primero para decidir qué atender. Cada riesgo abre su detalle.
- * - HU-036: agregar riesgos; HU-037: su nivel.
+ * - HU-036: agregar riesgos; HU-037: su nivel; HU-039: se señalan los altos y críticos sin control (RN-19).
  */
 export function RiesgosPage() {
   const matriz = usePeticion(obtenerMatriz)
@@ -64,6 +65,7 @@ export function RiesgosPage() {
     if (valores.clasificacionPeligro) f.clasificacionPeligro = valores.clasificacionPeligro as ClasificacionPeligro
     if (f.estado === 'confirmado') {
       if (valores.nivel === 'sin_evaluar') f.sinEvaluar = true
+      else if (valores.nivel === 'sin_control') f.sinControl = true
       else if (valores.nivel) f.nivel = valores.nivel as ClasificacionRiesgo
       if (celda) Object.assign(f, celda)
     }
@@ -170,6 +172,22 @@ export function RiesgosPage() {
                     </button>
                   </>
                 )}
+                {matriz.datos.altosSinControl > 0 && (
+                  <>
+                    {' · '}
+                    <button
+                      type="button"
+                      className="font-medium text-text-link hover:text-text-link-hover"
+                      onClick={() => {
+                        setCelda(null)
+                        setValue('estado', 'confirmado')
+                        setValue('nivel', 'sin_control')
+                      }}
+                    >
+                      {plural(matriz.datos.altosSinControl, 'alto o crítico sin control', 'altos o críticos sin control')}
+                    </button>
+                  </>
+                )}
               </p>
               <ul className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-text-secondary" aria-label="Niveles">
                 {(['bajo', 'medio', 'alto', 'critico'] as const).map((n, i) => (
@@ -207,6 +225,7 @@ export function RiesgosPage() {
                 registro={register('nivel', { onChange: () => setCelda(null) })}
                 opciones={[
                   ...NIVELES.map((n) => ({ valor: n, texto: ETIQUETAS_CLASIFICACION_RIESGO[n] })),
+                  { valor: 'sin_control', texto: 'Altos y críticos sin control' },
                   { valor: 'sin_evaluar', texto: 'Sin evaluar' },
                 ]}
                 ayuda={valores.estado !== 'confirmado' ? 'Solo los riesgos de la matriz tienen nivel.' : undefined}
@@ -305,7 +324,12 @@ function Origen({ riesgo }: { riesgo: Riesgo }) {
 function Nivel({ riesgo }: { riesgo: Riesgo }) {
   if (riesgo.estado === 'sugerido') return <Insignia tipo="neutro">Por revisar</Insignia>
   if (riesgo.estado === 'descartado') return <Insignia tipo="neutro">Descartado</Insignia>
-  return <EtiquetaRiesgo nivel={riesgo.evaluacion} />
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <EtiquetaRiesgo nivel={riesgo.evaluacion} />
+      {faltaControl(riesgo) && <Insignia tipo="advertencia">Sin control</Insignia>}
+    </div>
+  )
 }
 
 function FilaRiesgo({ riesgo }: { riesgo: Riesgo }) {

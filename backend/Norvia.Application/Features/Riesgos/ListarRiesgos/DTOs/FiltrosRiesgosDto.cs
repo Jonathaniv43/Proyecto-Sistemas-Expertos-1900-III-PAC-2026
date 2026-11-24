@@ -23,6 +23,9 @@ public sealed record FiltrosRiesgosDto
     /// <summary>true: solo los que todavía no tienen evaluación.</summary>
     public bool? SinEvaluar { get; init; }
 
+    /// <summary>true: solo los altos o críticos que todavía no tienen controles (RN-19, HU-039).</summary>
+    public bool? SinControl { get; init; }
+
     /// <summary>Celda del mapa: se envían las dos o ninguna.</summary>
     public short? Probabilidad { get; init; }
     public short? Severidad { get; init; }

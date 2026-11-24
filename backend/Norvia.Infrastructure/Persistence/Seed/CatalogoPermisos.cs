@@ -44,6 +44,13 @@ public static class CatalogoPermisos
         Empresa("riesgo.matriz", "Ver el mapa de la matriz de riesgos", "GET", "api/riesgos/matriz", "admin_empresa", "responsable_sst"),
         // HU-037: evaluar un riesgo.
         Empresa("riesgo.evaluar", "Evaluar un riesgo", "POST", "api/riesgos/{id}/evaluaciones", "admin_empresa", "responsable_sst"),
+        // HU-039: controles de un riesgo.
+        Empresa("riesgo.control.listar", "Ver los controles de un riesgo", "GET", "api/riesgos/{id}/controles",
+            "admin_empresa", "responsable_sst"),
+        Empresa("riesgo.control.sugeridos", "Ver los controles sugeridos para un riesgo", "GET", "api/riesgos/{id}/controles/sugeridos",
+            "admin_empresa", "responsable_sst"),
+        Empresa("riesgo.control.crear", "Agregar un control a un riesgo", "POST", "api/riesgos/{id}/controles",
+            "admin_empresa", "responsable_sst"),
 
         // HU-032: reporte anónimo.
         Empresa("encuesta.reporte", "Ver reporte anónimo de encuesta", "GET", "api/encuestas/{id}/reporte",
