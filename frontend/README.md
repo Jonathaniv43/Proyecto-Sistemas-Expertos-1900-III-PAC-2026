@@ -406,3 +406,18 @@ useFormulario(esquema, {
   - **Tareas del plan (`GET /plan-trabajo/tareas`):** tabla por prioridad con el nivel del riesgo, estado y responsable. En celular, prioridad, nivel y responsable van en la primera celda.
 - **`shared/riesgo/`:** `EtiquetaRiesgo` y la clasificación de niveles (`niveles.ts`) pasaron aquí desde `features/riesgos`, porque el plan también las usa (las features no se importan entre sí). `features/riesgos/niveles.ts` reexporta lo compartido.
 - `GrupoCasillas` acepta una leyenda con más que texto (`etiqueta: ReactNode`).
+
+## Asignar tareas (HU-043)
+
+- **Plan de trabajo:** cada tarea pendiente o en progreso tiene "Asignar" o "Reasignar", que abre `AsignarTareaModal`: responsable (`SelectBusqueda` con `GET /plan-trabajo/responsables`) y fecha límite (`CampoFecha`); guarda con `PUT /plan-trabajo/tareas/:id/asignacion`.
+  - La tabla muestra la fecha límite y el badge "Vencida": pendiente o en progreso con la fecha pasada. Se calcula, no se guarda.
+  - **En celular,** prioridad, nivel, responsable, fecha y estado van en la primera celda; la acción queda a la vista.
+- **`/plan-de-trabajo/nueva` (`NuevaTareaPage`):** tarea manual con título, detalle, prioridad, responsable, fecha límite y si pide evidencia. Al crearla vuelve al plan con un aviso.
+- **`shared/components/ui/CampoFecha`** (design-system § Campo de fecha):
+  - **Escribir:** dd/mm/aaaa, con las barras puestas solas.
+  - **Calendario:** botón con ícono; empieza el domingo, marca hoy y deshabilita los días antes de `minimo`.
+  - **Teclado:** flechas, Inicio/Fin, RePág/AvPág, Enter y Esc, que cierra solo el calendario.
+  - **Posición:** fija junto al campo, debajo o encima, así el cuerpo de un modal no lo recorta. En celular es una hoja inferior.
+- **`shared/validacion/fechas.ts`:**
+  - conversiones entre dd/mm/aaaa y aaaa-mm-dd, y `hoyHonduras()` (zona `America/Tegucigalpa`);
+  - la regla Zod `fechaLimite(actual)`: obligatoria y no anterior a hoy, salvo la que ya tenía.

@@ -50,3 +50,21 @@ export interface Tarea {
   controlTipo: TipoControl | null
   creadaEn: string
 }
+
+/** GET /api/plan-trabajo/responsables: vínculos activos de la empresa que pueden tener tareas (sin encuestados). */
+export interface Responsable {
+  id: string
+  nombreCompleto: string
+  rolCodigo: string
+}
+
+/** POST /api/plan-trabajo/tareas: tarea manual, ya asignada. */
+export interface CrearTareaManualRequest {
+  titulo: string
+  descripcion?: string
+  prioridad: 1 | 2 | 3
+  responsableId: string
+  /** aaaa-mm-dd */
+  fechaLimite: string
+  requiereEvidencia: boolean
+}

@@ -453,6 +453,108 @@
     }
   }
 
+  /* Campo de fecha (design-system.md § Campo de fecha): el calendario se abre como la lista del select, a 4px del
+     campo (arriba si no cabe debajo); en celular, como hoja inferior con el fondo oscurecido. Días de 40px (44px en celular). */
+  .calendario {
+    /* Fijo y colocado por el componente (--calendario-top/left): un modal con desplazamiento no lo recorta. */
+    position: fixed;
+    top: var(--calendario-top, 0);
+    left: var(--calendario-left, 0);
+    z-index: 30;
+    display: grid;
+    gap: var(--space-2);
+    width: max-content;
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-2);
+  }
+
+  .calendario-fondo {
+    display: none;
+  }
+
+  .calendario-rejilla {
+    border-collapse: separate;
+    border-spacing: 2px;
+  }
+
+  .calendario-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+  }
+
+  .calendario-nav:hover {
+    background: var(--color-bg-subtle);
+  }
+
+  .calendario-dia {
+    width: 40px;
+    height: 40px;
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+  }
+
+  .calendario-dia:hover:not(:disabled) {
+    background: var(--color-bg-subtle);
+  }
+
+  .calendario-dia[aria-current='date'] {
+    border-color: var(--color-border-strong);
+  }
+
+  .calendario-dia[aria-pressed='true'] {
+    border-color: transparent;
+    background: var(--color-action-primary);
+    color: var(--color-text-on-brand);
+  }
+
+  .calendario-dia:disabled {
+    cursor: not-allowed;
+    color: var(--color-text-disabled);
+  }
+
+  @media (max-width: 639px) {
+    .calendario {
+      position: fixed;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: auto;
+      justify-items: center;
+      padding: var(--space-4) var(--space-4) var(--space-6);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .calendario > :first-child {
+      width: 100%;
+    }
+
+    .calendario-dia,
+    .calendario-nav {
+      width: 44px;
+      height: 44px;
+    }
+
+    .calendario-fondo {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: var(--color-overlay);
+    }
+  }
+
   /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
   .area-texto {
     display: block;
