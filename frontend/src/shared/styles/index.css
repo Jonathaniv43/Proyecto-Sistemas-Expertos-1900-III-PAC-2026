@@ -555,6 +555,38 @@
     }
   }
 
+  /* Navegación de sección (design-system.md § Navegación de sección): enlaces en fila sobre una línea; el actual
+     lleva texto seleccionado y una barra de 2px. En pantallas chicas la fila se desplaza sin ensanchar la página. */
+  .nav-seccion {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    scrollbar-width: none;
+  }
+
+  .nav-seccion a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-height-touch);
+    border-bottom: 2px solid transparent;
+    margin-bottom: calc(-1 * var(--border-width));
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-seccion a:hover {
+    color: var(--color-text-primary);
+  }
+
+  .nav-seccion a[aria-current='page'] {
+    border-bottom-color: var(--color-text-selected);
+    color: var(--color-text-selected);
+  }
+
   /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
   .area-texto {
     display: block;

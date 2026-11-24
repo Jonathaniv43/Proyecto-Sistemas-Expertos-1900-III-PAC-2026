@@ -1,10 +1,10 @@
-import { Building2, ClipboardCheck, ClipboardList, Contact, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { BookOpen, Building2, ClipboardCheck, ClipboardList, Contact, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_TAREAS, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
+import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_PLATAFORMA, ROLES_TAREAS, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
 import { obtenerPerfilCompleto } from '../api/perfil'
 
 /** Primera pantalla después de iniciar sesión. Las funciones de cada módulo se agregan con su HU. */
@@ -35,6 +35,14 @@ export function InicioPage() {
           Falta el rubro o el número de trabajadores permanentes. <Link to="/empresa">Completar el perfil</Link>
         </Aviso>
       )}
+      <SiRol roles={ROLES_PLATAFORMA}>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link to="/catalogos" className={clasesBoton('secundario')}>
+            <BookOpen aria-hidden size={16} strokeWidth={1.5} />
+            Catálogos
+          </Link>
+        </div>
+      </SiRol>
       <SiRol roles={ROLES_EMPRESA}>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link to="/mis-encuestas" className={clasesBoton('secundario')}>

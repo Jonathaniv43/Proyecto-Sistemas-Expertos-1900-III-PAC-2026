@@ -6,6 +6,7 @@ export {
   ROLES,
   ROLES_EMPRESA,
   ROLES_GESTION,
+  ROLES_PLATAFORMA,
   ROLES_TAREAS,
   type Rol,
 } from './roles'

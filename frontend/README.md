@@ -446,3 +446,21 @@ useFormulario(esquema, {
   - **Columnas:** fecha y quién evaluó, tipo con "Vigente" (la más reciente de cada tipo), nivel, y probabilidad × severidad con los nombres de RN-80.
   - **Cuándo aparece:** solo si el riesgo tiene evaluaciones.
   - **Recarga:** se vuelve a pedir cuando cambia una de las evaluaciones vigentes (prop `version`), o sea, al guardar una nueva.
+
+## Catálogos de la plataforma (HU-023)
+
+- **`/catalogos` (feature `catalogos`):** para el staff (`ROLES_PLATAFORMA`), con enlace "Catálogos" en Inicio. `CatalogosLayout` muestra la navegación de sección (`.nav-seccion`, design-system § Navegación de sección).
+  - **Categorías:** filtro por rubro; enlace a sus preguntas (`/catalogos/preguntas?categoria=`).
+  - **Preguntas:** lista por categoría (la categoría va en la URL). El editor (`/catalogos/preguntas/nueva` y `/:id`, `PreguntaPage`) tiene:
+    - tipo, "Es obligatoria" y peligro (`SelectBusqueda` con "Ninguno");
+    - opciones con `useFieldArray` (subir, bajar, quitar, "Indica exposición" solo si hay peligro);
+    - las reglas de RN-68 en `schemas/catalogos.ts`;
+    - al editar, el bloque tipo, peligro y opciones solo se envía si cambió.
+  - **Peligros y plantillas:** búsqueda sin tildes y filtro por clasificación. El detalle (`/catalogos/peligros/:id`) administra sus plantillas de tarea: controles por efectividad y tareas modelo.
+  - **Rubros y plantillas de documento:** el editor del documento va en su propia página.
+- **Componentes de la feature:**
+  - `ModalFormulario` y `CuerpoFormulario`: modal con formulario, que no se cierra con cambios ni mientras guarda;
+  - `EstadoActivo` y `BotonEstado`: badge y activar o desactivar sin confirmación, porque no se borra nada;
+  - `EstadoCarga`: error con reintento o esqueleto;
+  - `useCambioEstado`: aviso de la acción y recarga.
+- **Soporte de plataforma** (`usePuedeEditar` falso): ve todo, con un aviso de solo consulta y sin botones de cambio.
