@@ -464,3 +464,14 @@ useFormulario(esquema, {
   - `EstadoCarga`: error con reintento o esqueleto;
   - `useCambioEstado`: aviso de la acción y recarga.
 - **Soporte de plataforma** (`usePuedeEditar` falso): ve todo, con un aviso de solo consulta y sin botones de cambio.
+
+## Reportar eventos (HU-047)
+
+- **`/eventos/reportar` (`ReportarEventoPage`):** para los cuatro roles de empresa, con enlace en Inicio. Reporte anónimo con tipo, estado de la enfermedad (si aplica), fecha, hora, lugar, descripción y "Es grave".
+  - **Esquema `schemas/reporte.ts`:** espejo del validador del backend. Fecha y hora no futuras en la hora de Honduras (margen de 5 min), y envía `fechaHoraEvento` con `-06:00`.
+  - **Al cambiar la fecha** se revalida la hora, porque "todavía no llega" depende de las dos.
+  - **Al enviar** muestra la confirmación con la hora de recepción; "Reportar otro evento" monta un formulario nuevo.
+- **`/eventos` y `/eventos/:id`:** para admin y Responsable SST. Lista con filtros por tipo, estado y gravedad, el último recibido primero, y detalle. No hay dato de quién reportó (RN-27).
+- **`shared/components/ui/CampoHora`:** hora escrita en 12 horas. `leerHora` acepta "2:30 pm", "230p" o "14:30", y al salir del campo queda "02:30 p. m.".
+- **`CampoFecha`:** tiene `maximo` para no admitir fechas futuras.
+- **`shared/validacion/fechas.ts`:** `leerHora`, `horaATexto` y `minutosAhoraHonduras`.

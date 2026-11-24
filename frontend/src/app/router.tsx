@@ -24,6 +24,9 @@ import { PeligrosPage } from '@/features/catalogos/pages/PeligrosPage'
 import { PreguntaPage } from '@/features/catalogos/pages/PreguntaPage'
 import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
 import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
+import { EventoPage } from '@/features/eventos/pages/EventoPage'
+import { EventosPage } from '@/features/eventos/pages/EventosPage'
+import { ReportarEventoPage } from '@/features/eventos/pages/ReportarEventoPage'
 import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
 import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
 import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
@@ -87,6 +90,8 @@ export const router = createBrowserRouter([
             children: [
               { path: 'mis-encuestas', element: <MisEncuestasPage /> },
               { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
+              // HU-047: cualquier persona de la empresa reporta, de forma anónima.
+              { path: 'eventos/reportar', element: <ReportarEventoPage /> },
             ],
           },
           {
@@ -124,6 +129,8 @@ export const router = createBrowserRouter([
               { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
               { path: 'riesgos/:id', element: <RiesgoPage /> },
               { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
+              { path: 'eventos', element: <EventosPage /> },
+              { path: 'eventos/:id', element: <EventoPage /> },
               { path: 'plan-de-trabajo/nueva', element: <NuevaTareaPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },

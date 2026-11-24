@@ -58,3 +58,36 @@ export const fechaLimite = (actual?: string | null) =>
       }
       return iso
     })
+
+/**
+ * Hora escrita como la define el design system (§ Campo de fecha: 12 horas con a. m. / p. m.). Acepta "2:30 pm",
+ * "02:30 p. m.", "230p", "14:30" o "1430"; devuelve la hora en 24 h, o null si no es una hora.
+ */
+export const leerHora = (texto: string): { h: number; m: number } | null => {
+  const t = texto.toLowerCase().replace(/\s|\./g, '')
+  const partes = /^(\d{1,2}):?(\d{2})?(am|pm|a|p)?$/.exec(t)
+  if (!partes) return null
+  let h = Number(partes[1])
+  const m = partes[2] ? Number(partes[2]) : 0
+  const periodo = partes[3]?.[0]
+  if (m > 59) return null
+  if (periodo) {
+    if (h < 1 || h > 12) return null
+    if (periodo === 'a' && h === 12) h = 0
+    if (periodo === 'p' && h !== 12) h += 12
+  } else if (h > 23 || !partes[2]) return null // sin a. m./p. m. tiene que ser 24 h con minutos
+  return { h, m }
+}
+
+/** { h: 14, m: 30 } → "02:30 p. m." */
+export const horaATexto = ({ h, m }: { h: number; m: number }) =>
+  `${String(h % 12 === 0 ? 12 : h % 12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${h < 12 ? 'a. m.' : 'p. m.'}`
+
+/** Hora actual en Honduras, en minutos desde la medianoche. */
+export const minutosAhoraHonduras = () => {
+  const [h, m] = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Tegucigalpa', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    .format(new Date())
+    .split(':')
+    .map(Number)
+  return h * 60 + m
+}
