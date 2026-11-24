@@ -1,5 +1,6 @@
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
+using Norvia.Application.Common.Notificaciones;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Features.Plan.AsignarTarea.DTOs;
 using Norvia.Application.Features.Plan.DTOs;
@@ -15,9 +16,10 @@ namespace Norvia.Application.Features.Plan.AsignarTarea;
 /// (design-system § Campo de fecha: al editar se conserva aunque esté vencida).</item>
 /// <item>Las tareas completadas o canceladas no se reasignan. El estado no cambia: iniciarla es HU-044.</item>
 /// </list>
-/// Avisar al responsable (RN-77) es HU-081.
+/// HU-081: si cambia el responsable, se le avisa en Norvia y por correo (RN-77).
 /// </summary>
-public sealed class AsignarTareaServicio(IAsignarTareaRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj)
+public sealed class AsignarTareaServicio(
+    IAsignarTareaRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj, Notificador notificador)
     : IServicioCasoDeUso
 {
     public async Task<Resultado<TareaResponseDto>> EjecutarAsync(Guid tareaId, AsignarTareaRequestDto request, CancellationToken ct)
@@ -30,8 +32,11 @@ public sealed class AsignarTareaServicio(IAsignarTareaRepositorio repositorio, I
         var responsable = request.ResponsableId!.Value;
         if (!await repositorio.EsResponsableValidoAsync(responsable, ct)) return Errores.ResponsableInvalido;
 
+        var nuevoResponsable = tarea.ResponsableId != responsable;
         tarea.ResponsableId = responsable;
         tarea.FechaLimite = fecha;
+        // Solo cambiar la fecha no es una asignación nueva: no se avisa de nuevo.
+        if (nuevoResponsable) notificador.TareaAsignada(tarea);
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);

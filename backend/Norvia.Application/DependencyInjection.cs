@@ -28,6 +28,9 @@ public static class DependencyInjection
         // Pieza compartida solo por los slices de alta del módulo Vinculos (HU-020, HU-115).
         services.AddScoped<Features.Vinculos.AltaDeVinculo>();
 
+        // Crea las notificaciones de M11 (D28) desde cualquier módulo: tareas (HU-081) y políticas (HU-116).
+        services.AddScoped<Common.Notificaciones.Notificador>();
+
         return services;
     }
 }
