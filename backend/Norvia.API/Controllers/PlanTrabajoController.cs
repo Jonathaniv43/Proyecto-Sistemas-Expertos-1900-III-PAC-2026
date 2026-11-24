@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Plan.AsignarTarea;
+using Norvia.Application.Features.Plan.CambiarEstadoTarea;
+using Norvia.Application.Features.Plan.CambiarEstadoTarea.DTOs;
 using Norvia.Application.Features.Plan.AsignarTarea.DTOs;
 using Norvia.Application.Features.Plan.CrearTareaManual;
 using Norvia.Application.Features.Plan.CrearTareaManual.DTOs;
@@ -8,6 +10,7 @@ using Norvia.Application.Features.Plan.DTOs;
 using Norvia.Application.Features.Plan.GenerarPlan;
 using Norvia.Application.Features.Plan.GenerarPlan.DTOs;
 using Norvia.Application.Features.Plan.ListarTareas;
+using Norvia.Application.Features.Plan.ListarMisTareas;
 using Norvia.Application.Features.Plan.ListarResponsables;
 using Norvia.Application.Features.Plan.ListarResponsables.DTOs;
 using Norvia.Application.Features.Plan.ObtenerPropuestaPlan;
@@ -63,4 +66,21 @@ public sealed class PlanTrabajoController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<ResponsableResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Responsables([FromServices] ListarResponsablesServicio servicio, CancellationToken cancellationToken) =>
         Ok(await servicio.EjecutarAsync(cancellationToken));
+
+    /// <summary>HU-044: las tareas asignadas a quien tiene la sesión.</summary>
+    [HttpGet("tareas/mias")]
+    [ProducesResponseType(typeof(IReadOnlyList<TareaResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> MisTareas([FromServices] ListarMisTareasServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(cancellationToken)).AHttp(this);
+
+    /// <summary>HU-044: pasa una tarea por pendiente, en progreso o completada (su responsable o el Responsable SST).</summary>
+    [HttpPatch("tareas/{id:guid}/estado")]
+    [ProducesResponseType(typeof(TareaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CambiarEstado(
+        Guid id, CambiarEstadoTareaRequestDto request, [FromServices] CambiarEstadoTareaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
 }

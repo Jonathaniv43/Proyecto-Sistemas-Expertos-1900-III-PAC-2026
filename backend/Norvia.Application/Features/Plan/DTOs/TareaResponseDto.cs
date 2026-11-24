@@ -30,4 +30,5 @@ public sealed record TareaResponseDto(
     int? RiesgoNivel,
     ClasificacionRiesgo? RiesgoClasificacion,
     TipoControl? ControlTipo,
-    DateTime CreadaEn);
+    DateTime CreadaEn,
+    DateTime? CompletadaEn);

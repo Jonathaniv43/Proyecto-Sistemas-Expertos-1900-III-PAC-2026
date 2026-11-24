@@ -1,10 +1,10 @@
-import { Building2, ClipboardCheck, ClipboardList, Contact, ListChecks, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { Building2, ClipboardCheck, ClipboardList, Contact, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { clasesBoton } from '@/shared/components/ui/clases'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
+import { etiquetaRol, ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_TAREAS, SiRol, useSesion, useTieneRol } from '@/shared/sesion'
 import { obtenerPerfilCompleto } from '../api/perfil'
 
 /** Primera pantalla después de iniciar sesión. Las funciones de cada módulo se agregan con su HU. */
@@ -41,6 +41,12 @@ export function InicioPage() {
             <ClipboardCheck aria-hidden size={16} strokeWidth={1.5} />
             Mis encuestas
           </Link>
+          <SiRol roles={ROLES_TAREAS}>
+            <Link to="/mis-tareas" className={clasesBoton('secundario')}>
+              <ListTodo aria-hidden size={16} strokeWidth={1.5} />
+              Mis tareas
+            </Link>
+          </SiRol>
         </div>
       </SiRol>
       <SiRol roles={ROLES_GESTION}>

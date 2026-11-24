@@ -10,11 +10,11 @@ import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
-import { fechaCorta, hoyHonduras } from '@/shared/validacion'
+import { fechaCorta } from '@/shared/validacion'
 import { generarPlan, listarResponsables, listarTareas, obtenerPropuesta } from '../api/plan'
 import { AsignarTareaModal } from '../components/AsignarTareaModal'
-import { PRIORIDADES } from '../etiquetas'
-import type { EstadoTarea, Tarea, TareaPropuesta, TipoControl } from '../types/plan'
+import { ESTADOS, PRIORIDADES, TIPOS_CONTROL, vencida } from '../etiquetas'
+import type { Tarea, TareaPropuesta } from '../types/plan'
 
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
 
@@ -23,24 +23,7 @@ export interface EstadoPlanNavegacion {
   creada?: string
 }
 
-/** Pendiente o en progreso con la fecha límite pasada (design-system.md § Badges: no es un estado guardado). */
-const vencida = (t: Tarea) => (t.estado === 'pendiente' || t.estado === 'en_progreso') && t.fechaLimite !== null && t.fechaLimite < hoyHonduras()
 const cerrada = (t: Tarea) => t.estado === 'completada' || t.estado === 'cancelada'
-
-const TIPOS_CONTROL: Record<TipoControl, string> = {
-  eliminacion: 'Eliminación',
-  sustitucion: 'Sustitución',
-  ingenieria: 'Ingeniería',
-  administrativo: 'Administrativo',
-  epp: 'Equipo de protección personal',
-}
-
-const ESTADOS: Record<EstadoTarea, { texto: string; tipo: 'neutro' | 'info' | 'exito' }> = {
-  pendiente: { texto: 'Pendiente', tipo: 'neutro' },
-  en_progreso: { texto: 'En progreso', tipo: 'info' },
-  completada: { texto: 'Completada', tipo: 'exito' },
-  cancelada: { texto: 'Cancelada', tipo: 'neutro' },
-}
 
 /** De dónde sale la tarea, en palabras: el control que implementa o la tarea modelo del peligro. */
 const origenPropuesta = (t: TareaPropuesta) =>

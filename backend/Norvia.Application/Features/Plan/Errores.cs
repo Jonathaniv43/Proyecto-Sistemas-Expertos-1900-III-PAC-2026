@@ -19,4 +19,16 @@ public static class Errores
 
     public static readonly Error FechaPasada = new("plan.fecha_pasada",
         "La fecha límite no puede ser anterior a hoy.", TipoError.Validacion);
+
+    public static readonly Error TareaAjena = new("plan.tarea_ajena",
+        "Solo la persona responsable de la tarea o el Responsable SST pueden cambiar su estado.", TipoError.Prohibido);
+
+    public static readonly Error TareaSinAsignar = new("plan.tarea_sin_asignar",
+        "La tarea necesita responsable y fecha límite antes de iniciarse.", TipoError.Conflicto);
+
+    public static readonly Error FaltaEvidencia = new("plan.falta_evidencia",
+        "La tarea pide evidencia: adjúntela antes de completarla.", TipoError.Conflicto);
+
+    public static readonly Error TareaCancelada = new("plan.tarea_cancelada",
+        "La tarea está cancelada: su estado ya no cambia.", TipoError.Conflicto);
 }

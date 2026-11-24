@@ -421,3 +421,13 @@ useFormulario(esquema, {
 - **`shared/validacion/fechas.ts`:**
   - conversiones entre dd/mm/aaaa y aaaa-mm-dd, y `hoyHonduras()` (zona `America/Tegucigalpa`);
   - la regla Zod `fechaLimite(actual)`: obligatoria y no anterior a hoy, salvo la que ya tenía.
+
+## Mis tareas (HU-044)
+
+- **`/mis-tareas` (`MisTareasPage`):** para admin, Responsable SST y colaborador (`ROLES_TAREAS`); enlace en Inicio junto a "Mis encuestas".
+  - **Por hacer** (en progreso y pendientes) y **Terminadas** (completadas y canceladas), en el orden de `GET /plan-trabajo/tareas/mias`.
+  - **Cada tarea** muestra su prioridad, fecha límite, "Vencida", de dónde sale y si pide evidencia.
+  - **Botones:** "Empezar", "Marcar como completada", "Volver a pendiente" y "Reabrir", con `PATCH /plan-trabajo/tareas/:id/estado`. Después se recarga la lista para conservar el orden del servidor.
+  - **Si pide evidencia,** "Marcar como completada" queda deshabilitado (RN-25): adjuntarla es HU-045.
+  - **Errores:** van junto a la tarea. Si ya no es suya (403) o no existe (404), el aviso va arriba y la lista se recarga.
+- `features/plan/etiquetas.ts` reúne prioridades, tipos de control, badges de estado y `vencida()`, que usan el plan y "Mis tareas".
