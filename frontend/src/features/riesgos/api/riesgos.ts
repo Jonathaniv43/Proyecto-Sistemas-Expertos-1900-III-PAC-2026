@@ -31,6 +31,10 @@ export const obtenerRiesgo = (signal: AbortSignal, id: string) => api.get<Riesgo
 export const evaluarRiesgo = (id: string, datos: { probabilidad: number; severidad: number }) =>
   api.post<Evaluacion>(`/riesgos/${id}/evaluaciones`, datos).then((r) => r.data)
 
+/** Historial de evaluaciones del riesgo (HU-041): iniciales y residuales, la más reciente primero. */
+export const listarEvaluaciones = (signal: AbortSignal, id: string) =>
+  api.get<Evaluacion[]>(`/riesgos/${id}/evaluaciones`, { signal }).then((r) => r.data)
+
 /**
  * Evaluación residual, con los controles aplicados (HU-040). Se guarda aparte de la inicial. 409 `riesgos.sin_evaluacion_inicial`,
  * `riesgos.sin_controles` o `riesgos.no_en_matriz`.

@@ -11,6 +11,7 @@ import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { evaluarRiesgo, evaluarRiesgoResidual, obtenerRiesgo } from '../api/riesgos'
 import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
+import { HistorialEvaluaciones } from '../components/HistorialEvaluaciones'
 import { MapaCalor } from '../components/MapaCalor'
 import { SeccionControles } from '../components/SeccionControles'
 import { nombrePeligro } from '../etiquetas'
@@ -26,7 +27,7 @@ const exigeControl = (c: ClasificacionRiesgo) => c === 'alto' || c === 'critico'
  * Un riesgo de la matriz: sus datos y su evaluación. HU-037: se elige probabilidad y severidad del 1 al
  * 5 con su explicación a la vista (o tocando una celda del mapa), se ve el nivel calculado y queda quién
  * evaluó y cuándo. Volver a evaluar no borra la evaluación anterior (RN-20). HU-039: sus controles. HU-040:
- * la evaluación residual, al lado de la inicial.
+ * la evaluación residual, al lado de la inicial. HU-041: el historial de todas las evaluaciones.
  */
 export function RiesgoPage() {
   const { id = '' } = useParams()
@@ -101,6 +102,10 @@ export function RiesgoPage() {
                 onEvaluado={(e) => setRiesgo((r) => r && (e.tipo === 'residual' ? { ...r, evaluacionResidual: e } : { ...r, evaluacion: e }))}
               />
               <SeccionControles riesgo={riesgo} onCambio={(totalControles) => setRiesgo((r) => r && { ...r, totalControles })} />
+              <HistorialEvaluaciones
+                riesgoId={riesgo.id}
+                version={`${riesgo.evaluacion?.id ?? ''}|${riesgo.evaluacionResidual?.id ?? ''}`}
+              />
             </>
           )}
         </>

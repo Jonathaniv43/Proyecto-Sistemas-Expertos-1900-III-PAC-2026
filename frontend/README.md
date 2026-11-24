@@ -439,3 +439,10 @@ useFormulario(esquema, {
   - **`filtros.ts`** convierte lo elegido en parámetros de `GET /plan-trabajo/tareas`. Una fecha a medio escribir no filtra; si no existe, o si el rango es imposible, se avisa y no se filtra.
   - **La lista se vuelve a pedir** solo cuando cambian los parámetros (la clave es el JSON de los filtros).
 - **Vencidas:** badge en cada fila y, junto al total, "N vencidas" en rojo, que las filtra.
+
+## Historial de un riesgo (HU-041)
+
+- **Detalle del riesgo, `HistorialEvaluaciones`:** con `GET /riesgos/:id/evaluaciones`, debajo de los controles.
+  - **Columnas:** fecha y quién evaluó, tipo con "Vigente" (la más reciente de cada tipo), nivel, y probabilidad × severidad con los nombres de RN-80.
+  - **Cuándo aparece:** solo si el riesgo tiene evaluaciones.
+  - **Recarga:** se vuelve a pedir cuando cambia una de las evaluaciones vigentes (prop `version`), o sea, al guardar una nueva.
