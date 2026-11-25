@@ -41,6 +41,7 @@ public static class CatalogoPermisos
         Empresa("documento.ver", "Ver un documento", "GET", "api/documentos/{id}", "admin_empresa", "responsable_sst"),
         // HU-071: solo el Responsable SST edita el borrador.
         Empresa("documento.editar", "Editar el borrador de un documento", "PUT", "api/documentos/{id}/borrador", "responsable_sst"),
+        Empresa("documento.aprobar", "Aprobar el borrador de un documento", "POST", "api/documentos/{id}/aprobacion", "responsable_sst"),
 
         // HU-033: peligros sugeridos por las respuestas.
         Empresa("encuesta.peligros_sugeridos", "Ver peligros sugeridos por la encuesta", "GET", "api/encuestas/{id}/peligros-sugeridos",

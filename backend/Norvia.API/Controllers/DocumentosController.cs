@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
+using Norvia.Application.Features.Documentos.AprobarDocumento;
 using Norvia.Application.Features.Documentos.DTOs;
 using Norvia.Application.Features.Documentos.EditarBorrador;
 using Norvia.Application.Features.Documentos.EditarBorrador.DTOs;
@@ -14,7 +15,7 @@ namespace Norvia.API.Controllers;
 /// <summary>
 /// Módulo Documentos (M9): políticas y procedimientos de la empresa (D13).
 /// <para>
-/// Pendiente de futuras HUs en este controlador: aprobar (HU-072), versión nueva (HU-073) y vigentes (HU-074).
+/// Pendiente de futuras HUs en este controlador: versión nueva (HU-073) y vigentes (HU-074).
 /// </para>
 /// </summary>
 [ApiController]
@@ -60,4 +61,15 @@ public sealed class DocumentosController : ControllerBase
     public async Task<IActionResult> EditarBorrador(
         Guid id, EditarBorradorRequestDto request, [FromServices] EditarBorradorServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// HU-072: aprueba el borrador y lo deja vigente; la vigente anterior pasa a reemplazada (RN-51). Si es una política,
+    /// avisa a los vínculos activos (RN-75). Sin borrador o con datos por completar, 409.
+    /// </summary>
+    [HttpPost("{id:guid}/aprobacion")]
+    [ProducesResponseType(typeof(DocumentoDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Aprobar(Guid id, [FromServices] AprobarDocumentoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }

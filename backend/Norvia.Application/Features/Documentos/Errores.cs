@@ -22,4 +22,8 @@ public static class Errores
     /// <summary>RN-50: solo se edita la versión en borrador; la vigente y las reemplazadas no cambian.</summary>
     public static readonly Error SinBorrador = new("documentos.sin_borrador",
         "El documento no tiene un borrador: una versión aprobada no se edita (RN-50).", TipoError.Conflicto);
+
+    /// <summary>RN-49: una versión aprobada ya no cambia, así que no se aprueba con datos por completar.</summary>
+    public static readonly Error PorCompletar = new("documentos.por_completar",
+        "El documento tiene datos por completar: complételos en el borrador antes de aprobarlo.", TipoError.Conflicto);
 }
