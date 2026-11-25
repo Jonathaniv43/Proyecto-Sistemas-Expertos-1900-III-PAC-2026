@@ -8,6 +8,7 @@ import { Boton } from '@/shared/components/ui/Boton'
 import { CampoSelect } from '@/shared/components/ui/CampoSelect'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
+import { MARCADORES_DOCUMENTO } from '@/shared/documentos'
 import { useFormulario } from '@/shared/forms'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { crearDocumento, editarDocumento, listarDocumentos, listarRubros } from '../api/catalogos'
@@ -116,7 +117,13 @@ function Formulario({ documento, rubros }: { documento: PlantillaDocumento | und
           required
           rows={14}
           error={errors.contenido?.message}
-          ayuda="Usa {{RazonSocial}} donde vaya el nombre de la empresa: se reemplaza al generar el documento."
+          ayuda={
+            <>
+              En Markdown: <code># Título</code>, <code>- lista</code>, <code>**negrita**</code>. Estos marcadores se reemplazan con
+              los datos de la empresa al generar el documento: {MARCADORES_DOCUMENTO.map((m) => m.marcador).join(', ')}. Para lo
+              que solo sabe la empresa, escribe <code>[Completar: lo que falta]</code>.
+            </>
+          }
           {...register('contenido')}
         />
         <CampoTexto
