@@ -1,4 +1,4 @@
-import { BookOpen, Building2, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, FileText, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { BookOpen, Building2, ScrollText, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, FileText, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -52,6 +52,10 @@ export function InicioPage() {
           <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
             <Megaphone aria-hidden size={16} strokeWidth={1.5} />
             Reportar un evento
+          </Link>
+          <Link to="/documentos-vigentes" className={clasesBoton('secundario')}>
+            <ScrollText aria-hidden size={16} strokeWidth={1.5} />
+            Políticas y procedimientos
           </Link>
           <SiRol roles={ROLES_TAREAS}>
             <Link to="/mis-tareas" className={clasesBoton('secundario')}>

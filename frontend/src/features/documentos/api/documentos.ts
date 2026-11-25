@@ -1,5 +1,12 @@
 import { api } from '@/shared/api'
-import type { DocumentoDetalle, DocumentoResumen, GenerarDocumentoRequest, PlantillaDisponible } from '../types/documentos'
+import type {
+  DocumentoDetalle,
+  DocumentoResumen,
+  DocumentoVigente,
+  DocumentoVigenteResumen,
+  GenerarDocumentoRequest,
+  PlantillaDisponible,
+} from '../types/documentos'
 
 /** Plantillas del rubro de la empresa (HU-070). 409 `documentos.sin_rubro` si el perfil no tiene rubro. */
 export const listarPlantillas = (signal: AbortSignal) =>
@@ -27,3 +34,11 @@ export const listarDocumentos = (signal: AbortSignal) => api.get<DocumentoResume
 
 export const obtenerDocumento = (signal: AbortSignal, id: string) =>
   api.get<DocumentoDetalle>(`/documentos/${id}`, { signal }).then((r) => r.data)
+
+/** Documentos vigentes de la empresa (HU-074), para todas las personas; `buscar` filtra por título. */
+export const listarVigentes = (signal: AbortSignal, buscar: string) =>
+  api.get<DocumentoVigenteResumen[]>('/documentos/vigentes', { signal, params: buscar ? { buscar } : {} }).then((r) => r.data)
+
+/** La versión vigente de un documento (HU-074). 404 si no existe o solo tiene un borrador. */
+export const obtenerVigente = (signal: AbortSignal, id: string) =>
+  api.get<DocumentoVigente>(`/documentos/vigentes/${id}`, { signal }).then((r) => r.data)

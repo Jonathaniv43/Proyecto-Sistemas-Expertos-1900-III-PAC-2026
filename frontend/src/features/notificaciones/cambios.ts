@@ -12,14 +12,14 @@ export function alCambiar(callback: () => void) {
 }
 
 /**
- * Pantalla del elemento relacionado (HU-117): la tarea asignada se atiende en Mis tareas. La de una política se
- * agrega con HU-116, cuando exista la pantalla de la versión vigente; mientras tanto no tiene enlace.
+ * Pantalla del elemento relacionado (HU-117): la tarea asignada se atiende en Mis tareas; la política publicada abre
+ * su versión vigente (HU-116, HU-074). Si después se aprobó otra versión, se ve la más nueva.
  */
 export const destinoDe = (n: Notificacion): string | undefined => {
   switch (n.tipo) {
     case 'tarea_asignada':
       return '/mis-tareas'
     case 'politica_publicada':
-      return undefined
+      return n.documentoId ? `/documentos-vigentes/${n.documentoId}` : undefined
   }
 }

@@ -27,6 +27,8 @@ import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
 import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
 import { DocumentoPage as DocumentoEmpresaPage } from '@/features/documentos/pages/DocumentoPage'
 import { DocumentosPage as DocumentosEmpresaPage } from '@/features/documentos/pages/DocumentosPage'
+import { DocumentoVigentePage } from '@/features/documentos/pages/DocumentoVigentePage'
+import { DocumentosVigentesPage } from '@/features/documentos/pages/DocumentosVigentesPage'
 import { EditarBorradorPage } from '@/features/documentos/pages/EditarBorradorPage'
 import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
 import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
@@ -102,6 +104,9 @@ export const router = createBrowserRouter([
               { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
               // HU-117: la bandeja propia (RN-79).
               { path: 'notificaciones', element: <NotificacionesPage /> },
+              // HU-074: los documentos vigentes, para todas las personas de la empresa.
+              { path: 'documentos-vigentes', element: <DocumentosVigentesPage /> },
+              { path: 'documentos-vigentes/:id', element: <DocumentoVigentePage /> },
               // HU-047: cualquier persona de la empresa reporta, de forma anónima.
               { path: 'eventos/reportar', element: <ReportarEventoPage /> },
             ],
