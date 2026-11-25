@@ -41,6 +41,7 @@ public static class ResultadoExtensiones
         TipoError.NoEncontrado => StatusCodes.Status404NotFound,
         TipoError.Conflicto => StatusCodes.Status409Conflict,
         TipoError.Expirado => StatusCodes.Status410Gone,
+        TipoError.DemasiadasSolicitudes => StatusCodes.Status429TooManyRequests,
         TipoError.Servidor => StatusCodes.Status500InternalServerError,
         _ => StatusCodes.Status500InternalServerError
     };

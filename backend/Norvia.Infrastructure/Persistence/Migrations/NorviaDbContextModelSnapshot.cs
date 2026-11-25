@@ -44,7 +44,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(254)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -61,6 +60,44 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.ToTable("Acceso", t =>
                         {
                             t.HasCheckConstraint("CK_Acceso_EmailEnMinusculas", "\"Email\" = lower(\"Email\")");
+                        });
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.AccesoProveedor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccesoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Proveedor")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ProveedorUserId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccesoId", "Proveedor")
+                        .IsUnique();
+
+                    b.HasIndex("Proveedor", "ProveedorUserId")
+                        .IsUnique();
+
+                    b.ToTable("AccesoProveedor", t =>
+                        {
+                            t.HasCheckConstraint("CK_AccesoProveedor_Proveedor", "\"Proveedor\" IN ('microsoft')");
                         });
                 });
 
@@ -446,6 +483,56 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Usuario");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VerificacionCorreoMicrosoft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CodigoHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<short>("EnviosEnVentana")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
+
+                    b.Property<DateTime>("ExpiraEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<short>("Intentos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
+
+                    b.Property<string>("ProveedorUserId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("VentanaEnviosExpiraEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email", "ProveedorUserId")
+                        .IsUnique();
+
+                    b.ToTable("VerificacionCorreoMicrosoft");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VinculoEmpresa", b =>
@@ -1859,6 +1946,17 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.AccesoProveedor", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Acceso.Acceso", "Acceso")
+                        .WithMany("Proveedores")
+                        .HasForeignKey("AccesoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Acceso");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.HistorialEstadoVinculo", b =>
                 {
                     b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", null)
@@ -2628,6 +2726,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.Acceso", b =>
                 {
+                    b.Navigation("Proveedores");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Staff");

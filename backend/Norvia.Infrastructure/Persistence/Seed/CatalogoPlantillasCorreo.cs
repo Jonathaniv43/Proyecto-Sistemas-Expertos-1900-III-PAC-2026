@@ -91,5 +91,25 @@ public static class CatalogoPlantillasCorreo
                 </body>
                 </html>
                 """)
+        ,
+        new(
+            Id: 5,
+            Codigo: "codigo_verificacion_correo",
+            Nombre: "Código para confirmar el correo",
+            Descripcion: "D29, RN-86: código de 6 dígitos al registrar una empresa con una cuenta de Microsoft que aún no tiene cuenta en Norvia. Vence en unos 10 minutos.",
+            Asunto: "Norvia — tu código de verificación",
+            CuerpoHtml: """
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="utf-8" /><title>Código de verificación</title></head>
+                <body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #1a1a1a; max-width: 520px;">
+                  <p>Hola,</p>
+                  <p>Usa este código para confirmar que <strong>{{Email}}</strong> es tu correo y terminar el registro en Norvia:</p>
+                  <p style="font-size: 1.75rem; letter-spacing: 0.35em; font-weight: 600;">{{Codigo}}</p>
+                  <p>El código vence en unos {{Minutos}} minutos.</p>
+                  <p style="font-size: 0.875rem; color: #666;">Si no iniciaste este registro, ignora este mensaje: nadie podrá crear una cuenta con tu correo sin este código.</p>
+                </body>
+                </html>
+                """)
     ];
 }

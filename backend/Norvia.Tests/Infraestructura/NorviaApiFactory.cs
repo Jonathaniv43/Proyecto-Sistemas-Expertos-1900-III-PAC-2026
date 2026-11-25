@@ -29,6 +29,9 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
     /// <summary>Correos que la API "envió" durante las pruebas (no se usa SMTP).</summary>
     public CorreosCapturados Correos { get; } = new();
 
+    /// <summary>Hace de Microsoft: cada prueba registra la identidad que quiere recibir (D29).</summary>
+    public ProveedorIdentidadFalso Microsoft { get; } = new();
+
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
@@ -63,7 +66,11 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
         // así controla cuándo se envía. Lote grande: otras pruebas también dejan notificaciones pendientes.
         builder.UseSetting("Notificaciones:Habilitado", "false");
         builder.UseSetting("Notificaciones:LoteMaximo", "1000");
-        builder.ConfigureTestServices(servicios => servicios.AddSingleton<IEnvioCorreo>(Correos));
+        builder.ConfigureTestServices(servicios =>
+        {
+            servicios.AddSingleton<IEnvioCorreo>(Correos);
+            servicios.AddSingleton<Norvia.Application.Common.Interfaces.IProveedorIdentidad>(Microsoft);
+        });
     }
 
     /// <summary>

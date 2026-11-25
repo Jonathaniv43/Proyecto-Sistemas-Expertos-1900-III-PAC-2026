@@ -11,6 +11,8 @@ public sealed class HasherPassword : IHasherPassword
 
     public string Hashear(Acceso acceso, string password) => _hasher.HashPassword(acceso, password);
 
+    /// <summary>Una cuenta sin contraseña (solo proveedor, D29) nunca verifica.</summary>
     public bool Verificar(Acceso acceso, string password) =>
-        _hasher.VerifyHashedPassword(acceso, acceso.PasswordHash, password) != PasswordVerificationResult.Failed;
+        acceso.PasswordHash is not null
+        && _hasher.VerifyHashedPassword(acceso, acceso.PasswordHash, password) != PasswordVerificationResult.Failed;
 }

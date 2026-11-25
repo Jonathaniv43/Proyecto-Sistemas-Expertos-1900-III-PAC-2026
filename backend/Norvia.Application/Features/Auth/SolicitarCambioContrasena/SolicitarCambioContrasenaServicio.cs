@@ -34,7 +34,8 @@ public sealed class SolicitarCambioContrasenaServicio(
     {
         var email = request.Email.Trim().ToLowerInvariant();
         var acceso = await repositorio.BuscarAccesoPorEmailAsync(email, cancellationToken);
-        if (acceso is null || !acceso.Verificado) return RespuestaGenerica;
+        // Una cuenta creada solo con un proveedor (sin contraseña, D29) no tiene qué cambiar.
+        if (acceso is null || !acceso.Verificado || acceso.PasswordHash is null) return RespuestaGenerica;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
         var token = tokens.Crear(acceso.Id, acceso.PasswordHash, ahora.AddMinutes(MinutosVigencia));

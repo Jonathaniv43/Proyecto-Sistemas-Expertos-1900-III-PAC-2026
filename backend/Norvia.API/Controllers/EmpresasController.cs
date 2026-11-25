@@ -9,6 +9,8 @@ using Norvia.Application.Features.Empresas.ListarRubrosRegistro.DTOs;
 using Norvia.Application.Features.Empresas.ObtenerPerfilEmpresa;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa.DTOs;
+using Norvia.Application.Features.Empresas.RegistrarEmpresaMicrosoft;
+using Norvia.Application.Features.Empresas.RegistrarEmpresaMicrosoft.DTOs;
 using Norvia.Application.Features.Empresas.ResolverEmpresaPorRtn;
 using Norvia.Application.Features.Empresas.ResolverEmpresaPorRtn.DTOs;
 
@@ -25,6 +27,21 @@ public sealed class EmpresasController : ControllerBase
     public async Task<IActionResult> Registrar(
         RegistrarEmpresaRequestDto request,
         [FromServices] RegistrarEmpresaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>
+    /// D29, HU-119: registra la empresa con una cuenta de Microsoft. El correo sale del token de identidad
+    /// (<c>POST /api/auth/microsoft/identidad</c>), no del cuerpo. Anónimo.
+    /// </summary>
+    [HttpPost("microsoft")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(RegistrarEmpresaResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RegistrarConMicrosoft(
+        RegistrarEmpresaMicrosoftRequestDto request,
+        [FromServices] RegistrarEmpresaMicrosoftServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttpCreado(this);
 

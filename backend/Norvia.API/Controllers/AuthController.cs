@@ -10,7 +10,17 @@ using Norvia.Application.Features.Auth.ReestablecerContrasena;
 using Norvia.Application.Features.Auth.SolicitarCambioContrasena;
 using Norvia.Application.Features.Auth.SolicitarCambioContrasena.DTOs;
 using Norvia.Application.Features.Auth.ReestablecerContrasena.DTOs;
+using Norvia.Application.Features.Auth.EnviarCodigoMicrosoft;
+using Norvia.Application.Features.Auth.EnviarCodigoMicrosoft.DTOs;
+using Norvia.Application.Features.Auth.IdentidadMicrosoft;
+using Norvia.Application.Features.Auth.IdentidadMicrosoft.DTOs;
 using Norvia.Application.Features.Auth.LoginEmpresa;
+using Norvia.Application.Features.Auth.LoginEmpresaMicrosoft;
+using Norvia.Application.Features.Auth.LoginEmpresaMicrosoft.DTOs;
+using Norvia.Application.Features.Auth.VerificarCodigoMicrosoft;
+using Norvia.Application.Features.Auth.VerificarCodigoMicrosoft.DTOs;
+using Norvia.Application.Features.Auth.VincularMicrosoft;
+using Norvia.Application.Features.Auth.VincularMicrosoft.DTOs;
 using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
 using Norvia.Application.Features.Auth.LoginPlataforma;
 using Norvia.Application.Features.Auth.LoginPlataforma.DTOs;
@@ -35,6 +45,71 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginEmpresa(
         LoginEmpresaRequestDto request, [FromServices] LoginEmpresaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// D29, HU-119/120: canjea el código de Microsoft (OAuth con PKCE) y devuelve un token de identidad de corta
+    /// vida, el correo verificado, los nombres para prellenar y el estado de la cuenta. Anónimo.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("microsoft/identidad")]
+    [ProducesResponseType(typeof(IdentidadMicrosoftResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> IdentidadMicrosoft(
+        IdentidadMicrosoftRequestDto request, [FromServices] IdentidadMicrosoftServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// D29, RN-86: envía un código de 6 dígitos al correo de la cuenta de Microsoft que aún no tiene cuenta en
+    /// Norvia, para probar que el correo es de quien se registra. Máximo 3 envíos cada 10 minutos. Anónimo.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("microsoft/codigo")]
+    [ProducesResponseType(typeof(EnviarCodigoMicrosoftResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> EnviarCodigoMicrosoft(
+        EnviarCodigoMicrosoftRequestDto request, [FromServices] EnviarCodigoMicrosoftServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// D29, RN-86: comprueba el código y devuelve el token de identidad con el correo confirmado. Máximo 5
+    /// intentos cada 10 minutos. Anónimo.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("microsoft/codigo/verificar")]
+    [ProducesResponseType(typeof(VerificarCodigoMicrosoftResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> VerificarCodigoMicrosoft(
+        VerificarCodigoMicrosoftRequestDto request, [FromServices] VerificarCodigoMicrosoftServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-120: inicia sesión en una empresa con una cuenta de Microsoft ya vinculada. Anónimo.</summary>
+    [AllowAnonymous]
+    [HttpPost("login/empresa/microsoft")]
+    [ProducesResponseType(typeof(SesionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> LoginEmpresaMicrosoft(
+        LoginEmpresaMicrosoftRequestDto request, [FromServices] LoginEmpresaMicrosoftServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-120, RN-83: vincula Microsoft a una cuenta con contraseña, confirmando esa contraseña. Anónimo.</summary>
+    [AllowAnonymous]
+    [HttpPost("microsoft/vincular")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VincularMicrosoft(
+        VincularMicrosoftRequestDto request, [FromServices] VincularMicrosoftServicio servicio,
+        CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     [AllowAnonymous]
