@@ -27,7 +27,7 @@ export function Contador({ id, actual, limite, exacto = false, unidad = 'caracte
       : ''
 
   return (
-    <span id={id} className={`shrink-0 text-xs tabular-nums ${color}`}>
+    <span id={id} className={`shrink-0 whitespace-nowrap text-xs tabular-nums ${color}`}>
       <span aria-hidden>
         {actual} / {limite}
       </span>

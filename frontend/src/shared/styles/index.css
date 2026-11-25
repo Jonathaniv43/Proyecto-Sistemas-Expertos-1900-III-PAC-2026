@@ -699,6 +699,13 @@
     overflow-y: auto;
   }
 
+  /* Editor de documento (design-system.md § Editor de documento): el área de texto crece con el documento, sin desplazamiento propio. */
+  .editor-documento .area-texto {
+    min-height: 384px;
+    max-height: none;
+    overflow-y: hidden;
+  }
+
   /* Tabla (design-system.css § Tabla): contenedor con borde y desplazamiento horizontal en pantallas chicas. */
   /* position: relative: así lo absoluto de adentro (p. ej. un encabezado sr-only) no se escapa del scroll y no ensancha la página. */
   .tabla-contenedor {

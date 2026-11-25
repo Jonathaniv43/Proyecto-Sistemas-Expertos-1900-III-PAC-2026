@@ -12,6 +12,10 @@ export const listarPlantillas = (signal: AbortSignal) =>
 export const generarDocumento = (datos: GenerarDocumentoRequest) =>
   api.post<DocumentoDetalle>('/documentos/generacion', datos).then((r) => r.data)
 
+/** Reemplaza el contenido del borrador (HU-071). 409 `documentos.sin_borrador` si ya no hay borrador (RN-50). */
+export const editarBorrador = (id: string, contenido: string) =>
+  api.put<DocumentoDetalle>(`/documentos/${id}/borrador`, { contenido }).then((r) => r.data)
+
 export const listarDocumentos = (signal: AbortSignal) => api.get<DocumentoResumen[]>('/documentos', { signal }).then((r) => r.data)
 
 export const obtenerDocumento = (signal: AbortSignal, id: string) =>
