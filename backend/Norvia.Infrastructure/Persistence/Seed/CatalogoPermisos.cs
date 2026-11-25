@@ -34,6 +34,12 @@ public static class CatalogoPermisos
         // Acceso mínimo del encuestado (además de pendientes/responder).
         Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
 
+        // HU-070: generar políticas y procedimientos desde una plantilla (Responsable SST); el admin consulta.
+        Empresa("documento.plantillas", "Ver las plantillas de documento del rubro", "GET", "api/documentos/plantillas", "responsable_sst"),
+        Empresa("documento.generar", "Generar un documento desde una plantilla", "POST", "api/documentos/generacion", "responsable_sst"),
+        Empresa("documento.listar", "Ver los documentos de la empresa", "GET", "api/documentos", "admin_empresa", "responsable_sst"),
+        Empresa("documento.ver", "Ver un documento", "GET", "api/documentos/{id}", "admin_empresa", "responsable_sst"),
+
         // HU-033: peligros sugeridos por las respuestas.
         Empresa("encuesta.peligros_sugeridos", "Ver peligros sugeridos por la encuesta", "GET", "api/encuestas/{id}/peligros-sugeridos",
             "admin_empresa", "responsable_sst"),

@@ -25,6 +25,9 @@ import { PeligrosPage } from '@/features/catalogos/pages/PeligrosPage'
 import { PreguntaPage } from '@/features/catalogos/pages/PreguntaPage'
 import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
 import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
+import { DocumentoPage as DocumentoEmpresaPage } from '@/features/documentos/pages/DocumentoPage'
+import { DocumentosPage as DocumentosEmpresaPage } from '@/features/documentos/pages/DocumentosPage'
+import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
 import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
 import { EventoPage } from '@/features/eventos/pages/EventoPage'
 import { EventosPage } from '@/features/eventos/pages/EventosPage'
@@ -145,7 +148,15 @@ export const router = createBrowserRouter([
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },
               { path: 'encuestas/:id/resultados', element: <ResultadosEncuestaPage /> },
+              // HU-070: políticas y procedimientos; el admin consulta.
+              { path: 'documentos', element: <DocumentosEmpresaPage /> },
+              { path: 'documentos/:id', element: <DocumentoEmpresaPage /> },
             ],
+          },
+          {
+            // HU-070: solo el Responsable SST genera documentos.
+            element: <RequiereRol roles={[ROLES.responsableSst]} />,
+            children: [{ path: 'documentos/generar', element: <GenerarDocumentoPage /> }],
           },
         ],
       },

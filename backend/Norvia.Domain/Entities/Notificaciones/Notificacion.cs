@@ -23,10 +23,7 @@ public class Notificacion : ITieneEmpresa
     public string Titulo { get; set; } = string.Empty;
     public string Mensaje { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Origen: versión de política aprobada (RN-75). Todavía sin FK: la tabla VersionDocumento llega con HU-070,
-    /// y en esa migración se agrega la FK compuesta (EmpresaId, VersionDocumentoId).
-    /// </summary>
+    /// <summary>Origen: versión de política aprobada (RN-75). FK compuesta (EmpresaId, VersionDocumentoId).</summary>
     public Guid? VersionDocumentoId { get; set; }
 
     /// <summary>Origen: tarea asignada (RN-77).</summary>
@@ -48,4 +45,5 @@ public class Notificacion : ITieneEmpresa
     public Empresa Empresa { get; set; } = null!;
     public VinculoEmpresa Destinatario { get; set; } = null!;
     public Tarea? Tarea { get; set; }
+    public VersionDocumento? VersionDocumento { get; set; }
 }
