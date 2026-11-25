@@ -31,9 +31,6 @@ public static class CatalogoPermisos
         Empresa("notificacion.leer", "Marcar una notificación como leída", "PATCH", "api/notificaciones/{id}/lectura",
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
-        // Acceso mínimo del encuestado (además de pendientes/responder).
-        Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
-
         // HU-070: generar políticas y procedimientos desde una plantilla (Responsable SST); el admin consulta.
         Empresa("documento.plantillas", "Ver las plantillas de documento del rubro", "GET", "api/documentos/plantillas", "responsable_sst"),
         Empresa("documento.generar", "Generar un documento desde una plantilla", "POST", "api/documentos/generacion", "responsable_sst"),
@@ -42,6 +39,11 @@ public static class CatalogoPermisos
         // HU-071: solo el Responsable SST edita el borrador.
         Empresa("documento.editar", "Editar el borrador de un documento", "PUT", "api/documentos/{id}/borrador", "responsable_sst"),
         Empresa("documento.aprobar", "Aprobar el borrador de un documento", "POST", "api/documentos/{id}/aprobacion", "responsable_sst"),
+        // HU-074: las versiones vigentes, para todas las personas de la empresa (también el encuestado, RN-74).
+        Empresa("documento.vigentes", "Ver los documentos vigentes", "GET", "api/documentos/vigentes",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        Empresa("documento.vigente.ver", "Ver un documento vigente", "GET", "api/documentos/vigentes/{id}",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
         // HU-033: peligros sugeridos por las respuestas.
         Empresa("encuesta.peligros_sugeridos", "Ver peligros sugeridos por la encuesta", "GET", "api/encuestas/{id}/peligros-sugeridos",

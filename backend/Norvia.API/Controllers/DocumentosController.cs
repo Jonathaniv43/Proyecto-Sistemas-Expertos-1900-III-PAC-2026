@@ -8,6 +8,9 @@ using Norvia.Application.Features.Documentos.GenerarDocumento;
 using Norvia.Application.Features.Documentos.GenerarDocumento.DTOs;
 using Norvia.Application.Features.Documentos.ListarDocumentos;
 using Norvia.Application.Features.Documentos.ListarPlantillasDisponibles;
+using Norvia.Application.Features.Documentos.ListarVigentes;
+using Norvia.Application.Features.Documentos.ListarVigentes.DTOs;
+using Norvia.Application.Features.Documentos.ObtenerVigente;
 using Norvia.Application.Features.Documentos.ObtenerDocumento;
 
 namespace Norvia.API.Controllers;
@@ -15,7 +18,7 @@ namespace Norvia.API.Controllers;
 /// <summary>
 /// Módulo Documentos (M9): políticas y procedimientos de la empresa (D13).
 /// <para>
-/// Pendiente de futuras HUs en este controlador: versión nueva (HU-073) y vigentes (HU-074).
+/// Pendiente de futuras HUs en este controlador: versión nueva (HU-073).
 /// </para>
 /// </summary>
 [ApiController]
@@ -71,5 +74,20 @@ public sealed class DocumentosController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Aprobar(Guid id, [FromServices] AprobarDocumentoServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-074: los documentos vigentes de la empresa, para todas las personas con vínculo; se buscan por título.</summary>
+    [HttpGet("vigentes")]
+    [ProducesResponseType(typeof(IReadOnlyList<DocumentoVigenteResumenResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Vigentes(
+        [FromQuery] FiltrosVigentesDto filtros, [FromServices] ListarVigentesServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(filtros, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-074: la versión vigente de un documento. Sin versión vigente (solo un borrador), 404.</summary>
+    [HttpGet("vigentes/{id:guid}")]
+    [ProducesResponseType(typeof(DocumentoVigenteResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Vigente(Guid id, [FromServices] ObtenerVigenteServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }
