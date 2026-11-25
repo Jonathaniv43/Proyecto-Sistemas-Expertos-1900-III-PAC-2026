@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { CambiarContrasenaPage } from '@/features/auth/pages/CambiarContrasenaPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { MicrosoftCallbackPage } from '@/features/auth/pages/MicrosoftCallbackPage'
 import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
 import { RestablecerContrasenaPage } from '@/features/auth/pages/RestablecerContrasenaPage'
 import { SolicitarCambioContrasenaPage } from '@/features/auth/pages/SolicitarCambioContrasenaPage'
@@ -70,6 +71,8 @@ export const router = createBrowserRouter([
           { path: 'login', element: <LoginPage /> },
           { path: 'plataforma', element: <LoginPlataformaPage /> },
           { path: 'registro', element: <RegistroEmpresaPage /> },
+          // D29, HU-119/120: retorno de Microsoft (OAuth con PKCE).
+          { path: 'auth/microsoft/callback', element: <MicrosoftCallbackPage /> },
           { path: 'verificar-cuenta', element: <VerificarCuentaPage /> },
           { path: 'recuperar-contrasena', element: <SolicitarCambioContrasenaPage /> },
         ],

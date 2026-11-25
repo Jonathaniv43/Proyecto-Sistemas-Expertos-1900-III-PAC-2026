@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { ElegirMetodo } from '@/shared/microsoft/ElegirMetodo'
+import { guardarIdentidad, leerIdentidad, olvidarIdentidad, type IdentidadMicrosoft } from '@/shared/microsoft/identidadGuardada'
+import { VerificarCorreoMicrosoft } from '@/shared/microsoft/VerificarCorreoMicrosoft'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoSelect } from '@/shared/components/ui/CampoSelect'
@@ -13,6 +16,7 @@ import { Volver } from '@/shared/components/ui/Volver'
 import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { listarRubrosRegistro, registrarEmpresa } from '../api/registro'
 import { RegistroCompletado } from '../components/RegistroCompletado'
+import { RegistroEmpresaMicrosoft, RegistroMicrosoftCompletado } from '../components/RegistroEmpresaMicrosoft'
 import { registroEmpresaEsquema } from '../schemas/registroEmpresa'
 import type { RegistrarEmpresaResponse } from '../types/registro'
 
@@ -30,6 +34,10 @@ const TIPOS_DOCUMENTO = [
  */
 export function RegistroEmpresaPage() {
   const [registro, setRegistro] = useState<RegistrarEmpresaResponse>()
+  // Pantalla previa (design-system.md § Elegir cómo entrar): con Microsoft hay una identidad ya validada; con correo se abre el formulario de siempre.
+  const [identidad, setIdentidad] = useState<IdentidadMicrosoft | null>(leerIdentidad)
+  const [conCorreo, setConCorreo] = useState(false)
+  const [conMicrosoft, setConMicrosoft] = useState(false)
   const rubros = usePeticion(listarRubrosRegistro)
   const cargandoRubrosVisible = useCargaVisible(rubros.cargando)
 
@@ -79,7 +87,68 @@ export function RegistroEmpresaPage() {
       <div className="mx-auto grid max-w-layout-narrow gap-6">
         <Volver a="/" texto="Volver a la página principal" titulo="Registro completado" />
         <h1 className="text-xl font-semibold">Registro completado</h1>
-        <RegistroCompletado registro={registro} />
+        {conMicrosoft ? <RegistroMicrosoftCompletado registro={registro} /> : <RegistroCompletado registro={registro} />}
+      </div>
+    )
+  }
+
+  if (identidad) {
+    const olvidar = () => {
+      olvidarIdentidad()
+      setIdentidad(null)
+    }
+    // RN-86: una cuenta nueva con Microsoft exige confirmar el correo con el código de 6 dígitos.
+    const falta = identidad.estado === 'sin_cuenta' && !identidad.correoVerificado
+    return (
+      <div className="mx-auto grid max-w-layout-narrow gap-6">
+        <Volver a="/" texto="Volver a la página principal" titulo="Registra tu empresa" />
+        <header className="grid gap-2">
+          <h1 className="text-xl font-semibold">Registra tu empresa</h1>
+          <p className="text-text-secondary">
+            Tu cuenta de Microsoft ya quedó validada. Completa los datos de la empresa y quedarás como su administrador.
+          </p>
+        </header>
+        {falta ? (
+          <VerificarCorreoMicrosoft
+            tokenIdentidad={identidad.tokenIdentidad}
+            email={identidad.email}
+            onCancelar={olvidar}
+            onVerificado={(tokenIdentidad) => {
+              const confirmada = { ...identidad, tokenIdentidad, correoVerificado: true }
+              guardarIdentidad(confirmada)
+              setIdentidad(confirmada)
+            }}
+          />
+        ) : (
+        <RegistroEmpresaMicrosoft
+          identidad={identidad}
+          onCancelar={olvidar}
+          onRegistrada={(r) => {
+            olvidarIdentidad()
+            setConMicrosoft(true)
+            setRegistro(r)
+          }}
+        />
+        )}
+      </div>
+    )
+  }
+
+  if (!conCorreo) {
+    return (
+      <div className="mx-auto grid max-w-layout-narrow gap-6">
+        <Volver a="/" texto="Volver a la página principal" titulo="Registra tu empresa" />
+        <header className="grid gap-2">
+          <h1 className="text-xl font-semibold">Registra tu empresa</h1>
+          <p className="text-text-secondary">Elige cómo quieres crear tu cuenta. Quien registra la empresa queda como su administrador.</p>
+        </header>
+        <ElegirMetodo proposito="registro" onCorreo={() => setConCorreo(true)} />
+        <p className="text-text-secondary">
+          ¿Ya tienes cuenta?{' '}
+          <Link to="/login" state={estadoVolver('/registro', 'Volver al registro')}>
+            Inicia sesión
+          </Link>
+        </p>
       </div>
     )
   }
