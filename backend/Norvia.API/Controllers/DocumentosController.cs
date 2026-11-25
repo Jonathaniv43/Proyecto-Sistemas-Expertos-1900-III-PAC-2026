@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Documentos.DTOs;
+using Norvia.Application.Features.Documentos.EditarBorrador;
+using Norvia.Application.Features.Documentos.EditarBorrador.DTOs;
 using Norvia.Application.Features.Documentos.GenerarDocumento;
 using Norvia.Application.Features.Documentos.GenerarDocumento.DTOs;
 using Norvia.Application.Features.Documentos.ListarDocumentos;
@@ -12,8 +14,7 @@ namespace Norvia.API.Controllers;
 /// <summary>
 /// Módulo Documentos (M9): políticas y procedimientos de la empresa (D13).
 /// <para>
-/// Pendiente de futuras HUs en este controlador: editar el borrador (HU-071), aprobar (HU-072), versión nueva (HU-073)
-/// y vigentes (HU-074).
+/// Pendiente de futuras HUs en este controlador: aprobar (HU-072), versión nueva (HU-073) y vigentes (HU-074).
 /// </para>
 /// </summary>
 [ApiController]
@@ -49,4 +50,14 @@ public sealed class DocumentosController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Obtener(Guid id, [FromServices] ObtenerDocumentoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-071: reemplaza el contenido del borrador. Solo el borrador se edita (RN-50); si no hay, 409.</summary>
+    [HttpPut("{id:guid}/borrador")]
+    [ProducesResponseType(typeof(DocumentoDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> EditarBorrador(
+        Guid id, EditarBorradorRequestDto request, [FromServices] EditarBorradorServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
 }

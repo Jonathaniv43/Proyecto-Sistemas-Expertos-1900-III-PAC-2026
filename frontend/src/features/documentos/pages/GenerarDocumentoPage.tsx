@@ -13,11 +13,7 @@ import { generarDocumento, listarPlantillas } from '../api/documentos'
 import { NOMBRE_TIPO } from '../etiquetas'
 import { generarDocumentoEsquema } from '../schemas/generar'
 import type { PlantillaDisponible } from '../types/documentos'
-
-/** Lo que /documentos/generar deja en el estado de la navegación al abrir el documento generado. */
-export interface EstadoDocumentoGenerado {
-  generado: true
-}
+import type { EstadoDocumentoNavegacion } from './DocumentoPage'
 
 /**
  * HU-070: genera una política o un procedimiento desde una plantilla del rubro de la empresa. Se llena con los datos del
@@ -97,7 +93,7 @@ function Formulario({ plantillas }: { plantillas: PlantillaDisponible[] }) {
       onSubmit={enviar(async (datos) => {
         const documento = await generarDocumento({ plantillaDocumentoId: datos.plantillaDocumentoId, titulo: datos.titulo || undefined })
         // replace: "Volver" desde el documento lleva a la lista, no de nuevo al formulario.
-        navigate(`/documentos/${documento.id}`, { replace: true, state: { generado: true } satisfies EstadoDocumentoGenerado })
+        navigate(`/documentos/${documento.id}`, { replace: true, state: { generado: true } satisfies EstadoDocumentoNavegacion })
       })}
     >
       {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}

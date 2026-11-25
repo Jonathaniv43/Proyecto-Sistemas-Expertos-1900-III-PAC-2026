@@ -1,25 +1,33 @@
-import { TriangleAlert } from 'lucide-react'
+import { PencilLine, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { ContenidoDocumento } from '@/shared/documentos'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
+import { clasesBoton } from '@/shared/components/ui/clases'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { ROLES, useTieneRol } from '@/shared/sesion'
 import { obtenerDocumento } from '../api/documentos'
 import { ESTADOS_VERSION, fecha, NOMBRE_TIPO } from '../etiquetas'
-import type { EstadoDocumentoGenerado } from './GenerarDocumentoPage'
+
+/** Lo que dejan en el estado de la navegación generar (HU-070) y guardar el borrador (HU-071). */
+export interface EstadoDocumentoNavegacion {
+  generado?: true
+  guardado?: true
+}
 
 /**
  * HU-070: un documento con su versión de trabajo. Si es un borrador, avisa que la empresa debe revisarlo y qué datos
- * quedaron por completar (resaltados en el texto, RN-49). Editarlo es HU-071 y aprobarlo, HU-072.
+ * quedaron por completar (resaltados en el texto, RN-49). El Responsable SST edita el borrador (HU-071); aprobarlo es HU-072.
  */
 export function DocumentoPage() {
   const { id = '' } = useParams()
-  const generado = (useLocation().state as EstadoDocumentoGenerado | null)?.generado === true
+  const estadoNavegacion = useLocation().state as EstadoDocumentoNavegacion | null
+  const puedeEditar = useTieneRol([ROLES.responsableSst])
   const peticion = usePeticion(obtenerDocumento)
   const cargandoVisible = useCargaVisible(peticion.cargando && !peticion.datos)
   const { ejecutar } = peticion
@@ -50,7 +58,15 @@ export function DocumentoPage() {
       ) : (
         <>
           <header className="grid gap-2">
-            <h1 className="text-xl font-semibold wrap-break-word">{d.titulo}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <h1 className="text-xl font-semibold wrap-break-word">{d.titulo}</h1>
+              {puedeEditar && v.estado === 'borrador' && (
+                <Link to={`/documentos/${d.id}/editar`} className={clasesBoton('primario')}>
+                  <PencilLine aria-hidden size={16} strokeWidth={1.5} />
+                  Editar borrador
+                </Link>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <Insignia tipo="neutro">{NOMBRE_TIPO[d.tipoDocumento]}</Insignia>
               <Insignia tipo={ESTADOS_VERSION[v.estado].tipo}>{ESTADOS_VERSION[v.estado].texto}</Insignia>
@@ -65,7 +81,8 @@ export function DocumentoPage() {
           </header>
 
           <div role="status" className="contents">
-            {generado && <Aviso tipo="exito">Se generó el borrador con los datos de la empresa.</Aviso>}
+            {estadoNavegacion?.generado && <Aviso tipo="exito">Se generó el borrador con los datos de la empresa.</Aviso>}
+            {estadoNavegacion?.guardado && <Aviso tipo="exito">Se guardaron los cambios del borrador.</Aviso>}
           </div>
           {v.estado === 'borrador' && (
             <Aviso tipo="info" titulo="Revisa el contenido antes de aprobarlo">

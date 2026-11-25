@@ -27,6 +27,7 @@ import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
 import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
 import { DocumentoPage as DocumentoEmpresaPage } from '@/features/documentos/pages/DocumentoPage'
 import { DocumentosPage as DocumentosEmpresaPage } from '@/features/documentos/pages/DocumentosPage'
+import { EditarBorradorPage } from '@/features/documentos/pages/EditarBorradorPage'
 import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
 import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
 import { EventoPage } from '@/features/eventos/pages/EventoPage'
@@ -154,9 +155,12 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            // HU-070: solo el Responsable SST genera documentos.
+            // HU-070 y HU-071: solo el Responsable SST genera documentos y edita el borrador.
             element: <RequiereRol roles={[ROLES.responsableSst]} />,
-            children: [{ path: 'documentos/generar', element: <GenerarDocumentoPage /> }],
+            children: [
+              { path: 'documentos/generar', element: <GenerarDocumentoPage /> },
+              { path: 'documentos/:id/editar', element: <EditarBorradorPage /> },
+            ],
           },
         ],
       },
