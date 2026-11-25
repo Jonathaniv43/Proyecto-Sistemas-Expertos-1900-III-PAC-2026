@@ -27,6 +27,10 @@ internal static class ConfiguracionExtensions
     public static PropertyBuilder<bool> PorDefectoFalse(this PropertyBuilder<bool> propiedad) =>
         propiedad.HasDefaultValue(false);
 
+    /// <summary>Entero con DEFAULT 0 (igual al valor por defecto de C#: no hace falta centinela).</summary>
+    public static PropertyBuilder<short> PorDefectoCero(this PropertyBuilder<short> propiedad) =>
+        propiedad.HasDefaultValue((short)0);
+
     /// <summary>Enum guardado como varchar(n) en snake_case, con su CHECK (... IN (...)).</summary>
     public static EntityTypeBuilder<T> EnumComoTexto<T, TEnum>(
         this EntityTypeBuilder<T> entidad, System.Linq.Expressions.Expression<Func<T, TEnum>> propiedad, int largo)

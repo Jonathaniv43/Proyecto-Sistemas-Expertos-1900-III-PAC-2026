@@ -24,7 +24,7 @@ public sealed class ConfirmarCambioContrasenaServicio(
 
         var acceso = await repositorio.BuscarAccesoAsync(enlace.AccesoId, cancellationToken);
         var ahora = await reloj.AhoraAsync(cancellationToken);
-        if (acceso is null || enlace.ExpiraUtc <= ahora || !tokens.SelloVigente(enlace, acceso.PasswordHash))
+        if (acceso?.PasswordHash is null || enlace.ExpiraUtc <= ahora || !tokens.SelloVigente(enlace, acceso.PasswordHash))
             return Errores.EnlaceCambioContrasenaInvalido;
 
         if (hasher.Verificar(acceso, request.ContrasenaNueva)) return Errores.ContrasenaIgualActual;

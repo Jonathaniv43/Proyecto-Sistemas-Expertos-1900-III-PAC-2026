@@ -46,6 +46,8 @@ public static class DependencyInjection
             .Validate(o => o.SonValidos(),
                 "Cors__Origenes debe tener al menos un origen (https://dominio, sin barra final), separados por coma.")
             .ValidateOnStart();
+        services.AddOptions<MicrosoftOpciones>()
+            .Bind(configuration.GetSection(MicrosoftOpciones.Seccion));
         services.AddOptions<StaffSeedOpciones>()
             .Bind(configuration.GetSection(StaffSeedOpciones.Seccion));
         services.AddOptions<CatalogoSstOpciones>()
@@ -56,6 +58,9 @@ public static class DependencyInjection
         services.AddSingleton<ICifradorEmpresaId, CifradorEmpresaId>();
         services.AddSingleton<ITokenServicio, JwtTokenServicio>();
         services.AddSingleton<ITokenCambioContrasena, TokenCambioContrasena>();
+        services.AddSingleton<IHashCodigoVerificacion, HashCodigoVerificacion>();
+        services.AddSingleton<ITokenIdentidadExterna, TokenIdentidadExterna>();
+        services.AddHttpClient<IProveedorIdentidad, MicrosoftProveedorIdentidad>();
         services.AddSingleton<IHasherPassword, HasherPassword>();
         services.AddSingleton<IGeneradorContrasenaTemporal, GeneradorContrasenaTemporal>();
 

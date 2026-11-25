@@ -32,6 +32,8 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     public DbSet<Persona> Persona => Set<Persona>();
     public DbSet<Usuario> Usuario => Set<Usuario>();
     public DbSet<Acceso> Acceso => Set<Acceso>();
+    public DbSet<AccesoProveedor> AccesoProveedor => Set<AccesoProveedor>();
+    public DbSet<VerificacionCorreoMicrosoft> VerificacionCorreoMicrosoft => Set<VerificacionCorreoMicrosoft>();
     public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
     public DbSet<StaffPlataforma> StaffPlataforma => Set<StaffPlataforma>();
     public DbSet<RolStaffPlataforma> RolStaffPlataforma => Set<RolStaffPlataforma>();

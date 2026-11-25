@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { sesion } from '@/shared/api'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -9,6 +10,7 @@ import { leerUltimaEmpresa, rutaActual, rutaLogin, type EmpresaLogin } from '@/s
 import { iniciarSesionEmpresa } from '../api/sesion'
 import { loginEmpresaEsquema } from '../schemas/login'
 import { TarjetaEmpresa } from './BuscarEmpresa'
+import { ElegirMetodo } from '@/shared/microsoft/ElegirMetodo'
 
 /** Un solo mensaje para cualquier dato incorrecto: no revela si falló la empresa, el correo o la contraseña. */
 const NO_SE_PUDO = 'No pudimos iniciar sesión. Revisa el correo y la contraseña.'
@@ -28,6 +30,8 @@ export function CredencialesEmpresa({ idEmpresa }: { idEmpresa: string }) {
 function FormularioCredenciales({ empresa }: { empresa: EmpresaLogin }) {
   const location = useLocation()
   const volverAqui = estadoVolver(rutaActual(location), 'Volver a iniciar sesión')
+  // Pantalla previa (design-system.md § Elegir cómo entrar): Microsoft o correo y contraseña.
+  const [conCorreo, setConCorreo] = useState(false)
 
   const {
     register,
@@ -53,6 +57,10 @@ function FormularioCredenciales({ empresa }: { empresa: EmpresaLogin }) {
         </Link>
       </section>
 
+      {!conCorreo ? (
+        <ElegirMetodo proposito="login" idEmpresa={empresa.idEmpresa} onCorreo={() => setConCorreo(true)} />
+      ) : (
+        <>
       <form
         noValidate
         className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6"
@@ -96,6 +104,8 @@ function FormularioCredenciales({ empresa }: { empresa: EmpresaLogin }) {
           </Link>
         </p>
       </div>
+        </>
+      )}
     </>
   )
 }

@@ -28,3 +28,17 @@ export interface RegistrarEmpresaResponse {
   /** false si no se pudo enviar el correo con la contraseña temporal. */
   correoEnviado: boolean
 }
+
+/** POST /api/empresas/microsoft (HU-119): sin correo ni contraseña; el correo sale del token de identidad. */
+export interface RegistrarEmpresaMicrosoftRequest {
+  tokenIdentidad: string
+  razonSocial: string
+  rtn: string
+  rubroCodigo: string
+  primerNombre: string
+  segundoNombre?: string
+  primerApellido: string
+  segundoApellido?: string
+  tipoDocumento?: 'dni' | 'pasaporte'
+  numeroDocumento?: string
+}

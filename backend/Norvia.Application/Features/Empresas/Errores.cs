@@ -29,4 +29,9 @@ public static class Errores
         "empresas.rtn_no_encontrado",
         "No se encontró una empresa activa con ese RTN.",
         TipoError.NoEncontrado);
+
+    public static readonly Error CuentaNoDisponible = new(
+        "empresas.cuenta_no_disponible",
+        "La cuenta no puede registrar empresas en este momento.",
+        TipoError.Prohibido);
 }
