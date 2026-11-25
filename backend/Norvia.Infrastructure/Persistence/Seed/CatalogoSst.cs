@@ -13,7 +13,7 @@ namespace Norvia.Infrastructure.Persistence.Seed;
 /// administración de catálogos. Los códigos siguen su regla (minúsculas, números y guion bajo).
 /// </para>
 /// </summary>
-public static class CatalogoSst
+public static partial class CatalogoSst
 {
     public sealed record PlantillaSemilla(TipoControl? Tipo, string Titulo, string? Descripcion, short Prioridad = 2, bool Evidencia = false);
 

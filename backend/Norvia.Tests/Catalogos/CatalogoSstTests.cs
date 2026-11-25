@@ -52,6 +52,14 @@ public sealed class CatalogoSstTests(NorviaApiFactory api)
             else Assert.DoesNotContain(p.Opciones, o => o.IndicaExposicion);
         }
 
+        // HU-070: la política de SST y el procedimiento de investigación, para todos los rubros, solo con marcadores conocidos.
+        var documentos = await db.PlantillaDocumento.AsNoTracking().ToListAsync();
+        Assert.Contains(documentos, d => d.Codigo == "politica_sst" && d.TipoDocumento == Domain.Enums.TipoDocumento.Politica && d.RubroId == null);
+        Assert.Contains(documentos, d => d.Codigo == "procedimiento_investigacion" && d.TipoDocumento == Domain.Enums.TipoDocumento.Procedimiento && d.RubroId == null);
+        var conocidos = new[] { "RazonSocial", "RTN", "Direccion", "ActividadEconomica", "Rubro", "Fecha" };
+        Assert.All(documentos.SelectMany(d => System.Text.RegularExpressions.Regex.Matches(d.Contenido, @"\{\{\s*(\w+)\s*\}\}")),
+            m => Assert.Contains(m.Groups[1].Value, conocidos));
+
         // Cada peligro sugiere controles (HU-039) y al menos una tarea (HU-042).
         var plantillas = await db.PlantillaTarea.AsNoTracking().ToListAsync();
         foreach (var peligro in await db.Peligro.AsNoTracking().ToListAsync())
@@ -79,6 +87,10 @@ public sealed class CatalogoSstTests(NorviaApiFactory api)
         await using var db = await BaseNuevaAsync();
         // Antes de la carga, el staff ya creó un peligro con un código del catálogo.
         db.Peligro.Add(new Peligro { Codigo = "fis_ruido", Nombre = "Ruido (versión del staff)", Clasificacion = Domain.Enums.ClasificacionPeligro.Fisico });
+        db.PlantillaDocumento.Add(new PlantillaDocumento
+        {
+            Codigo = "politica_sst", Titulo = "Política del staff", TipoDocumento = Domain.Enums.TipoDocumento.Politica, Contenido = "# Propia"
+        });
         await db.SaveChangesAsync();
         await SembrarAsync(db);
 
@@ -97,15 +109,16 @@ public sealed class CatalogoSstTests(NorviaApiFactory api)
         Assert.Equal("Texto editado por el staff", (await db.PreguntaExploratoria.SingleAsync(p => p.Id == pregunta.Id)).Texto);
         Assert.False((await db.PlantillaTarea.SingleAsync(p => p.Id == plantilla.Id)).Activa);
         Assert.Equal(1, await db.Peligro.CountAsync(p => p.Codigo == "fis_ruido"));
+        Assert.Equal("Política del staff", (await db.PlantillaDocumento.SingleAsync(p => p.Codigo == "politica_sst")).Titulo);
     }
 
     // ---------- Apoyo ----------
 
-    private sealed record Conteo(int Categorias, int Preguntas, int Opciones, int Peligros, int Plantillas);
+    private sealed record Conteo(int Categorias, int Preguntas, int Opciones, int Peligros, int Plantillas, int PlantillasDocumento);
 
     private static async Task<Conteo> ContarAsync(NorviaDbContext db) => new(
         await db.CategoriaRiesgo.CountAsync(), await db.PreguntaExploratoria.CountAsync(), await db.OpcionPregunta.CountAsync(),
-        await db.Peligro.CountAsync(), await db.PlantillaTarea.CountAsync());
+        await db.Peligro.CountAsync(), await db.PlantillaTarea.CountAsync(), await db.PlantillaDocumento.CountAsync());
 
     private static async Task SembrarAsync(NorviaDbContext db)
     {

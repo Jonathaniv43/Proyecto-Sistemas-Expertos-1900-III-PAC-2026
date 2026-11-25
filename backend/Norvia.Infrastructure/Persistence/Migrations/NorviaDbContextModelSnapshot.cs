@@ -1106,6 +1106,115 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.ToTable("TipoRespuestaPregunta", (string)null);
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Documentos.Documento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CreadoPorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PlantillaDocumentoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TipoDocumento")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlantillaDocumentoId");
+
+                    b.HasIndex("EmpresaId", "CreadoPorId");
+
+                    b.ToTable("Documento", t =>
+                        {
+                            t.HasCheckConstraint("CK_Documento_TipoDocumento", "\"TipoDocumento\" IN ('politica', 'procedimiento')");
+                        });
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Documentos.VersionDocumento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AprobadaEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("AprobadaPorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Contenido")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreadaEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CreadaPorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DocumentoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)");
+
+                    b.Property<int>("NumeroVersion")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentoId", "NumeroVersion")
+                        .IsUnique();
+
+                    b.HasIndex("EmpresaId", "AprobadaPorId");
+
+                    b.HasIndex("EmpresaId", "CreadaPorId");
+
+                    b.HasIndex("EmpresaId", "DocumentoId");
+
+                    b.HasIndex(new[] { "DocumentoId" }, "IX_VersionDocumento_DocumentoId_Borrador")
+                        .IsUnique()
+                        .HasFilter("\"Estado\" = 'borrador'");
+
+                    b.HasIndex(new[] { "DocumentoId" }, "IX_VersionDocumento_DocumentoId_Vigente")
+                        .IsUnique()
+                        .HasFilter("\"Estado\" = 'vigente'");
+
+                    b.ToTable("VersionDocumento", t =>
+                        {
+                            t.HasCheckConstraint("CK_VersionDocumento_Aprobacion", "\"Estado\" = 'borrador' OR (\"AprobadaPorId\" IS NOT NULL AND \"AprobadaEn\" IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_VersionDocumento_Estado", "\"Estado\" IN ('borrador', 'vigente', 'reemplazada')");
+
+                            t.HasCheckConstraint("CK_VersionDocumento_NumeroVersion", "\"NumeroVersion\" >= 1");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1643,6 +1752,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasFilter("\"CorreoEstado\" = 'pendiente'");
 
                     b.HasIndex("EmpresaId", "TareaId");
+
+                    b.HasIndex("EmpresaId", "VersionDocumentoId");
 
                     b.HasIndex("VersionDocumentoId", "DestinatarioId")
                         .IsUnique()
@@ -2221,6 +2332,70 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("TipoRespuestaPregunta");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Documentos.Documento", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Catalogos.PlantillaDocumento", "PlantillaDocumento")
+                        .WithMany()
+                        .HasForeignKey("PlantillaDocumentoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "CreadoPor")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "CreadoPorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreadoPor");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("PlantillaDocumento");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Documentos.VersionDocumento", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "AprobadaPor")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "AprobadaPorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "CreadaPor")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "CreadaPorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Documentos.Documento", "Documento")
+                        .WithMany("Versiones")
+                        .HasForeignKey("EmpresaId", "DocumentoId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AprobadaPor");
+
+                    b.Navigation("CreadaPor");
+
+                    b.Navigation("Documento");
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
                 {
                     b.HasOne("Norvia.Domain.Entities.Catalogos.Rubro", "Rubro")
@@ -2558,11 +2733,19 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasPrincipalKey("EmpresaId", "Id")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Norvia.Domain.Entities.Documentos.VersionDocumento", "VersionDocumento")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "VersionDocumentoId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Destinatario");
 
                     b.Navigation("Empresa");
 
                     b.Navigation("Tarea");
+
+                    b.Navigation("VersionDocumento");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Plan.Tarea", b =>
@@ -2786,6 +2969,11 @@ namespace Norvia.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.Rubro", b =>
                 {
                     b.Navigation("Categorias");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Documentos.Documento", b =>
+                {
+                    b.Navigation("Versiones");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Empresas.Empresa", b =>
