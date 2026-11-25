@@ -16,6 +16,13 @@ export const generarDocumento = (datos: GenerarDocumentoRequest) =>
 export const editarBorrador = (id: string, contenido: string) =>
   api.put<DocumentoDetalle>(`/documentos/${id}/borrador`, { contenido }).then((r) => r.data)
 
+/**
+ * Aprueba el borrador y lo deja vigente (HU-072); si es una política, Norvia avisa a los vínculos activos (RN-75).
+ * 409 `documentos.por_completar` si quedan datos por completar y `documentos.sin_borrador` si ya no hay borrador.
+ */
+export const aprobarDocumento = (id: string) =>
+  api.post<DocumentoDetalle>(`/documentos/${id}/aprobacion`).then((r) => r.data)
+
 export const listarDocumentos = (signal: AbortSignal) => api.get<DocumentoResumen[]>('/documentos', { signal }).then((r) => r.data)
 
 export const obtenerDocumento = (signal: AbortSignal, id: string) =>
