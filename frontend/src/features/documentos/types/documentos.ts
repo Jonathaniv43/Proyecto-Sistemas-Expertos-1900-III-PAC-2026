@@ -40,6 +40,23 @@ export interface VersionDocumento {
   aprobadaPorNombre: string | null
 }
 
+/** GET /api/documentos/vigentes (HU-074): un documento vigente, para cualquier persona de la empresa. */
+export interface DocumentoVigenteResumen {
+  /** Id del documento. */
+  id: string
+  titulo: string
+  tipoDocumento: TipoDocumento
+  numeroVersion: number
+  vigenteDesde: string
+}
+
+/** GET /api/documentos/vigentes/{id} (HU-074): solo lo que se publica de la versión vigente. */
+export interface DocumentoVigente extends DocumentoVigenteResumen {
+  /** Markdown, sin `[Completar: …]` (RN-49). */
+  contenido: string
+  aprobadaPorNombre: string
+}
+
 /** GET /api/documentos/{id} y respuesta de la generación. */
 export interface DocumentoDetalle {
   id: string

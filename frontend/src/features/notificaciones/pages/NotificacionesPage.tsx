@@ -147,7 +147,7 @@ function ItemNotificacion({ notificacion: n, cargando, ocupada, onMarcar, onAbri
                 onAbrir(destino)
               }}
             >
-              {n.tipo === 'tarea_asignada' ? 'Ver mis tareas' : 'Abrir'}
+              {n.tipo === 'tarea_asignada' ? 'Ver mis tareas' : 'Ver la política'}
             </Link>
           )}
           {noLeida && (

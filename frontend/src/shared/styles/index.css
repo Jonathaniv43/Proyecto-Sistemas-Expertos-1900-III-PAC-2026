@@ -769,3 +769,34 @@
     }
   }
 }
+
+/*
+ * Documento vigente (HU-074, design-system.md § Documento): "Descargar PDF" abre la impresión del navegador. Se imprime
+ * solo el documento, sin la barra de la app ni los botones, y sin el borde de la card.
+ */
+@media print {
+  body:has(.documento-imprimible) * {
+    visibility: hidden;
+  }
+
+  /* Mismo prefijo que la regla de arriba, para que pese más que ella. */
+  body:has(.documento-imprimible) .documento-imprimible,
+  body:has(.documento-imprimible) .documento-imprimible * {
+    visibility: visible;
+  }
+
+  .documento-imprimible {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+
+  .documento-imprimible .no-imprimir {
+    display: none;
+  }
+
+  .documento-imprimible article {
+    border: 0;
+    padding: 0;
+  }
+}
