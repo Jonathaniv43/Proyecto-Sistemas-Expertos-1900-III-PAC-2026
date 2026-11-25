@@ -18,4 +18,8 @@ public static class Errores
 
     public static readonly Error DocumentoNoEncontrado = new("documentos.no_encontrado",
         "El documento no existe.", TipoError.NoEncontrado);
+
+    /// <summary>RN-50: solo se edita la versión en borrador; la vigente y las reemplazadas no cambian.</summary>
+    public static readonly Error SinBorrador = new("documentos.sin_borrador",
+        "El documento no tiene un borrador: una versión aprobada no se edita (RN-50).", TipoError.Conflicto);
 }
