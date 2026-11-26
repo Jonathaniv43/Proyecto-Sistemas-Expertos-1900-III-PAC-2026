@@ -1,0 +1,37 @@
+using Norvia.Application.Common.Resultados;
+
+namespace Norvia.Application.Features.Empresas;
+
+/// <summary>Errores de negocio del módulo Empresas, compartidos solo por sus slices.</summary>
+public static class Errores
+{
+    public static readonly Error RtnDuplicado = new("empresas.rtn_duplicado", "Ya existe una empresa registrada con ese RTN.", TipoError.Conflicto);
+
+    public static readonly Error EmailDuplicado = new("empresas.email_duplicado", "Ya existe una cuenta registrada con ese correo electrónico.", TipoError.Conflicto);
+
+    public static readonly Error DocumentoDuplicado = new("empresas.documento_duplicado", "Ya existe una persona registrada con ese documento de identidad.", TipoError.Conflicto);
+
+    public static readonly Error RubroInvalido = new("empresas.rubro_invalido", "El rubro indicado no existe o no está activo.", TipoError.Validacion);
+
+    public static readonly Error TipoDocumentoInvalido = new("empresas.tipo_documento_invalido", "El tipo de documento no es válido.", TipoError.Validacion);
+
+    public static readonly Error PlantillaCorreoNoEncontrada = new(
+        "empresas.plantilla_correo_no_encontrada",
+        "No está configurada la plantilla de correo de bienvenida.",
+        TipoError.Servidor);
+
+    public static readonly Error EmpresaNoEncontrada = new(
+        "empresas.no_encontrada",
+        "No se encontró la empresa de la sesión.",
+        TipoError.NoEncontrado);
+
+    public static readonly Error EmpresaPorRtnNoEncontrada = new(
+        "empresas.rtn_no_encontrado",
+        "No se encontró una empresa activa con ese RTN.",
+        TipoError.NoEncontrado);
+
+    public static readonly Error CuentaNoDisponible = new(
+        "empresas.cuenta_no_disponible",
+        "La cuenta no puede registrar empresas en este momento.",
+        TipoError.Prohibido);
+}

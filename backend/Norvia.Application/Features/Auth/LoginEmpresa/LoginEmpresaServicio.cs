@@ -2,6 +2,8 @@ using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Common.Seguridad;
+using Norvia.Application.Features.Auth.DTOs;
+using Norvia.Application.Features.Auth.LoginEmpresa.DTOs;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Auth.LoginEmpresa;
@@ -15,7 +17,7 @@ public sealed class LoginEmpresaServicio(
     IReloj reloj,
     EmisorSesion emisor) : IServicioCasoDeUso
 {
-    public async Task<Resultado<SesionResponse>> EjecutarAsync(LoginEmpresaRequest request, CancellationToken cancellationToken)
+    public async Task<Resultado<SesionResponseDto>> EjecutarAsync(LoginEmpresaRequestDto request, CancellationToken cancellationToken)
     {
         if (!cifrador.TryDescifrar(request.IdEmpresa, out var empresaId))
             return Errores.CredencialesInvalidas;
@@ -27,12 +29,13 @@ public sealed class LoginEmpresaServicio(
         var vinculo = await repo.BuscarVinculoAsync(acceso.Id, empresaId, cancellationToken);
         if (vinculo is null
             || vinculo.Estado != EstadoVinculo.Activo
-            || vinculo.Empresa.Estado != EstadoEmpresa.Activa)
+            || vinculo.Empresa.Estado != EstadoEmpresa.Activa
+            || !await repo.UsuarioActivoAsync(vinculo.PersonaId, cancellationToken))
             return Errores.CredencialesInvalidas;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
-        var sesion = new SesionToken(acceso.Id, TipoSesion.Empresa, vinculo.Id, vinculo.EmpresaId, vinculo.Rol.Codigo);
-        var (fila, respuesta) = emisor.Emitir(sesion, ahora);
+        var sesion = new SesionToken(acceso.Id, TipoSesion.Empresa, vinculo.Id, vinculo.EmpresaId, vinculo.Rol.Codigo, acceso.Email);
+        var (fila, respuesta) = emisor.Emitir(sesion, ahora, acceso.DebeCambiarPassword);
 
         repo.AgregarRefresh(fila);
         await uow.GuardarCambiosAsync(cancellationToken);

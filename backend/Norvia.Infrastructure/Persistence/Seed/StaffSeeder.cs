@@ -5,6 +5,8 @@ using Norvia.Application.Common.Interfaces;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Infrastructure.Opciones;
 
+using Norvia.Infrastructure.Data;
+
 namespace Norvia.Infrastructure.Persistence.Seed;
 
 /// <summary>Crea el primer staff de plataforma con las credenciales del .env (StaffSeed__*).</summary>
@@ -36,24 +38,14 @@ public sealed class StaffSeeder(
 
     private async Task SembrarAsync(string email, string password, CancellationToken cancellationToken)
     {
-        if (!await db.RolStaffPlataforma.AnyAsync(r => r.Id == 1, cancellationToken))
-        {
-            db.RolStaffPlataforma.Add(new RolStaffPlataforma
-            {
-                Id = 1,
-                Codigo = "admin",
-                Nombre = "Administrador plataforma"
-            });
-            await db.SaveChangesAsync(cancellationToken);
-        }
-
         if (await db.Acceso.AnyAsync(a => a.Email == email, cancellationToken))
             return;
 
         var acceso = new Acceso { Email = email, Verificado = true };
         acceso.PasswordHash = hasher.Hashear(acceso, password);
         db.Acceso.Add(acceso);
-        db.StaffPlataforma.Add(new StaffPlataforma { Acceso = acceso, RolStaffPlataformaId = 1, Activo = true });
+        // El rol admin_plataforma lo crea la migración (CatalogoBase, HU-097).
+        db.StaffPlataforma.Add(new StaffPlataforma { Acceso = acceso, RolStaffPlataformaId = CatalogoBase.RolStaffAdminId, Activo = true });
         await db.SaveChangesAsync(cancellationToken);
     }
 }

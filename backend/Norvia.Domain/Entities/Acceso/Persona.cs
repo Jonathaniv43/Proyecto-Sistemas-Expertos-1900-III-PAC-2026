@@ -9,6 +9,8 @@ public class Persona
     public string PrimerApellido { get; set; } = string.Empty;
     public string? SegundoApellido { get; set; }
     public TipoDocumentoIdentidad? TipoDocumento { get; set; }
+    /// <summary>Nombre del documento cuando <see cref="TipoDocumento"/> es <see cref="Enums.TipoDocumentoIdentidad.Otro"/> (ej. carnet de residencia).</summary>
+    public string? TipoDocumentoEspecificacion { get; set; }
     public string? NumeroDocumento { get; set; }
     public string? Telefono { get; set; }
     public DateTime CreadoEn { get; set; }

@@ -1,0 +1,838 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg-canvas font-sans text-sm font-regular text-text-primary antialiased;
+  }
+
+  a {
+    @apply text-text-link hover:text-text-link-hover;
+  }
+
+  /* Edge trae su propio botón para ver la contraseña: se oculta, CampoTexto ya tiene el suyo. */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+
+  /* El anillo de foco nunca se elimina (design-system.md § Bordes). */
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+/* Spinner de botón (design-system.css § Botón): solo dentro de botones. */
+@layer components {
+  /* Contenedor de cada pantalla (AppLayout): siempre deja el espacio de seguridad arriba, a los
+     lados y abajo. Las páginas no agregan su propio padding superior. */
+  .pagina {
+    padding-top: calc(var(--layout-space-top) + var(--safe-top));
+    padding-right: calc(var(--layout-gutter) + var(--safe-right));
+    padding-bottom: calc(var(--layout-space-bottom) + var(--safe-bottom));
+    padding-left: calc(var(--layout-gutter) + var(--safe-left));
+  }
+
+  /* Mismos márgenes laterales que .pagina, para barras fijas alineadas con el contenido. */
+  .margen-lateral {
+    padding-right: calc(var(--layout-gutter) + var(--safe-right));
+    padding-left: calc(var(--layout-gutter) + var(--safe-left));
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-full);
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: girar 0.7s linear infinite;
+  }
+
+  /* Radio (design-system.css § Radio): círculo de 16px y punto central de 6px. */
+  .radio {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  .radio input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .radio-circulo {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border: var(--border-width) solid var(--color-border-input);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-surface);
+    transition: background-color 0.12s, border-color 0.12s;
+  }
+
+  .radio-circulo::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-text-on-brand);
+    opacity: 0;
+  }
+
+  .radio:hover .radio-circulo {
+    border-color: var(--color-border-input-hover);
+  }
+
+  /* Con :has el círculo puede ir envuelto (opciones con descripción), no solo justo después del input. */
+  .radio:has(input:checked) .radio-circulo {
+    border-color: var(--color-action-primary);
+    background: var(--color-action-primary);
+  }
+
+  .radio:has(input:checked) .radio-circulo::after {
+    opacity: 1;
+  }
+
+  .radio:hover:has(input:checked) .radio-circulo {
+    border-color: var(--color-action-primary-hover);
+    background: var(--color-action-primary-hover);
+  }
+
+  .radio:has(input:focus-visible) .radio-circulo {
+    box-shadow:
+      0 0 0 var(--focus-ring-offset) var(--color-bg-surface),
+      0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
+  }
+
+  /* Casilla (design-system.css § Checkbox): caja de 16px, radio sm, tilde en text-on-brand. */
+  .casilla {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  .casilla input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .casilla-caja {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border: var(--border-width) solid var(--color-border-input);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-surface);
+    color: var(--color-text-on-brand);
+    transition: background-color 0.12s, border-color 0.12s;
+  }
+
+  .casilla-caja svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+  }
+
+  .casilla:hover .casilla-caja {
+    border-color: var(--color-border-input-hover);
+  }
+
+  .casilla:has(input:checked) .casilla-caja {
+    border-color: var(--color-action-primary);
+    background: var(--color-action-primary);
+  }
+
+  .casilla:has(input:checked) .casilla-caja svg {
+    opacity: 1;
+  }
+
+  .casilla:hover:has(input:checked) .casilla-caja {
+    border-color: var(--color-action-primary-hover);
+    background: var(--color-action-primary-hover);
+  }
+
+  .casilla:has(input:focus-visible) .casilla-caja {
+    box-shadow:
+      0 0 0 var(--focus-ring-offset) var(--color-bg-surface),
+      0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
+  }
+
+  /* Radio y casilla deshabilitados (vista previa de una encuesta): DS § Deshabilitado. */
+  .radio:has(input:disabled),
+  .casilla:has(input:disabled) {
+    cursor: default;
+  }
+
+  .radio:has(input:disabled) .radio-circulo,
+  .casilla:has(input:disabled) .casilla-caja {
+    border-color: var(--color-border-default);
+    background: var(--color-bg-disabled);
+  }
+
+  /* Insignia de estado (design-system.css § Badge): 22px de alto, Caption medium. */
+  .insignia {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 22px;
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  /* Etiqueta de riesgo (design-system.md § Etiqueta de riesgo): chip neutro; solo el cuadrado lleva el color. */
+  .etiqueta-riesgo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 22px;
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-subtle);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    font-variant-numeric: tabular-nums;
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  .cuadro-riesgo {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Mapa de calor de riesgo (design-system.md § Mapa de calor): celdas de 44px con 2px de separación. */
+  .mapa-calor {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: var(--space-2);
+    justify-content: start;
+  }
+
+  .mapa-calor-titulo-y {
+    align-self: center;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .mapa-calor-titulo-x {
+    grid-column: 2;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .mapa-calor-celdas {
+    display: grid;
+    grid-template-columns: 16px repeat(5, 44px);
+    grid-auto-rows: 44px;
+    gap: 2px;
+  }
+
+  .mapa-calor-eje {
+    display: grid;
+    place-items: center;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mapa-calor-celda {
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    print-color-adjust: exact;
+  }
+
+  /* Celda sin riesgos en el mapa de la matriz: el color del nivel queda de fondo, sin interacción. */
+  .mapa-calor-vacia {
+    cursor: default;
+  }
+
+  /* Elegida o con foco: anillo de 2px en texto principal con un halo del fondo, visible sobre cualquier color. */
+  .mapa-calor-celda[aria-pressed='true'],
+  .mapa-calor-celda:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 2px var(--color-text-primary),
+      inset 0 0 0 4px var(--color-bg-surface);
+  }
+
+  @media (max-width: 639px) {
+    .mapa-calor {
+      grid-template-columns: auto;
+    }
+
+    .mapa-calor-titulo-y {
+      justify-self: start;
+      writing-mode: horizontal-tb;
+      transform: none;
+    }
+
+    .mapa-calor-titulo-x {
+      grid-column: 1;
+    }
+  }
+
+  /* Botón de solo ícono (design-system.css § icon-btn): mismo alto que los controles. */
+  .boton-icono {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--control-height);
+    height: var(--control-height);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background-color 0.12s, color 0.12s;
+  }
+
+  .boton-icono:hover:not(:disabled) {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+  }
+
+  .boton-icono:disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 639px) {
+    .boton-icono {
+      width: var(--control-height-touch);
+      height: var(--control-height-touch);
+    }
+  }
+
+  /* Ver/ocultar contraseña (CampoTexto): dentro del input, a la derecha y centrado; más chico que la
+     caja para no tapar su borde. 32px en escritorio (caja de 36), 36px en celular (caja de 44). */
+  .boton-icono.boton-ver-contrasena {
+    position: absolute;
+    top: 50%;
+    right: var(--space-1);
+    width: var(--space-8);
+    height: var(--space-8);
+    border-radius: var(--radius-sm);
+    transform: translateY(-50%);
+  }
+
+  @media (max-width: 639px) {
+    .boton-icono.boton-ver-contrasena {
+      width: var(--control-height);
+      height: var(--control-height);
+    }
+  }
+
+  /* Barra fija de "Volver" (design-system.md § Volver): aparece al desplazar, debajo de las listas
+     desplegables (z 30) y de los modales (top-layer). */
+  .barra-volver {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 20;
+    /* Aire arriba y abajo del link (--space-2), y debajo del notch / barra de estado en celular. */
+    height: calc(var(--control-height) + 2 * var(--space-2) + var(--safe-top));
+    padding-top: calc(var(--space-2) + var(--safe-top));
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-1);
+    opacity: 0;
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition:
+      opacity 0.12s,
+      transform 0.12s,
+      visibility 0.12s;
+  }
+
+  .barra-volver[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+  }
+
+  .barra-volver-titulo {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 639px) {
+    .barra-volver {
+      height: calc(var(--control-height-touch) + 2 * var(--space-2) + var(--safe-top));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .barra-volver {
+      transition: none;
+    }
+  }
+
+  /* Diálogo de confirmación (design-system.md § Modal y § Diálogo): <dialog> nativo, 400px;
+     en celular sale como hoja inferior. */
+  .dialogo {
+    width: min(400px, calc(100% - 2 * var(--space-4)));
+    margin: auto;
+    padding: var(--space-6);
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-3);
+  }
+
+  .dialogo::backdrop {
+    background: var(--color-overlay);
+  }
+
+  @media (max-width: 639px) {
+    .dialogo {
+      width: 100%;
+      max-width: 100%;
+      margin: auto 0 0;
+      border-radius: 16px 16px 0 0;
+      /* Hoja inferior: encima de la barra de gestos. */
+      padding-bottom: calc(var(--space-6) + var(--safe-bottom));
+    }
+  }
+
+  /* Modal de formulario (design-system.md § Modal): 560px, encabezado y pie fijos, el medio desplaza. */
+  .modal {
+    width: min(560px, calc(100% - 2 * var(--space-4)));
+    max-height: calc(100dvh - 2 * var(--space-8));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-3);
+  }
+
+  .modal[open],
+  .modal > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .modal > form {
+    flex: 1;
+  }
+
+  .modal::backdrop {
+    background: var(--color-overlay);
+  }
+
+  .modal-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6);
+  }
+
+  /* position: relative: los controles ocultos con position absolute (radios, casillas) quedan dentro del scroll. */
+  .modal-cuerpo {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-2) var(--space-6) var(--space-6);
+  }
+
+  .modal-pie {
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  @media (max-width: 639px) {
+    .modal {
+      width: 100%;
+      max-width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      border-radius: 0;
+    }
+
+    /* Pantalla completa: cabecera bajo el notch y pie sobre la barra de gestos. */
+    .modal-cabecera {
+      padding-top: calc(var(--space-4) + var(--safe-top));
+    }
+
+    .modal-pie {
+      padding-bottom: calc(var(--space-4) + var(--safe-bottom));
+    }
+  }
+
+  /* Select con búsqueda (design-system.md § Select, lista abierta): a 4px del campo y con su ancho;
+     ~8 opciones y luego desplaza. En celular, hoja inferior con el fondo oscurecido. */
+  .lista-busqueda {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    z-index: 30;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-2);
+  }
+
+  .lista-busqueda-opciones {
+    max-height: calc(8 * var(--control-height));
+    overflow-y: auto;
+    padding-bottom: var(--space-1);
+  }
+
+  .lista-busqueda-fondo {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    .lista-busqueda {
+      position: fixed;
+      top: auto;
+      bottom: 0;
+      border-radius: 16px 16px 0 0;
+      max-height: 80dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lista-busqueda-opciones {
+      max-height: none;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: calc(var(--space-1) + var(--safe-bottom));
+    }
+
+    .lista-busqueda-fondo {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: var(--color-overlay);
+    }
+  }
+
+  /* Campo de fecha (design-system.md § Campo de fecha): el calendario se abre como la lista del select, a 4px del
+     campo (arriba si no cabe debajo); en celular, como hoja inferior con el fondo oscurecido. Días de 40px (44px en celular). */
+  .calendario {
+    /* Fijo y colocado por el componente (--calendario-top/left): un modal con desplazamiento no lo recorta. */
+    position: fixed;
+    top: var(--calendario-top, 0);
+    left: var(--calendario-left, 0);
+    z-index: 30;
+    display: grid;
+    gap: var(--space-2);
+    width: max-content;
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-2);
+  }
+
+  .calendario-fondo {
+    display: none;
+  }
+
+  .calendario-rejilla {
+    border-collapse: separate;
+    border-spacing: 2px;
+  }
+
+  .calendario-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+  }
+
+  .calendario-nav:hover {
+    background: var(--color-bg-subtle);
+  }
+
+  .calendario-dia {
+    width: 40px;
+    height: 40px;
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+  }
+
+  .calendario-dia:hover:not(:disabled) {
+    background: var(--color-bg-subtle);
+  }
+
+  .calendario-dia[aria-current='date'] {
+    border-color: var(--color-border-strong);
+  }
+
+  .calendario-dia[aria-pressed='true'] {
+    border-color: transparent;
+    background: var(--color-action-primary);
+    color: var(--color-text-on-brand);
+  }
+
+  .calendario-dia:disabled {
+    cursor: not-allowed;
+    color: var(--color-text-disabled);
+  }
+
+  @media (max-width: 639px) {
+    .calendario {
+      position: fixed;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: auto;
+      justify-items: center;
+      padding: var(--space-4) var(--space-4) var(--space-6);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .calendario > :first-child {
+      width: 100%;
+    }
+
+    .calendario-dia,
+    .calendario-nav {
+      width: 44px;
+      height: 44px;
+    }
+
+    .calendario-fondo {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: var(--color-overlay);
+    }
+  }
+
+  /* Navegación de sección (design-system.md § Navegación de sección): enlaces en fila sobre una línea; el actual
+     lleva texto seleccionado y una barra de 2px. En pantallas chicas la fila se desplaza sin ensanchar la página. */
+  .nav-seccion {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    scrollbar-width: none;
+  }
+
+  .nav-seccion a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-height-touch);
+    border-bottom: 2px solid transparent;
+    margin-bottom: calc(-1 * var(--border-width));
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-seccion a:hover {
+    color: var(--color-text-primary);
+  }
+
+  .nav-seccion a[aria-current='page'] {
+    border-bottom-color: var(--color-text-selected);
+    color: var(--color-text-selected);
+  }
+
+  /* Área de texto (design-system.css § Área de texto): 3 líneas mínimo, crece hasta ~8 y luego desplaza. */
+  .area-texto {
+    display: block;
+    width: 100%;
+    min-height: 80px;
+    max-height: 184px;
+    padding: var(--space-3);
+    resize: none;
+    field-sizing: content;
+    overflow-y: auto;
+  }
+
+  /* Editor de documento (design-system.md § Editor de documento): el área de texto crece con el documento, sin desplazamiento propio. */
+  .editor-documento .area-texto {
+    min-height: 384px;
+    max-height: none;
+    overflow-y: hidden;
+  }
+
+  /* Tabla (design-system.css § Tabla): contenedor con borde y desplazamiento horizontal en pantallas chicas. */
+  /* position: relative: así lo absoluto de adentro (p. ej. un encabezado sr-only) no se escapa del scroll y no ensancha la página. */
+  .tabla-contenedor {
+    position: relative;
+    overflow-x: auto;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-surface);
+  }
+
+  .tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--color-bg-surface);
+  }
+
+  .tabla th {
+    height: 40px;
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .tabla td {
+    height: var(--table-row-height);
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    white-space: nowrap;
+  }
+
+  .tabla td.envolver {
+    min-width: 200px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    white-space: normal;
+  }
+
+  .tabla tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .tabla tbody tr:hover {
+    background: var(--color-bg-subtle);
+  }
+
+  @keyframes girar {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2s;
+    }
+  }
+}
+
+/*
+ * Documento vigente (HU-074) y matriz de riesgos (HU-075): "Descargar PDF" abre la impresión del navegador.
+ * Se imprime solo el área imprimible correspondiente, sin barra de la app ni botones de navegación.
+ */
+@page matriz {
+  size: landscape;
+  margin: 12mm;
+}
+
+@media print {
+  body:has(.documento-imprimible) *,
+  body:has(.matriz-imprimible) * {
+    visibility: hidden;
+  }
+
+  /* Mismo prefijo que la regla de arriba, para que pese más que ella. */
+  body:has(.documento-imprimible) .documento-imprimible,
+  body:has(.documento-imprimible) .documento-imprimible *,
+  body:has(.matriz-imprimible) .matriz-imprimible,
+  body:has(.matriz-imprimible) .matriz-imprimible * {
+    visibility: visible;
+  }
+
+  .documento-imprimible,
+  .matriz-imprimible {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+
+  .matriz-imprimible {
+    page: matriz;
+  }
+
+  .documento-imprimible .no-imprimir,
+  .matriz-imprimible .no-imprimir {
+    display: none;
+  }
+
+  .documento-imprimible article {
+    border: 0;
+    padding: 0;
+  }
+
+  .matriz-imprimible .tabla-contenedor {
+    overflow: visible;
+  }
+
+  .matriz-imprimible .tabla td,
+  .matriz-imprimible .tabla th {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    white-space: normal;
+  }
+
+  .matriz-imprimible .tabla tr,
+  .matriz-imprimible .bloque-impresion {
+    break-inside: avoid;
+  }
+
+  .matriz-imprimible .cuadro-riesgo,
+  .matriz-imprimible .insignia {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

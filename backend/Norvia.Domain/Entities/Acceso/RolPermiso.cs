@@ -4,7 +4,7 @@ namespace Norvia.Domain.Entities.Acceso;
 public class RolPermiso
 {
     public short RolId { get; set; }
-    public short PermisoId { get; set; }
+    public Guid PermisoId { get; set; }
 
     public Rol Rol { get; set; } = null!;
     public Permiso Permiso { get; set; } = null!;

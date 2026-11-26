@@ -2,6 +2,8 @@ using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Common.Seguridad;
+using Norvia.Application.Features.Auth.DTOs;
+using Norvia.Application.Features.Auth.LoginPlataforma.DTOs;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Auth.LoginPlataforma;
@@ -14,7 +16,7 @@ public sealed class LoginPlataformaServicio(
     IReloj reloj,
     EmisorSesion emisor) : IServicioCasoDeUso
 {
-    public async Task<Resultado<SesionResponse>> EjecutarAsync(LoginPlataformaRequest request, CancellationToken cancellationToken)
+    public async Task<Resultado<SesionResponseDto>> EjecutarAsync(LoginPlataformaRequestDto request, CancellationToken cancellationToken)
     {
         var acceso = await repo.BuscarAccesoAsync(request.Email.Trim().ToLowerInvariant(), cancellationToken);
         if (acceso is null || !acceso.Verificado || !hasher.Verificar(acceso, request.Password))
@@ -25,8 +27,8 @@ public sealed class LoginPlataformaServicio(
             return Errores.CredencialesInvalidas;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
-        var sesion = new SesionToken(acceso.Id, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo);
-        var (fila, respuesta) = emisor.Emitir(sesion, ahora);
+        var sesion = new SesionToken(acceso.Id, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo, acceso.Email);
+        var (fila, respuesta) = emisor.Emitir(sesion, ahora, acceso.DebeCambiarPassword);
 
         repo.AgregarRefresh(fila);
         await uow.GuardarCambiosAsync(cancellationToken);

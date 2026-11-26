@@ -8,6 +8,12 @@ public static class InicializacionBaseDatos
     public static async Task InicializarBaseDatosAsync(this IServiceProvider servicios, CancellationToken cancellationToken = default)
     {
         using var scope = servicios.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<PermisosSeeder>().EjecutarAsync(cancellationToken);
+        await scope.ServiceProvider.GetRequiredService<PlantillasCorreoSeeder>().EjecutarAsync(cancellationToken);
+        await scope.ServiceProvider.GetRequiredService<TiposDocumentoIdentidadSeeder>().EjecutarAsync(cancellationToken);
+        await scope.ServiceProvider.GetRequiredService<TiposRespuestaPreguntaSeeder>().EjecutarAsync(cancellationToken);
+        // HU-097: contenido SST inicial; necesita los tipos de respuesta.
+        await scope.ServiceProvider.GetRequiredService<CatalogoSstSeeder>().EjecutarAsync(cancellationToken);
         await scope.ServiceProvider.GetRequiredService<StaffSeeder>().EjecutarAsync(cancellationToken);
     }
 }

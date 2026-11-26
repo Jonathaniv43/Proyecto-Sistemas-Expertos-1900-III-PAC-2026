@@ -1,0 +1,132 @@
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Norvia.Application.Common.Interfaces;
+using Norvia.Domain.Common;
+using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Entities.Accidentes;
+using Norvia.Domain.Entities.Auditoria;
+using Norvia.Domain.Entities.Catalogos;
+using Norvia.Domain.Entities.Documentos;
+using Norvia.Domain.Entities.Empresas;
+using Norvia.Domain.Entities.Encuestas;
+using Norvia.Domain.Entities.Notificaciones;
+using Norvia.Domain.Entities.Plan;
+using Norvia.Domain.Entities.Riesgos;
+
+namespace Norvia.Infrastructure.Data;
+
+/// <summary>
+/// Contexto de EF Core de Norvia. Los DbSet van en singular porque EF usa su nombre
+/// como nombre de tabla y el modelo de datos usa tablas en singular.
+/// <para>
+/// Aislamiento multiempresa (§2, HU-093): toda entidad <see cref="ITieneEmpresa"/> tiene un filtro global
+/// <c>EmpresaId == EmpresaIdActual</c>. Sin sesión de empresa, <see cref="EmpresaIdActual"/> es nulo y esas
+/// tablas no devuelven filas. Saltar el filtro (<c>IgnoreQueryFilters</c>) solo se permite en el login,
+/// los seeders y las operaciones de plataforma, con un comentario que lo justifique.
+/// </para>
+/// </summary>
+public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantActual tenant) : DbContext(options)
+{
+    /// <summary>Empresa de la sesión. EF la lee en cada consulta (no queda fija en el modelo).</summary>
+    public Guid? EmpresaIdActual => tenant.EmpresaId;
+
+    // Acceso (globales, salvo VinculoEmpresa e HistorialEstadoVinculo)
+    public DbSet<Persona> Persona => Set<Persona>();
+    public DbSet<Usuario> Usuario => Set<Usuario>();
+    public DbSet<Acceso> Acceso => Set<Acceso>();
+    public DbSet<AccesoProveedor> AccesoProveedor => Set<AccesoProveedor>();
+    public DbSet<VerificacionCorreoMicrosoft> VerificacionCorreoMicrosoft => Set<VerificacionCorreoMicrosoft>();
+    public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
+    public DbSet<StaffPlataforma> StaffPlataforma => Set<StaffPlataforma>();
+    public DbSet<RolStaffPlataforma> RolStaffPlataforma => Set<RolStaffPlataforma>();
+    public DbSet<Rol> Rol => Set<Rol>();
+    public DbSet<Permiso> Permiso => Set<Permiso>();
+    public DbSet<RolPermiso> RolPermiso => Set<RolPermiso>();
+    public DbSet<RolStaffPlataformaPermiso> RolStaffPlataformaPermiso => Set<RolStaffPlataformaPermiso>();
+    public DbSet<VinculoEmpresa> VinculoEmpresa => Set<VinculoEmpresa>();
+    public DbSet<HistorialEstadoVinculo> HistorialEstadoVinculo => Set<HistorialEstadoVinculo>();
+
+    // Empresas
+    public DbSet<Empresa> Empresa => Set<Empresa>();
+    public DbSet<HistorialEstadoEmpresa> HistorialEstadoEmpresa => Set<HistorialEstadoEmpresa>();
+
+    // Catálogos (globales)
+    public DbSet<Rubro> Rubro => Set<Rubro>();
+    public DbSet<CategoriaRiesgo> CategoriaRiesgo => Set<CategoriaRiesgo>();
+    public DbSet<Peligro> Peligro => Set<Peligro>();
+    public DbSet<PreguntaExploratoria> PreguntaExploratoria => Set<PreguntaExploratoria>();
+    public DbSet<OpcionPregunta> OpcionPregunta => Set<OpcionPregunta>();
+    public DbSet<PlantillaTarea> PlantillaTarea => Set<PlantillaTarea>();
+    public DbSet<PlantillaDocumento> PlantillaDocumento => Set<PlantillaDocumento>();
+    public DbSet<PlantillaCorreo> PlantillaCorreo => Set<PlantillaCorreo>();
+    public DbSet<TipoDocumentoIdentidadCatalogo> TipoDocumentoIdentidad => Set<TipoDocumentoIdentidadCatalogo>();
+    public DbSet<TipoRespuestaPreguntaCatalogo> TipoRespuestaPregunta => Set<TipoRespuestaPreguntaCatalogo>();
+
+    // Encuestas
+    public DbSet<Encuesta> Encuesta => Set<Encuesta>();
+    public DbSet<EncuestaVersion> EncuestaVersion => Set<EncuestaVersion>();
+    public DbSet<EncuestaCategoria> EncuestaCategoria => Set<EncuestaCategoria>();
+    public DbSet<EncuestaSeccion> EncuestaSeccion => Set<EncuestaSeccion>();
+    public DbSet<EncuestaPregunta> EncuestaPregunta => Set<EncuestaPregunta>();
+    public DbSet<EncuestaOpcion> EncuestaOpcion => Set<EncuestaOpcion>();
+    public DbSet<ParticipacionEncuesta> ParticipacionEncuesta => Set<ParticipacionEncuesta>();
+    public DbSet<RespuestaEncuesta> RespuestaEncuesta => Set<RespuestaEncuesta>();
+    public DbSet<DetalleRespuesta> DetalleRespuesta => Set<DetalleRespuesta>();
+    public DbSet<DetalleRespuestaOpcion> DetalleRespuestaOpcion => Set<DetalleRespuestaOpcion>();
+
+    // Riesgos
+    public DbSet<RiesgoEmpresa> RiesgoEmpresa => Set<RiesgoEmpresa>();
+    public DbSet<EvaluacionRiesgo> EvaluacionRiesgo => Set<EvaluacionRiesgo>();
+    public DbSet<Control> Control => Set<Control>();
+
+    // Accidentes / Eventos (M6)
+    public DbSet<Accidente> Accidente => Set<Accidente>();
+    public DbSet<InvestigacionAccidente> InvestigacionAccidente => Set<InvestigacionAccidente>();
+
+    // Plan de trabajo (M5)
+    public DbSet<Tarea> Tarea => Set<Tarea>();
+
+    // Documentos (M9)
+    public DbSet<Documento> Documento => Set<Documento>();
+    public DbSet<VersionDocumento> VersionDocumento => Set<VersionDocumento>();
+
+    // Notificaciones (M11)
+    public DbSet<Notificacion> Notificacion => Set<Notificacion>();
+
+    // Auditoría (HU-099)
+    public DbSet<RegistroAuditoria> RegistroAuditoria => Set<RegistroAuditoria>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Carga todas las IEntityTypeConfiguration<T> de Persistence/Configurations.
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(NorviaDbContext).Assembly);
+
+        // Ninguna tabla se borra en cascada: todas las FK usan ON DELETE RESTRICT (modelo de datos §6).
+        foreach (var fk in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        {
+            fk.DeleteBehavior = DeleteBehavior.Restrict;
+        }
+
+        AplicarFiltroPorEmpresa(modelBuilder);
+    }
+
+    /// <summary>HasQueryFilter(e => e.EmpresaId == EmpresaIdActual) en cada entidad ITieneEmpresa.</summary>
+    private void AplicarFiltroPorEmpresa(ModelBuilder modelBuilder)
+    {
+        var tiposDeEmpresa = modelBuilder.Model.GetEntityTypes()
+            .Where(t => typeof(ITieneEmpresa).IsAssignableFrom(t.ClrType) && t.BaseType is null);
+
+        foreach (var tipo in tiposDeEmpresa)
+        {
+            var e = Expression.Parameter(tipo.ClrType, "e");
+            var empresaDeLaFila = Expression.Convert(
+                Expression.Property(e, nameof(ITieneEmpresa.EmpresaId)), typeof(Guid?));
+            var empresaDeLaSesion = Expression.Property(Expression.Constant(this), nameof(EmpresaIdActual));
+            var filtro = Expression.Lambda(Expression.Equal(empresaDeLaFila, empresaDeLaSesion), e);
+
+            modelBuilder.Entity(tipo.ClrType).HasQueryFilter(filtro);
+        }
+    }
+}

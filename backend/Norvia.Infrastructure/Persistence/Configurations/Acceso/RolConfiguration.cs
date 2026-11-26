@@ -17,5 +17,7 @@ public class RolConfiguration : IEntityTypeConfiguration<Rol>
         b.Property(r => r.Codigo).HasMaxLength(30).IsRequired();
         b.Property(r => r.Nombre).HasMaxLength(60).IsRequired();
         b.HasIndex(r => r.Codigo).IsUnique();
+
+        b.HasData(Seed.CatalogoBase.Roles); // HU-097
     }
 }

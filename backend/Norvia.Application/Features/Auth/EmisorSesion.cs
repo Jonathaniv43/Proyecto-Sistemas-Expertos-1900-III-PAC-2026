@@ -1,5 +1,6 @@
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Seguridad;
+using Norvia.Application.Features.Auth.DTOs;
 using Norvia.Domain.Entities.Acceso;
 
 namespace Norvia.Application.Features.Auth;
@@ -11,7 +12,7 @@ namespace Norvia.Application.Features.Auth;
 /// </summary>
 public sealed class EmisorSesion(ITokenServicio tokens)
 {
-    public (RefreshToken Fila, SesionResponse Respuesta) Emitir(SesionToken sesion, DateTime ahoraUtc)
+    public (RefreshToken Fila, SesionResponseDto Respuesta) Emitir(SesionToken sesion, DateTime ahoraUtc, bool debeCambiarPassword)
     {
         var (plano, hash) = tokens.CrearRefresh();
 
@@ -24,7 +25,7 @@ public sealed class EmisorSesion(ITokenServicio tokens)
             ExpiraEn = ahoraUtc.Add(tokens.RefreshDuracion)
         };
 
-        var respuesta = new SesionResponse(tokens.CrearAccess(sesion, ahoraUtc), plano, tokens.AccessSegundos);
+        var respuesta = new SesionResponseDto(tokens.CrearAccess(sesion, ahoraUtc), plano, tokens.AccessSegundos, debeCambiarPassword);
         return (fila, respuesta);
     }
 }

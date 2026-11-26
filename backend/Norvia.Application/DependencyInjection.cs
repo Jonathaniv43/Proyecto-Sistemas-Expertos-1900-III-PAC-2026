@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.CasosDeUso;
@@ -9,6 +10,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        ValidatorOptions.Global.LanguageManager.Culture = new CultureInfo("es");
+
         var ensamblado = typeof(DependencyInjection).Assembly;
 
         services.AddValidatorsFromAssembly(ensamblado);
@@ -21,6 +24,15 @@ public static class DependencyInjection
 
         // Piezas compartidas solo por los slices del módulo Auth.
         services.AddScoped<EmisorSesion>();
+
+        // Pieza compartida solo por los slices de alta del módulo Vinculos (HU-020, HU-115).
+        services.AddScoped<Features.Vinculos.AltaDeVinculo>();
+
+        // Crea las notificaciones de M11 (D28) desde cualquier módulo: tareas (HU-081) y políticas (HU-116).
+        services.AddScoped<Common.Notificaciones.Notificador>();
+
+        // Registra la auditoría inalterable de acciones importantes (HU-099).
+        services.AddScoped<Common.Auditoria.Auditor>();
 
         return services;
     }
