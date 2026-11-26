@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -12,7 +13,7 @@ namespace Norvia.Application.Features.Eventos.DescartarEvento;
 /// descartó, cuándo y el motivo (opcional); queda fuera de las estadísticas (HU-052). Uno cerrado ya no se descarta.
 /// </summary>
 public sealed class DescartarEventoServicio(
-    IDescartarEventoRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj, ITenantActual sesion) : IServicioCasoDeUso
+    IDescartarEventoRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj, ITenantActual sesion, Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<EventoDetalleResponseDto>> EjecutarAsync(Guid id, DescartarEventoRequestDto request, CancellationToken ct)
     {
@@ -24,6 +25,8 @@ public sealed class DescartarEventoServicio(
         evento.DescartadoPorId = vinculoId;
         evento.DescartadoEn = await reloj.AhoraAsync(ct);
         evento.MotivoDescarte = string.IsNullOrWhiteSpace(request.Motivo) ? null : request.Motivo.Trim();
+        auditor.Registrar(AccionesAuditoria.EventoDescartado, EntidadesAuditoria.Accidente, evento.Id,
+            new { evento.Tipo, motivo = evento.MotivoDescarte });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return await repositorio.DetalleAsync(id, ct);

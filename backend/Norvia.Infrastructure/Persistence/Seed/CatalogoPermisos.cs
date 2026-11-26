@@ -134,6 +134,10 @@ public static class CatalogoPermisos
             "admin_empresa", "responsable_sst"),
         Empresa("encuesta.cerrar", "Cerrar encuesta", "POST", "api/encuestas/{id}/cierre", "admin_empresa", "responsable_sst"),
 
+        // HU-099: consulta del registro inalterable de auditoría.
+        Empresa("auditoria.listar", "Consultar auditoría de acciones", "GET", "api/auditoria",
+            "admin_empresa", "responsable_sst"),
+
         // HU-047: reporte anónimo (RN-27, RN-74) y consulta básica de eventos (M6).
         // Pendiente HU-100: evento.evidencias (POST api/eventos/{id}/evidencias).
         // Pendiente HU-049/050/052: investigación, descarte, medidas correctivas y estadísticas.

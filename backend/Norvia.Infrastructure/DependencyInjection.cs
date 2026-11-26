@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.Interfaces;
+using Norvia.Infrastructure.Auditoria;
 using Norvia.Infrastructure.Data;
 using Norvia.Infrastructure.Opciones;
 using Norvia.Application.Common.Correo;
@@ -26,9 +28,12 @@ public static class DependencyInjection
 
         // ITenantActual lo registra la capa que conoce la sesión (la API, a partir del JWT).
         services.AddScoped<AsignarEmpresaInterceptor>();
+        services.AddSingleton<ProtegerRegistroAuditoriaInterceptor>();
         services.AddDbContext<NorviaDbContext>((sp, options) => options
             .UseNpgsql(connectionString)
-            .AddInterceptors(sp.GetRequiredService<AsignarEmpresaInterceptor>()));
+            .AddInterceptors(
+                sp.GetRequiredService<AsignarEmpresaInterceptor>(),
+                sp.GetRequiredService<ProtegerRegistroAuditoriaInterceptor>()));
         services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 
         // Opciones: la configuración se lee solo aquí (patrón Options).
@@ -77,6 +82,7 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddScoped<IBandejaNotificaciones, BandejaNotificaciones>();
         services.AddScoped<EnvioNotificacionesPendientes>();
+        services.AddScoped<IRegistroAuditoria, RepositorioRegistroAuditoria>();
 
         // Repositorios por slice: I<CasoDeUso>Repositorio → <CasoDeUso>Repositorio.
         var repositorios = typeof(DependencyInjection).Assembly.GetTypes()

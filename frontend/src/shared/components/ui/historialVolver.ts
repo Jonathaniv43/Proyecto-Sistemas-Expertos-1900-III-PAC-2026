@@ -89,6 +89,7 @@ const TEXTOS: [patron: string, texto: string][] = [
   ['/documentos/:id', 'Volver al documento'],
   ['/documentos-vigentes', 'Volver a políticas y procedimientos'],
   ['/documentos-vigentes/:id', 'Volver al documento'],
+  ['/auditoria', 'Volver a auditoría'],
 ]
 
 function textoPara(anterior: URL, actual: Location): string | undefined {

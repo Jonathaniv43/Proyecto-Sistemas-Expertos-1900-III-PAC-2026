@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -17,8 +18,11 @@ namespace Norvia.Application.Features.Plan.GenerarPlan;
 /// los índices únicos por plantilla de cada riesgo y por control.</item>
 /// </list>
 /// </summary>
-public sealed class GenerarPlanServicio(IGenerarPlanRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, ITenantActual sesion)
-    : IServicioCasoDeUso
+public sealed class GenerarPlanServicio(
+    IGenerarPlanRepositorio repositorio,
+    IUnidadDeTrabajo unidadDeTrabajo,
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<GenerarPlanResponseDto>> EjecutarAsync(GenerarPlanRequestDto request, CancellationToken ct)
     {
@@ -45,6 +49,8 @@ public sealed class GenerarPlanServicio(IGenerarPlanRepositorio repositorio, IUn
         if (tareas.Count > 0)
         {
             repositorio.Agregar(tareas);
+            auditor.Registrar(AccionesAuditoria.PlanGenerado, EntidadesAuditoria.Tarea, tareas[0].Id,
+                new { tareasCreadas = tareas.Count });
             await unidadDeTrabajo.GuardarCambiosAsync(ct);
         }
         return new GenerarPlanResponseDto(tareas.Count);

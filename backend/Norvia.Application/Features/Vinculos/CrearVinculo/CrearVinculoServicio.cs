@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -12,7 +13,8 @@ namespace Norvia.Application.Features.Vinculos.CrearVinculo;
 public sealed class CrearVinculoServicio(
     ICrearVinculoRepositorio repositorio,
     AltaDeVinculo alta,
-    IUnidadDeTrabajo unidadDeTrabajo) : IServicioCasoDeUso
+    IUnidadDeTrabajo unidadDeTrabajo,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<CrearVinculoResponseDto>> EjecutarAsync(CrearVinculoRequestDto request, CancellationToken ct)
     {
@@ -24,9 +26,11 @@ public sealed class CrearVinculoServicio(
         var preparado = await alta.PrepararAsync(datos, rol.Id, request.PasswordTemporal, generarSiFalta: false, ct);
         if (!preparado.EsExito) return preparado.Error!;
 
+        var (vinculo, persona, acceso, cuentaNueva, _) = preparado.Valor;
+        auditor.Registrar(AccionesAuditoria.VinculoCreado, EntidadesAuditoria.VinculoEmpresa, vinculo.Id,
+            new { persona = persona.NombreCompleto, email = acceso.Email, rol = rol.Codigo, cuentaNueva });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
-        var (vinculo, persona, acceso, cuentaNueva, _) = preparado.Valor;
         return new CrearVinculoResponseDto(vinculo.Id, persona.Id, acceso.Email, persona.NombreCompleto, rol.Codigo,
             vinculo.Estado, vinculo.CreadoEn, cuentaNueva);
     }

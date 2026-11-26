@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -18,7 +19,10 @@ namespace Norvia.Application.Features.Riesgos.CrearControl;
 /// <item>Queda <c>propuesto</c>; se implementa con el plan de trabajo (M5).</item>
 /// </list>
 /// </summary>
-public sealed class CrearControlServicio(ICrearControlRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo) : IServicioCasoDeUso
+public sealed class CrearControlServicio(
+    ICrearControlRepositorio repositorio,
+    IUnidadDeTrabajo unidadDeTrabajo,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<ControlResponseDto>> EjecutarAsync(Guid riesgoId, CrearControlRequestDto request, CancellationToken ct)
     {
@@ -42,6 +46,8 @@ public sealed class CrearControlServicio(ICrearControlRepositorio repositorio, I
             Estado = EstadoControl.Propuesto
         };
         repositorio.Agregar(control);
+        auditor.Registrar(AccionesAuditoria.ControlCreado, EntidadesAuditoria.Control, control.Id,
+            new { riesgoId, control.Tipo, control.Descripcion, control.PlantillaTareaId });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return ControlResponseDto.De(control);

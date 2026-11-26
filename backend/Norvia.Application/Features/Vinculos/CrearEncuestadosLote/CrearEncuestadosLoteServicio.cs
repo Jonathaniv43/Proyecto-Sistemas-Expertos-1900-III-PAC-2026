@@ -1,4 +1,5 @@
 using FluentValidation;
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Features.Vinculos.CrearEncuestadosLote.DTOs;
@@ -14,7 +15,8 @@ namespace Norvia.Application.Features.Vinculos.CrearEncuestadosLote;
 public sealed class CrearEncuestadosLoteServicio(
     AltaDeVinculo alta,
     IValidator<FilaEncuestadoDto> validadorFila,
-    IUnidadDeTrabajo unidadDeTrabajo) : IServicioCasoDeUso
+    IUnidadDeTrabajo unidadDeTrabajo,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<CrearEncuestadosLoteResponseDto> EjecutarAsync(CrearEncuestadosLoteRequestDto request, CancellationToken ct)
     {
@@ -57,7 +59,14 @@ public sealed class CrearEncuestadosLoteServicio(
         }
 
         if (preparados.Count > 0)
+        {
+            foreach (var (_, datos) in preparados)
+            {
+                auditor.Registrar(AccionesAuditoria.EncuestadoCreado, EntidadesAuditoria.VinculoEmpresa, datos.Vinculo.Id,
+                    new { persona = datos.Persona.NombreCompleto, email = datos.Acceso.Email, rol = "encuestado", datos.CuentaNueva, lote = true });
+            }
             await unidadDeTrabajo.GuardarCambiosAsync(ct);
+        }
 
         var cuentas = preparados
             .Select(p => new EncuestadoCreadoDto(p.Fila, p.Datos.Vinculo.Id, p.Datos.Acceso.Email,

@@ -704,6 +704,61 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.ToTable("InvestigacionAccidente");
                 });
 
+            modelBuilder.Entity("Norvia.Domain.Entities.Auditoria.RegistroAuditoria", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Detalle")
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Entidad")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<Guid>("EntidadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Fecha")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid?>("StaffPlataformaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("VinculoEmpresaId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("EmpresaId", "Id");
+
+                    b.HasIndex("StaffPlataformaId");
+
+                    b.HasIndex("EmpresaId", "Fecha")
+                        .IsDescending(false, true);
+
+                    b.HasIndex("EmpresaId", "VinculoEmpresaId");
+
+                    b.HasIndex("Entidad", "EntidadId");
+
+                    b.ToTable("RegistroAuditoria", t =>
+                        {
+                            t.HasCheckConstraint("CK_RegistroAuditoria_AutorExcluyente", "\"VinculoEmpresaId\" IS NULL OR \"StaffPlataformaId\" IS NULL");
+                        });
+                });
+
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2262,6 +2317,32 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("InvestigadaPor");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Auditoria.RegistroAuditoria", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Empresas.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.StaffPlataforma", "StaffPlataforma")
+                        .WithMany()
+                        .HasForeignKey("StaffPlataformaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Norvia.Domain.Entities.Acceso.VinculoEmpresa", "VinculoEmpresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId", "VinculoEmpresaId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("StaffPlataforma");
+
+                    b.Navigation("VinculoEmpresa");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Catalogos.CategoriaRiesgo", b =>

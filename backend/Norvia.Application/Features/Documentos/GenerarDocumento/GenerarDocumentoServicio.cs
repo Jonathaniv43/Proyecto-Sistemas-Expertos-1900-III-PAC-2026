@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -21,7 +22,8 @@ public sealed class GenerarDocumentoServicio(
     IGenerarDocumentoRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<DocumentoDetalleResponseDto>> EjecutarAsync(GenerarDocumentoRequestDto request, CancellationToken ct)
     {
@@ -48,6 +50,8 @@ public sealed class GenerarDocumentoServicio(
             CreadaPorId = vinculoId
         });
         repositorio.Agregar(documento);
+        auditor.Registrar(AccionesAuditoria.DocumentoGenerado, EntidadesAuditoria.Documento, documento.Id,
+            new { documento.Titulo, documento.TipoDocumento, plantillaId = plantilla.Id });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         var detalle = await repositorio.DetalleAsync(documento.Id, ct);
