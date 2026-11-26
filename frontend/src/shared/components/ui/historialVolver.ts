@@ -77,6 +77,7 @@ const TEXTOS: [patron: string, texto: string][] = [
   ['/mis-encuestas', 'Volver a mis encuestas'],
   ['/mis-encuestas/:id', 'Volver a la encuesta'],
   ['/empresa', 'Volver al perfil de la empresa'],
+  ['/empresas', 'Volver a empresas'],
   ['/riesgos', 'Volver a la matriz'],
   ['/riesgos/nuevo', 'Volver a agregar riesgo'],
   ['/riesgos/imprimir', 'Volver a imprimir la matriz'],

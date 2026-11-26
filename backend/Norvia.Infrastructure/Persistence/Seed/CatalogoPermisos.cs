@@ -198,6 +198,10 @@ public static class CatalogoPermisos
         Plataforma("catalogo.plantilla_tarea.actualizar", "Editar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}", "admin_plataforma"),
         Plataforma("catalogo.plantilla_tarea.estado", "Activar o desactivar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}/estado", "admin_plataforma"),
 
+        // HU-024: consultar empresas registradas y personas con acceso vigente (sin datos SST, alcance plataforma).
+        Plataforma("empresa.listar", "Consultar empresas registradas", "GET", "api/plataforma/empresas",
+            "admin_plataforma", "soporte_plataforma"),
+
         // TEMPORALES para probar el middleware (borrar junto con PruebaController).
         Plataforma("prueba.plataforma", "Prueba plataforma", "GET", "api/prueba/plataforma", "admin_plataforma"),
         Empresa("prueba.empresa", "Prueba empresa", "GET", "api/prueba/empresa", "admin_empresa"),
