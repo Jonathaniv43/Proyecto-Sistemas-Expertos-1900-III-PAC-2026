@@ -771,32 +771,68 @@
 }
 
 /*
- * Documento vigente (HU-074, design-system.md § Documento): "Descargar PDF" abre la impresión del navegador. Se imprime
- * solo el documento, sin la barra de la app ni los botones, y sin el borde de la card.
+ * Documento vigente (HU-074) y matriz de riesgos (HU-075): "Descargar PDF" abre la impresión del navegador.
+ * Se imprime solo el área imprimible correspondiente, sin barra de la app ni botones de navegación.
  */
+@page matriz {
+  size: landscape;
+  margin: 12mm;
+}
+
 @media print {
-  body:has(.documento-imprimible) * {
+  body:has(.documento-imprimible) *,
+  body:has(.matriz-imprimible) * {
     visibility: hidden;
   }
 
   /* Mismo prefijo que la regla de arriba, para que pese más que ella. */
   body:has(.documento-imprimible) .documento-imprimible,
-  body:has(.documento-imprimible) .documento-imprimible * {
+  body:has(.documento-imprimible) .documento-imprimible *,
+  body:has(.matriz-imprimible) .matriz-imprimible,
+  body:has(.matriz-imprimible) .matriz-imprimible * {
     visibility: visible;
   }
 
-  .documento-imprimible {
+  .documento-imprimible,
+  .matriz-imprimible {
     position: absolute;
     inset: 0 auto auto 0;
     width: 100%;
   }
 
-  .documento-imprimible .no-imprimir {
+  .matriz-imprimible {
+    page: matriz;
+  }
+
+  .documento-imprimible .no-imprimir,
+  .matriz-imprimible .no-imprimir {
     display: none;
   }
 
   .documento-imprimible article {
     border: 0;
     padding: 0;
+  }
+
+  .matriz-imprimible .tabla-contenedor {
+    overflow: visible;
+  }
+
+  .matriz-imprimible .tabla td,
+  .matriz-imprimible .tabla th {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    white-space: normal;
+  }
+
+  .matriz-imprimible .tabla tr,
+  .matriz-imprimible .bloque-impresion {
+    break-inside: avoid;
+  }
+
+  .matriz-imprimible .cuadro-riesgo,
+  .matriz-imprimible .insignia {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

@@ -39,6 +39,7 @@ import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
 import { NotificacionesPage } from '@/features/notificaciones/pages/NotificacionesPage'
 import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
 import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
+import { ImprimirMatrizPage } from '@/features/riesgos/pages/ImprimirMatrizPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
 import { RiesgoPage } from '@/features/riesgos/pages/RiesgoPage'
 import { RiesgosPage } from '@/features/riesgos/pages/RiesgosPage'
@@ -144,6 +145,7 @@ export const router = createBrowserRouter([
               { path: 'empresa', element: <PerfilEmpresaPage /> },
               { path: 'riesgos', element: <RiesgosPage /> },
               { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
+              { path: 'riesgos/imprimir', element: <ImprimirMatrizPage /> },
               { path: 'riesgos/:id', element: <RiesgoPage /> },
               { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
               { path: 'eventos', element: <EventosPage /> },

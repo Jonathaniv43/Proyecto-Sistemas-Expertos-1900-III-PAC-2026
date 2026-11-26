@@ -19,6 +19,8 @@ using Norvia.Application.Features.Riesgos.ListarRiesgos;
 using Norvia.Application.Features.Riesgos.ListarRiesgos.DTOs;
 using Norvia.Application.Features.Riesgos.ObtenerMatriz;
 using Norvia.Application.Features.Riesgos.ObtenerMatriz.DTOs;
+using Norvia.Application.Features.Riesgos.ObtenerReporteMatriz;
+using Norvia.Application.Features.Riesgos.ObtenerReporteMatriz.DTOs;
 using Norvia.Application.Features.Riesgos.ObtenerRiesgo;
 
 namespace Norvia.API.Controllers;
@@ -43,6 +45,13 @@ public sealed class RiesgosController : ControllerBase
     [HttpGet("matriz")]
     [ProducesResponseType(typeof(MatrizRiesgosResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Matriz([FromServices] ObtenerMatrizServicio servicio, CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(cancellationToken));
+
+    /// <summary>HU-075: reporte consolidado de la matriz de riesgos para imprimir o guardar en PDF al vuelo.</summary>
+    [HttpGet("matriz/reporte")]
+    [ProducesResponseType(typeof(ReporteMatrizResponseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ReporteMatriz(
+        [FromServices] ObtenerReporteMatrizServicio servicio, CancellationToken cancellationToken) =>
         Ok(await servicio.EjecutarAsync(cancellationToken));
 
     /// <summary>HU-036: peligros activos del catálogo, para elegir al agregar un riesgo.</summary>
