@@ -39,6 +39,10 @@ public static class CatalogoPermisos
         // HU-071: solo el Responsable SST edita el borrador.
         Empresa("documento.editar", "Editar el borrador de un documento", "PUT", "api/documentos/{id}/borrador", "responsable_sst"),
         Empresa("documento.aprobar", "Aprobar el borrador de un documento", "POST", "api/documentos/{id}/aprobacion", "responsable_sst"),
+        // HU-073: crear versión nueva (solo Responsable SST) y consultar versiones anteriores (también el admin).
+        Empresa("documento.version.crear", "Crear una versión nueva de un documento", "POST", "api/documentos/{id}/versiones", "responsable_sst"),
+        Empresa("documento.version.listar", "Ver el historial de versiones de un documento", "GET", "api/documentos/{id}/versiones", "admin_empresa", "responsable_sst"),
+        Empresa("documento.version.ver", "Ver una versión de un documento", "GET", "api/documentos/{id}/versiones/{versionId}", "admin_empresa", "responsable_sst"),
         // HU-074: las versiones vigentes, para todas las personas de la empresa (también el encuestado, RN-74).
         Empresa("documento.vigentes", "Ver los documentos vigentes", "GET", "api/documentos/vigentes",
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),

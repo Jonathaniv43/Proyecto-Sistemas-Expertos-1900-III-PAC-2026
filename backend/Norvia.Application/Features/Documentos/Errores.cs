@@ -26,4 +26,15 @@ public static class Errores
     /// <summary>RN-49: una versión aprobada ya no cambia, así que no se aprueba con datos por completar.</summary>
     public static readonly Error PorCompletar = new("documentos.por_completar",
         "El documento tiene datos por completar: complételos en el borrador antes de aprobarlo.", TipoError.Conflicto);
+
+    /// <summary>HU-073: solo se admite un borrador a la vez por documento.</summary>
+    public static readonly Error YaTieneBorrador = new("documentos.ya_tiene_borrador",
+        "El documento ya tiene un borrador abierto. Edítelo o apruébelo antes de crear otra versión.", TipoError.Conflicto);
+
+    /// <summary>HU-073: la versión nueva parte de la versión vigente.</summary>
+    public static readonly Error SinVigente = new("documentos.sin_vigente",
+        "El documento todavía no tiene una versión vigente desde la cual crear una versión nueva.", TipoError.Conflicto);
+
+    public static readonly Error VersionNoEncontrada = new("documentos.version_no_encontrada",
+        "La versión del documento no existe.", TipoError.NoEncontrado);
 }

@@ -1,7 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
-import { Link, useBlocker, useNavigate, useParams } from 'react-router-dom'
+import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { AreaTexto } from '@/shared/components/ui/AreaTexto'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -65,6 +65,7 @@ export function EditarBorradorPage() {
 
 function Editor({ documento: d }: { documento: DocumentoDetalle }) {
   const navigate = useNavigate()
+  const estadoNavegacion = useLocation().state as EstadoDocumentoNavegacion | null
   const {
     register,
     control,
@@ -101,6 +102,14 @@ function Editor({ documento: d }: { documento: DocumentoDetalle }) {
         <h1 className="text-xl font-semibold">Editar borrador</h1>
         <p className="text-text-secondary wrap-break-word">{`${d.titulo} · versión ${d.version.numeroVersion}`}</p>
       </header>
+
+      {estadoNavegacion?.nuevaVersion && (
+        <div role="status" className="contents">
+          <Aviso tipo="exito">
+            {`Se creó la versión ${d.version.numeroVersion} como borrador a partir de la versión vigente. La versión vigente sigue publicada hasta que apruebes esta.`}
+          </Aviso>
+        </div>
+      )}
 
       <form
         noValidate
