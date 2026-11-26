@@ -25,6 +25,16 @@ public sealed record VersionDocumentoResponseDto(
     DateTime? AprobadaEn,
     string? AprobadaPorNombre);
 
+/// <summary>Resumen de una versión en el historial del documento, sin contenido (HU-073).</summary>
+public sealed record VersionResumenResponseDto(
+    Guid Id,
+    int NumeroVersion,
+    EstadoVersionDocumento Estado,
+    DateTime CreadaEn,
+    string CreadaPorNombre,
+    DateTime? AprobadaEn,
+    string? AprobadaPorNombre);
+
 /// <summary>
 /// Un documento con su versión de trabajo (el borrador si hay uno; si no, la vigente). <see cref="PorCompletar"/> lista
 /// los <c>[Completar: …]</c> que quedan en esa versión, para avisar qué datos faltan (RN-49).

@@ -8,6 +8,7 @@ import type {
   FiltrosRiesgos,
   MatrizRiesgos,
   PeligroDisponible,
+  ReporteMatriz,
   Riesgo,
 } from '../types/riesgos'
 
@@ -17,6 +18,10 @@ export const listarRiesgos = (signal: AbortSignal, filtros: FiltrosRiesgos = {})
 
 /** Cuántos riesgos de la matriz hay en cada celda de probabilidad × severidad (HU-038). */
 export const obtenerMatriz = (signal: AbortSignal) => api.get<MatrizRiesgos>('/riesgos/matriz', { signal }).then((r) => r.data)
+
+/** Reporte oficial consolidado de la matriz de riesgos para imprimir o guardar en PDF (HU-075). */
+export const obtenerReporteMatriz = (signal: AbortSignal) =>
+  api.get<ReporteMatriz>('/riesgos/matriz/reporte', { signal }).then((r) => r.data)
 
 export const listarPeligrosDisponibles = (signal: AbortSignal) =>
   api.get<PeligroDisponible[]>('/riesgos/peligros-disponibles', { signal }).then((r) => r.data)

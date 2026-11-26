@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
 using Norvia.Application.Features.Documentos.AprobarDocumento;
+using Norvia.Application.Features.Documentos.CrearVersionNueva;
 using Norvia.Application.Features.Documentos.DTOs;
 using Norvia.Application.Features.Documentos.EditarBorrador;
 using Norvia.Application.Features.Documentos.EditarBorrador.DTOs;
@@ -8,19 +9,16 @@ using Norvia.Application.Features.Documentos.GenerarDocumento;
 using Norvia.Application.Features.Documentos.GenerarDocumento.DTOs;
 using Norvia.Application.Features.Documentos.ListarDocumentos;
 using Norvia.Application.Features.Documentos.ListarPlantillasDisponibles;
+using Norvia.Application.Features.Documentos.ListarVersiones;
 using Norvia.Application.Features.Documentos.ListarVigentes;
 using Norvia.Application.Features.Documentos.ListarVigentes.DTOs;
-using Norvia.Application.Features.Documentos.ObtenerVigente;
 using Norvia.Application.Features.Documentos.ObtenerDocumento;
+using Norvia.Application.Features.Documentos.ObtenerVersion;
+using Norvia.Application.Features.Documentos.ObtenerVigente;
 
 namespace Norvia.API.Controllers;
 
-/// <summary>
-/// Módulo Documentos (M9): políticas y procedimientos de la empresa (D13).
-/// <para>
-/// Pendiente de futuras HUs en este controlador: versión nueva (HU-073).
-/// </para>
-/// </summary>
+/// <summary>Módulo Documentos (M9): políticas y procedimientos de la empresa (D13, HU-070 a HU-074).</summary>
 [ApiController]
 [Route("api/documentos")]
 public sealed class DocumentosController : ControllerBase
@@ -75,6 +73,31 @@ public sealed class DocumentosController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Aprobar(Guid id, [FromServices] AprobarDocumentoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-073: crea una versión nueva en borrador copiando el contenido de la vigente (RN-50).</summary>
+    [HttpPost("{id:guid}/versiones")]
+    [ProducesResponseType(typeof(DocumentoDetalleResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CrearVersion(
+        Guid id, [FromServices] CrearVersionNuevaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttpCreado(this);
+
+    /// <summary>HU-073: historial de versiones del documento, de la más reciente a la primera.</summary>
+    [HttpGet("{id:guid}/versiones")]
+    [ProducesResponseType(typeof(IReadOnlyList<VersionResumenResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarVersiones(
+        Guid id, [FromServices] ListarVersionesServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-073: consulta de una versión concreta del documento (vigente, reemplazada o borrador).</summary>
+    [HttpGet("{id:guid}/versiones/{versionId:guid}")]
+    [ProducesResponseType(typeof(DocumentoDetalleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerVersion(
+        Guid id, Guid versionId, [FromServices] ObtenerVersionServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, versionId, cancellationToken)).AHttp(this);
 
     /// <summary>HU-074: los documentos vigentes de la empresa, para todas las personas con vínculo; se buscan por título.</summary>
     [HttpGet("vigentes")]

@@ -32,6 +32,7 @@ import { DocumentosVigentesPage } from '@/features/documentos/pages/DocumentosVi
 import { AuditoriaPage } from '@/features/auditoria/pages/AuditoriaPage'
 import { EditarBorradorPage } from '@/features/documentos/pages/EditarBorradorPage'
 import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
+import { VersionDocumentoPage } from '@/features/documentos/pages/VersionDocumentoPage'
 import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
 import { EventoPage } from '@/features/eventos/pages/EventoPage'
 import { EventosPage } from '@/features/eventos/pages/EventosPage'
@@ -40,6 +41,7 @@ import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
 import { NotificacionesPage } from '@/features/notificaciones/pages/NotificacionesPage'
 import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
 import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
+import { ImprimirMatrizPage } from '@/features/riesgos/pages/ImprimirMatrizPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
 import { RiesgoPage } from '@/features/riesgos/pages/RiesgoPage'
 import { RiesgosPage } from '@/features/riesgos/pages/RiesgosPage'
@@ -145,6 +147,7 @@ export const router = createBrowserRouter([
               { path: 'empresa', element: <PerfilEmpresaPage /> },
               { path: 'riesgos', element: <RiesgosPage /> },
               { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
+              { path: 'riesgos/imprimir', element: <ImprimirMatrizPage /> },
               { path: 'riesgos/:id', element: <RiesgoPage /> },
               { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
               { path: 'eventos', element: <EventosPage /> },
@@ -155,11 +158,12 @@ export const router = createBrowserRouter([
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },
               { path: 'encuestas/:id/resultados', element: <ResultadosEncuestaPage /> },
-              // HU-070: políticas y procedimientos; el admin consulta.
+              // HU-070 y HU-073: políticas, procedimientos y sus versiones; el admin consulta.
               { path: 'documentos', element: <DocumentosEmpresaPage /> },
               { path: 'documentos/:id', element: <DocumentoEmpresaPage /> },
               // HU-099: registro inalterable de acciones; solo gestión.
               { path: 'auditoria', element: <AuditoriaPage /> },
+              { path: 'documentos/:id/versiones/:versionId', element: <VersionDocumentoPage /> },
             ],
           },
           {

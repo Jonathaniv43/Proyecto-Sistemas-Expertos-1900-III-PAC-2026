@@ -1,4 +1,4 @@
-import { Plus, Search, ShieldAlert, TriangleAlert, X } from 'lucide-react'
+import { Plus, Printer, Search, ShieldAlert, TriangleAlert, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link, useLocation } from 'react-router-dom'
@@ -15,10 +15,10 @@ import { Volver } from '@/shared/components/ui/Volver'
 import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { listarRiesgos, obtenerMatriz } from '../api/riesgos'
 import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
-import { MapaMatriz } from '../components/MapaMatriz'
+import { LeyendaNiveles, MapaMatriz } from '../components/MapaMatriz'
 import { faltaControl } from '../controles'
 import { ETIQUETAS_CLASIFICACION, nombrePeligro } from '../etiquetas'
-import { CLASES_NIVEL, ETIQUETAS_CLASIFICACION_RIESGO } from '../niveles'
+import { ETIQUETAS_CLASIFICACION_RIESGO } from '../niveles'
 import type { ClasificacionPeligro, ClasificacionRiesgo, EstadoRiesgo, FiltrosRiesgos, Riesgo } from '../types/riesgos'
 
 const fecha = (iso: string) => new Date(iso).toLocaleDateString('es-HN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -108,10 +108,18 @@ export function RiesgosPage() {
           <h1 className="text-xl font-semibold">Matriz de riesgos</h1>
           <p className="text-text-secondary">Dónde están los riesgos de la empresa y cuáles atender primero.</p>
         </div>
-        <Link to="/riesgos/nuevo" className={clasesBoton('primario')}>
-          <Plus aria-hidden size={16} strokeWidth={1.5} />
-          Agregar riesgo
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {matriz.datos && matriz.datos.total > 0 && (
+            <Link to="/riesgos/imprimir" className={clasesBoton('secundario')}>
+              <Printer aria-hidden size={16} strokeWidth={1.5} />
+              Imprimir o descargar PDF
+            </Link>
+          )}
+          <Link to="/riesgos/nuevo" className={clasesBoton('primario')}>
+            <Plus aria-hidden size={16} strokeWidth={1.5} />
+            Agregar riesgo
+          </Link>
+        </div>
       </header>
 
       <div role="status" className="contents">
@@ -194,14 +202,7 @@ export function RiesgosPage() {
                   </>
                 )}
               </p>
-              <ul className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-text-secondary" aria-label="Niveles">
-                {(['bajo', 'medio', 'alto', 'critico'] as const).map((n, i) => (
-                  <li key={n} className="inline-flex items-center gap-2">
-                    <span aria-hidden className={`cuadro-riesgo ${CLASES_NIVEL[n]}`} />
-                    {ETIQUETAS_CLASIFICACION_RIESGO[n]} {['1–4', '5–9', '10–14', '15–25'][i]}
-                  </li>
-                ))}
-              </ul>
+              <LeyendaNiveles />
             </div>
             <MapaMatriz matriz={matriz.datos} seleccion={celda} onSeleccionar={elegirCelda} />
           </section>
