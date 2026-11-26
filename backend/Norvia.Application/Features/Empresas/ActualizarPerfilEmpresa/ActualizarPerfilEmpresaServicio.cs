@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -13,7 +14,8 @@ namespace Norvia.Application.Features.Empresas.ActualizarPerfilEmpresa;
 public sealed class ActualizarPerfilEmpresaServicio(
     IActualizarPerfilEmpresaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<PerfilEmpresaResponseDto>> EjecutarAsync(
         ActualizarPerfilEmpresaRequestDto request, CancellationToken ct)
@@ -49,6 +51,8 @@ public sealed class ActualizarPerfilEmpresaServicio(
         if (request.FechaInicioOperaciones is not null)
             empresa.FechaInicioOperaciones = request.FechaInicioOperaciones;
 
+        auditor.Registrar(AccionesAuditoria.EmpresaPerfilActualizado, EntidadesAuditoria.Empresa, empresa.Id,
+            new { empresa.RazonSocial, rubro = empresa.Rubro?.Nombre, rubroId = empresa.RubroId, empresa.TrabajadoresPermanentes });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
         return PerfilEmpresaResponseDto.De(empresa);
     }

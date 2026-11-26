@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -10,7 +11,8 @@ public sealed class CerrarEncuestaServicio(
     ICerrarEncuestaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado> EjecutarAsync(Guid encuestaId, CancellationToken ct)
     {
@@ -27,6 +29,8 @@ public sealed class CerrarEncuestaServicio(
         encuesta.Estado = EstadoEncuesta.Cerrada;
         encuesta.CerradaEn = await reloj.AhoraAsync(ct);
 
+        auditor.Registrar(AccionesAuditoria.EncuestaCerrada, EntidadesAuditoria.Encuesta, encuesta.Id,
+            new { titulo = encuesta.Titulo });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
         return Resultado.Exito();
     }

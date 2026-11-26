@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Notificaciones;
@@ -22,7 +23,8 @@ public sealed class AprobarDocumentoServicio(
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
     ITenantActual sesion,
-    Notificador notificador) : IServicioCasoDeUso
+    Notificador notificador,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<DocumentoDetalleResponseDto>> EjecutarAsync(Guid documentoId, CancellationToken ct)
     {
@@ -50,6 +52,14 @@ public sealed class AprobarDocumentoServicio(
             borrador.AprobadaPorId = vinculoId;
             borrador.AprobadaEn = aprobadaEn;
             notificador.PoliticaPublicada(borrador.Id, borrador.Documento.Titulo, destinatarios);
+            auditor.Registrar(AccionesAuditoria.DocumentoAprobado, EntidadesAuditoria.Documento, borrador.DocumentoId, new
+            {
+                titulo = borrador.Documento.Titulo,
+                tipoDocumento = borrador.Documento.TipoDocumento,
+                versionId = borrador.Id,
+                numeroVersion = borrador.NumeroVersion,
+                versionReemplazadaId = anterior?.Id
+            });
             await unidadDeTrabajo.GuardarCambiosAsync(t);
         }, ct);
 

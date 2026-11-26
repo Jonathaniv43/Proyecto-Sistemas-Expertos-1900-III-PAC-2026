@@ -29,6 +29,7 @@ import { DocumentoPage as DocumentoEmpresaPage } from '@/features/documentos/pag
 import { DocumentosPage as DocumentosEmpresaPage } from '@/features/documentos/pages/DocumentosPage'
 import { DocumentoVigentePage } from '@/features/documentos/pages/DocumentoVigentePage'
 import { DocumentosVigentesPage } from '@/features/documentos/pages/DocumentosVigentesPage'
+import { AuditoriaPage } from '@/features/auditoria/pages/AuditoriaPage'
 import { EditarBorradorPage } from '@/features/documentos/pages/EditarBorradorPage'
 import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
 import { VersionDocumentoPage } from '@/features/documentos/pages/VersionDocumentoPage'
@@ -160,6 +161,8 @@ export const router = createBrowserRouter([
               // HU-070 y HU-073: políticas, procedimientos y sus versiones; el admin consulta.
               { path: 'documentos', element: <DocumentosEmpresaPage /> },
               { path: 'documentos/:id', element: <DocumentoEmpresaPage /> },
+              // HU-099: registro inalterable de acciones; solo gestión.
+              { path: 'auditoria', element: <AuditoriaPage /> },
               { path: 'documentos/:id/versiones/:versionId', element: <VersionDocumentoPage /> },
             ],
           },

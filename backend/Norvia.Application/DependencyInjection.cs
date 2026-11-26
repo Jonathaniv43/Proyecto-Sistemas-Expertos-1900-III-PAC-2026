@@ -31,6 +31,9 @@ public static class DependencyInjection
         // Crea las notificaciones de M11 (D28) desde cualquier módulo: tareas (HU-081) y políticas (HU-116).
         services.AddScoped<Common.Notificaciones.Notificador>();
 
+        // Registra la auditoría inalterable de acciones importantes (HU-099).
+        services.AddScoped<Common.Auditoria.Auditor>();
+
         return services;
     }
 }

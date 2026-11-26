@@ -1,4 +1,4 @@
-import { BookOpen, Building2, ScrollText, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, FileText, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { BookOpen, Building2, ScrollText, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, FileText, History, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -90,6 +90,10 @@ export function InicioPage() {
           <Link to="/empresa" className={clasesBoton('secundario')}>
             <Building2 aria-hidden size={16} strokeWidth={1.5} />
             Perfil de la empresa
+          </Link>
+          <Link to="/auditoria" className={clasesBoton('secundario')}>
+            <History aria-hidden size={16} strokeWidth={1.5} />
+            Auditoría
           </Link>
         </div>
       </SiRol>

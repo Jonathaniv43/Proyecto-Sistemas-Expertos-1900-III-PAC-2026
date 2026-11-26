@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Notificaciones;
@@ -19,7 +20,8 @@ public sealed class CrearTareaManualServicio(
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
     ITenantActual sesion,
-    Notificador notificador) : IServicioCasoDeUso
+    Notificador notificador,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<TareaResponseDto>> EjecutarAsync(CrearTareaManualRequestDto request, CancellationToken ct)
     {
@@ -40,6 +42,8 @@ public sealed class CrearTareaManualServicio(
         };
         repositorio.Agregar(tarea);
         notificador.TareaAsignada(tarea);
+        auditor.Registrar(AccionesAuditoria.TareaCreada, EntidadesAuditoria.Tarea, tarea.Id,
+            new { tarea.Titulo, tarea.Prioridad, tarea.ResponsableId, tarea.FechaLimite });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);

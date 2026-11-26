@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -19,7 +20,8 @@ namespace Norvia.Application.Features.Vinculos.ActualizarVinculo;
 public sealed class ActualizarVinculoServicio(
     IActualizarVinculoRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<VinculoResponseDto>> EjecutarAsync(
         Guid id, ActualizarVinculoRequestDto request, CancellationToken ct)
@@ -44,12 +46,15 @@ public sealed class ActualizarVinculoServicio(
             && await repositorio.ContarOtrosAdministradoresActivosAsync(vinculo.Id, ct) == 0)
             return Errores.UltimoAdministrador;
 
-        if (estadoNuevo != vinculo.Estado)
+        var estadoAnterior = vinculo.Estado;
+        var rolAnterior = vinculo.Rol.Codigo;
+
+        if (estadoNuevo != estadoAnterior)
         {
             repositorio.AgregarHistorial(new HistorialEstadoVinculo
             {
                 VinculoEmpresaId = vinculo.Id,
-                EstadoAnterior = vinculo.Estado,
+                EstadoAnterior = estadoAnterior,
                 EstadoNuevo = estadoNuevo,
                 MotivoCodigo = request.MotivoCodigo ?? MotivoEstadoVinculo.DecisionAdmin, // solo al reactivar
                 MotivoDetalle = string.IsNullOrWhiteSpace(request.MotivoDetalle) ? null : request.MotivoDetalle.Trim(),
@@ -62,6 +67,19 @@ public sealed class ActualizarVinculoServicio(
 
         vinculo.RolId = rolNuevo.Id;
         vinculo.Rol = rolNuevo;
+        if (estadoNuevo != estadoAnterior || rolNuevo.Codigo != rolAnterior)
+        {
+            auditor.Registrar(AccionesAuditoria.VinculoActualizado, EntidadesAuditoria.VinculoEmpresa, vinculo.Id, new
+            {
+                persona = vinculo.Persona.NombreCompleto,
+                rolAnterior,
+                rolNuevo = rolNuevo.Codigo,
+                estadoAnterior,
+                estadoNuevo,
+                motivo = estadoNuevo != estadoAnterior ? request.MotivoCodigo : null,
+                motivoDetalle = string.IsNullOrWhiteSpace(request.MotivoDetalle) ? null : request.MotivoDetalle.Trim()
+            });
+        }
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return VinculoResponseDto.De(vinculo);

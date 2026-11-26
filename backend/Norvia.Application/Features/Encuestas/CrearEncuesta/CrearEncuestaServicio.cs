@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -14,7 +15,8 @@ namespace Norvia.Application.Features.Encuestas.CrearEncuesta;
 public sealed class CrearEncuestaServicio(
     ICrearEncuestaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<CrearEncuestaResponseDto>> EjecutarAsync(
         CrearEncuestaRequestDto request, CancellationToken ct)
@@ -103,6 +105,11 @@ public sealed class CrearEncuestaServicio(
 
         encuesta.Versiones.Add(version);
         repositorio.Agregar(encuesta);
+        auditor.Registrar(AccionesAuditoria.EncuestaCreada, EntidadesAuditoria.Encuesta, encuesta.Id, new
+        {
+            titulo = encuesta.Titulo,
+            categorias = categorias.Select(c => c.Nombre).OrderBy(n => n).ToList()
+        });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return new CrearEncuestaResponseDto(encuesta.Id, encuesta.Titulo, encuesta.Estado, version.Id, null);
