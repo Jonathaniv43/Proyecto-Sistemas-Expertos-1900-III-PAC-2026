@@ -6,6 +6,7 @@ import type {
   DocumentoVigenteResumen,
   GenerarDocumentoRequest,
   PlantillaDisponible,
+  VersionResumen,
 } from '../types/documentos'
 
 /** Plantillas del rubro de la empresa (HU-070). 409 `documentos.sin_rubro` si el perfil no tiene rubro. */
@@ -29,6 +30,21 @@ export const editarBorrador = (id: string, contenido: string) =>
  */
 export const aprobarDocumento = (id: string) =>
   api.post<DocumentoDetalle>(`/documentos/${id}/aprobacion`).then((r) => r.data)
+
+/**
+ * Crea una versión nueva en borrador copiando el contenido de la vigente (HU-073, RN-50).
+ * 409 `documentos.ya_tiene_borrador` si ya existe un borrador; `documentos.sin_vigente` si no hay versión vigente.
+ */
+export const crearVersionNueva = (id: string) =>
+  api.post<DocumentoDetalle>(`/documentos/${id}/versiones`).then((r) => r.data)
+
+/** Historial de versiones del documento, de la más reciente a la primera (HU-073). */
+export const listarVersiones = (signal: AbortSignal, id: string) =>
+  api.get<VersionResumen[]>(`/documentos/${id}/versiones`, { signal }).then((r) => r.data)
+
+/** Consulta una versión concreta de un documento (HU-073). 404 si no existe o pertenece a otra empresa. */
+export const obtenerVersion = (signal: AbortSignal, id: string, versionId: string) =>
+  api.get<DocumentoDetalle>(`/documentos/${id}/versiones/${versionId}`, { signal }).then((r) => r.data)
 
 export const listarDocumentos = (signal: AbortSignal) => api.get<DocumentoResumen[]>('/documentos', { signal }).then((r) => r.data)
 

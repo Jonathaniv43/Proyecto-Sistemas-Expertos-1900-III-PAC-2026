@@ -31,6 +31,7 @@ import { DocumentoVigentePage } from '@/features/documentos/pages/DocumentoVigen
 import { DocumentosVigentesPage } from '@/features/documentos/pages/DocumentosVigentesPage'
 import { EditarBorradorPage } from '@/features/documentos/pages/EditarBorradorPage'
 import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
+import { VersionDocumentoPage } from '@/features/documentos/pages/VersionDocumentoPage'
 import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
 import { EventoPage } from '@/features/eventos/pages/EventoPage'
 import { EventosPage } from '@/features/eventos/pages/EventosPage'
@@ -154,9 +155,10 @@ export const router = createBrowserRouter([
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },
               { path: 'encuestas/:id/resultados', element: <ResultadosEncuestaPage /> },
-              // HU-070: políticas y procedimientos; el admin consulta.
+              // HU-070 y HU-073: políticas, procedimientos y sus versiones; el admin consulta.
               { path: 'documentos', element: <DocumentosEmpresaPage /> },
               { path: 'documentos/:id', element: <DocumentoEmpresaPage /> },
+              { path: 'documentos/:id/versiones/:versionId', element: <VersionDocumentoPage /> },
             ],
           },
           {

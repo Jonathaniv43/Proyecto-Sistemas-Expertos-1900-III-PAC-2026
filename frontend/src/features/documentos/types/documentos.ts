@@ -40,6 +40,9 @@ export interface VersionDocumento {
   aprobadaPorNombre: string | null
 }
 
+/** GET /api/documentos/{id}/versiones (HU-073): resumen de cada versión en el historial, sin contenido. */
+export type VersionResumen = Omit<VersionDocumento, 'contenido'>
+
 /** GET /api/documentos/vigentes (HU-074): un documento vigente, para cualquier persona de la empresa. */
 export interface DocumentoVigenteResumen {
   /** Id del documento. */
