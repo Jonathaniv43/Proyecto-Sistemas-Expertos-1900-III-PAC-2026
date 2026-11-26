@@ -7,6 +7,7 @@ import { RestablecerContrasenaPage } from '@/features/auth/pages/RestablecerCont
 import { SolicitarCambioContrasenaPage } from '@/features/auth/pages/SolicitarCambioContrasenaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { PerfilEmpresaPage } from '@/features/empresas/pages/PerfilEmpresaPage'
+import { EmpresasRegistradasPage } from '@/features/empresas/pages/EmpresasRegistradasPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
 import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
@@ -112,9 +113,10 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            // HU-023: catálogos de la plataforma (staff de Norvia; soporte solo consulta).
+            // HU-023 y HU-024: catálogos y consulta de empresas de la plataforma (staff de Norvia).
             element: <RequiereRol roles={ROLES_PLATAFORMA} />,
             children: [
+              { path: 'empresas', element: <EmpresasRegistradasPage /> },
               {
                 path: 'catalogos',
                 element: <CatalogosLayout />,

@@ -41,6 +41,10 @@ export function InicioPage() {
             <BookOpen aria-hidden size={16} strokeWidth={1.5} />
             Catálogos
           </Link>
+          <Link to="/empresas" className={clasesBoton('secundario')}>
+            <Building2 aria-hidden size={16} strokeWidth={1.5} />
+            Empresas
+          </Link>
         </div>
       </SiRol>
       <SiRol roles={ROLES_EMPRESA}>
