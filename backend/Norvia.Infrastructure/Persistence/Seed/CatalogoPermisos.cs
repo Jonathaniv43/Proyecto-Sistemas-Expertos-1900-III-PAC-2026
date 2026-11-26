@@ -140,6 +140,11 @@ public static class CatalogoPermisos
         Empresa("encuesta.publicar", "Publicar versión de encuesta", "POST", "api/encuestas/{id}/versiones/{versionId}/publicacion",
             "admin_empresa", "responsable_sst"),
         Empresa("encuesta.cerrar", "Cerrar encuesta", "POST", "api/encuestas/{id}/cierre", "admin_empresa", "responsable_sst"),
+        // HU-034: historial y comparación de encuestas y versiones (RN-12, D8).
+        Empresa("encuesta.historial", "Consultar encuestas anteriores", "GET", "api/encuestas/historial",
+            "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.comparar", "Comparar resultados entre encuestas o versiones", "GET", "api/encuestas/comparacion",
+            "admin_empresa", "responsable_sst"),
 
         // HU-099: consulta del registro inalterable de auditoría.
         Empresa("auditoria.listar", "Consultar auditoría de acciones", "GET", "api/auditoria",

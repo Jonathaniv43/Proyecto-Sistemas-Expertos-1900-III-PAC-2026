@@ -70,6 +70,14 @@ public static class Errores
         "Este peligro sugerido ya fue confirmado o descartado.",
         TipoError.Conflicto);
 
+    public static readonly Error VersionNoComparable = new("encuestas.version_no_comparable",
+        "Debes elegir dos versiones distintas que ya hayan sido publicadas para compararlas.",
+        TipoError.Validacion);
+
+    public static readonly Error VersionSinPublicar = new("encuestas.version_sin_publicar",
+        "No se pueden consultar resultados de una versión que sigue en borrador.",
+        TipoError.Conflicto);
+
     public static Error RespuestaInvalidaDetalle(string detalle) =>
         new("encuestas.respuesta_invalida", detalle, TipoError.Validacion);
 }
