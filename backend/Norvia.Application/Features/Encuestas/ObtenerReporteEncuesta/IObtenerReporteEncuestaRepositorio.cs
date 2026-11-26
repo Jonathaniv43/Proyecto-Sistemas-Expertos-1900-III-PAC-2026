@@ -4,7 +4,7 @@ namespace Norvia.Application.Features.Encuestas.ObtenerReporteEncuesta;
 
 public interface IObtenerReporteEncuestaRepositorio
 {
-    Task<Encuesta?> BuscarConVersionPublicadaAsync(Guid encuestaId, CancellationToken ct);
+    Task<Encuesta?> BuscarConVersionAsync(Guid encuestaId, Guid? versionId, CancellationToken ct);
     Task<int> ContarParticipacionesAsync(Guid encuestaId, CancellationToken ct);
     Task<List<RespuestaEncuesta>> ListarRespuestasDeVersionAsync(Guid versionId, CancellationToken ct);
 }

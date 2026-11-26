@@ -9,8 +9,10 @@ import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { PerfilEmpresaPage } from '@/features/empresas/pages/PerfilEmpresaPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
+import { CompararEncuestasPage } from '@/features/encuestas/pages/CompararEncuestasPage'
 import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
 import { EncuestasPage } from '@/features/encuestas/pages/EncuestasPage'
+import { HistorialEncuestasPage } from '@/features/encuestas/pages/HistorialEncuestasPage'
 import { MisEncuestasPage } from '@/features/encuestas/pages/MisEncuestasPage'
 import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncuestaPage'
 import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
@@ -152,6 +154,8 @@ export const router = createBrowserRouter([
               { path: 'plan-de-trabajo/nueva', element: <NuevaTareaPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
+              { path: 'encuestas/historial', element: <HistorialEncuestasPage /> },
+              { path: 'encuestas/comparar', element: <CompararEncuestasPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },
               { path: 'encuestas/:id/resultados', element: <ResultadosEncuestaPage /> },
               // HU-070: políticas y procedimientos; el admin consulta.

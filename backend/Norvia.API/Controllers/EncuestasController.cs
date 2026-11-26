@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Norvia.API.Extensiones;
+using Norvia.Application.Features.Encuestas.CompararEncuestas;
+using Norvia.Application.Features.Encuestas.CompararEncuestas.DTOs;
 using Norvia.Application.Features.Encuestas.ObtenerPeligrosSugeridos;
 using Norvia.Application.Features.Encuestas.ObtenerPeligrosSugeridos.DTOs;
 using Norvia.Application.Features.Encuestas.ActualizarBorradorEncuesta;
@@ -14,6 +16,8 @@ using Norvia.Application.Features.Encuestas.ListarEncuestas;
 using Norvia.Application.Features.Encuestas.ListarEncuestas.DTOs;
 using Norvia.Application.Features.Encuestas.ListarEncuestasPendientes;
 using Norvia.Application.Features.Encuestas.ListarEncuestasPendientes.DTOs;
+using Norvia.Application.Features.Encuestas.ListarHistorialEncuestas;
+using Norvia.Application.Features.Encuestas.ListarHistorialEncuestas.DTOs;
 using Norvia.Application.Features.Encuestas.ListarTiposRespuesta;
 using Norvia.Application.Features.Encuestas.ListarTiposRespuesta.DTOs;
 using Norvia.Application.Features.Encuestas.ObtenerEncuesta;
@@ -67,6 +71,28 @@ public sealed class EncuestasController : ControllerBase
     public async Task<IActionResult> Listar(
         [FromServices] ListarEncuestasServicio servicio, CancellationToken cancellationToken) =>
         Ok(await servicio.EjecutarAsync(cancellationToken));
+
+    /// <summary>HU-034: encuestas cerradas o con versiones anteriores (y vigentes si se solicitan para comparar).</summary>
+    [HttpGet("historial")]
+    [ProducesResponseType(typeof(IReadOnlyList<EncuestaHistorialResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ListarHistorial(
+        [FromQuery] FiltrosHistorialEncuestasDto filtros,
+        [FromServices] ListarHistorialEncuestasServicio servicio,
+        CancellationToken cancellationToken) =>
+        Ok(await servicio.EjecutarAsync(filtros, cancellationToken));
+
+    /// <summary>HU-034: compara resultados y peligros sugeridos entre dos versiones publicadas o cerradas.</summary>
+    [HttpGet("comparacion")]
+    [ProducesResponseType(typeof(ComparacionEncuestasResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Comparar(
+        [FromQuery] CompararEncuestasRequestDto request,
+        [FromServices] CompararEncuestasServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     /// <summary>HU-030: detalle de una encuesta con su versión publicada y su borrador.</summary>
     [HttpGet("{id:guid}")]
@@ -129,14 +155,17 @@ public sealed class EncuestasController : ControllerBase
         [FromServices] ResponderEncuestaServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, request, cancellationToken)).AHttp(this);
 
-    /// <summary>HU-032: reporte anónimo de la versión publicada vigente (RN-73).</summary>
+    /// <summary>HU-032 y HU-034: reporte anónimo de la versión indicada o de la versión publicada vigente (RN-73).</summary>
     [HttpGet("{id:guid}/reporte")]
     [ProducesResponseType(typeof(ReporteEncuestaResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ObtenerReporte(
-        Guid id, [FromServices] ObtenerReporteEncuestaServicio servicio, CancellationToken cancellationToken) =>
-        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+        Guid id,
+        [FromQuery] Guid? versionId,
+        [FromServices] ObtenerReporteEncuestaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, versionId, cancellationToken)).AHttp(this);
 
     /// <summary>HU-033: peligros sugeridos por las respuestas (registra los nuevos como riesgos sugeridos).</summary>
     [HttpGet("{id:guid}/peligros-sugeridos")]

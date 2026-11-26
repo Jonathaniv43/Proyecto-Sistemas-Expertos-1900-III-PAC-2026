@@ -1,4 +1,4 @@
-import { ClipboardList, Plus, TriangleAlert } from 'lucide-react'
+import { ClipboardList, History, Plus, TriangleAlert } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -27,10 +27,16 @@ export function EncuestasPage() {
       <Volver a="/inicio" texto="Volver al inicio" titulo="Encuestas" ancho="layout" />
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-xl font-semibold">Encuestas</h1>
-        <Link to="/encuestas/nueva" className={clasesBoton('primario')}>
-          <Plus aria-hidden size={16} strokeWidth={1.5} />
-          Nueva encuesta
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/encuestas/historial" className={clasesBoton('secundario')}>
+            <History aria-hidden size={16} strokeWidth={1.5} />
+            Encuestas anteriores
+          </Link>
+          <Link to="/encuestas/nueva" className={clasesBoton('primario')}>
+            <Plus aria-hidden size={16} strokeWidth={1.5} />
+            Nueva encuesta
+          </Link>
+        </div>
       </header>
 
       {encuestas.error ? (

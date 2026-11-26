@@ -1,9 +1,11 @@
 import { api } from '@/shared/api'
 import type {
   CategoriaDisponible,
+  ComparacionEncuestas,
   CrearEncuestaRequest,
   CrearEncuestaResponse,
   EncuestaDetalle,
+  EncuestaHistorial,
   EncuestaPendiente,
   EncuestaResumen,
   GuardarBorradorRequest,
@@ -51,8 +53,37 @@ export const listarPendientes = (signal: AbortSignal) =>
 export const responderEncuesta = (id: string, datos: ResponderEncuestaRequest) =>
   api.post<{ mensaje: string }>(`/encuestas/${id}/respuestas`, datos).then((r) => r.data)
 
-export const obtenerReporte = (signal: AbortSignal, id: string) =>
-  api.get<ReporteEncuesta>(`/encuestas/${id}/reporte`, { signal }).then((r) => r.data)
+export const obtenerReporte = (signal: AbortSignal, id: string, versionId?: string) =>
+  api
+    .get<ReporteEncuesta>(`/encuestas/${id}/reporte`, {
+      signal,
+      params: versionId ? { versionId } : undefined,
+    })
+    .then((r) => r.data)
+
+/** HU-034: encuestas cerradas o con versiones anteriores (y vigentes si se piden para comparar). */
+export const listarHistorialEncuestas = (
+  signal: AbortSignal,
+  filtros?: { buscar?: string; incluirVigentes?: boolean },
+) =>
+  api
+    .get<EncuestaHistorial[]>('/encuestas/historial', {
+      signal,
+      params: {
+        buscar: filtros?.buscar || undefined,
+        incluirVigentes: filtros?.incluirVigentes || undefined,
+      },
+    })
+    .then((r) => r.data)
+
+/** HU-034: compara resultados y peligros sugeridos entre dos versiones publicadas o cerradas. */
+export const compararEncuestas = (signal: AbortSignal, baseVersionId: string, compararVersionId: string) =>
+  api
+    .get<ComparacionEncuestas>('/encuestas/comparacion', {
+      signal,
+      params: { baseVersionId, compararVersionId },
+    })
+    .then((r) => r.data)
 
 /** Peligros sugeridos por las respuestas (HU-033). Registra las sugerencias nuevas como riesgos sugeridos. */
 export const obtenerPeligrosSugeridos = (signal: AbortSignal, id: string) =>
