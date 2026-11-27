@@ -28,7 +28,7 @@ jobs:
       - name: Correr pruebas (Testcontainers)
         run: dotnet test backend/Norvia.slnx --no-build
 
-    deploy:
+  deploy:
     needs: test
     if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
