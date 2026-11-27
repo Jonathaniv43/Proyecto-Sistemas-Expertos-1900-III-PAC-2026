@@ -6,7 +6,7 @@ using Norvia.Application.Features.Auth.VerificarCodigoMicrosoft.DTOs;
 namespace Norvia.Application.Features.Auth.VerificarCodigoMicrosoft;
 
 /// <summary>
-/// Comprueba el código de 6 dígitos contra la fila de <see cref="Norvia.Domain.Entities.Acceso.VerificacionCorreoMicrosoft"/>
+/// Comprueba el código de 6 dígitos contra la fila de <see cref="Norvia.Domain.Entities.Acceso.VerificacionCorreo"/>
 /// y devuelve el token de identidad con el correo confirmado (RN-86). 6 dígitos son un millón de combinaciones, así
 /// que los intentos fallidos están limitados. Una vez confirmado, la fila se borra: el código sirve una sola vez.
 /// </summary>

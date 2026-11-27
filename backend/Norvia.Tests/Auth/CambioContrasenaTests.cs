@@ -60,7 +60,7 @@ public sealed partial class CambioContrasenaTests(NorviaApiFactory api)
         }
 
         await using var db = api.NuevoContexto(empresaId: null);
-        Assert.False((await db.Acceso.SingleAsync(x => x.Email == email)).DebeCambiarPassword);
+        Assert.NotNull((await db.Acceso.SingleAsync(x => x.Email == email)).PasswordHash);
     }
 
     [Fact]

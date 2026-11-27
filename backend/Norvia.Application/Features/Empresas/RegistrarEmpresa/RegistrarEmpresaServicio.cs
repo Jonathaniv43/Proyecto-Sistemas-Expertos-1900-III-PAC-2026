@@ -3,6 +3,7 @@ using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Correo;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
+using Norvia.Application.Common.Seguridad;
 using Norvia.Application.Features.Empresas.RegistrarEmpresa.DTOs;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Empresas;
@@ -14,8 +15,8 @@ namespace Norvia.Application.Features.Empresas.RegistrarEmpresa;
 public sealed class RegistrarEmpresaServicio(
     IRegistrarEmpresaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
-    IHasherPassword hasherPassword,
-    IGeneradorContrasenaTemporal generadorContrasena,
+    IHashCodigoVerificacion hashCodigo,
+    IReloj reloj,
     ICifradorEmpresaId cifrador,
     IPlantillasCorreo plantillas,
     IEnvioCorreo envioCorreo,
@@ -49,8 +50,6 @@ public sealed class RegistrarEmpresaServicio(
         var rubroId = await repositorio.BuscarRubroIdActivoAsync(rubroCodigo, cancellationToken);
         if (rubroId is null) return Errores.RubroInvalido;
 
-        var passwordTemporal = generadorContrasena.Generar();
-
         var empresa = new Empresa
         {
             RazonSocial = request.RazonSocial.Trim(),
@@ -78,10 +77,8 @@ public sealed class RegistrarEmpresaServicio(
         var acceso = new Acceso
         {
             Email = email,
-            Verificado = false,
-            DebeCambiarPassword = true
+            Verificado = false
         };
-        acceso.PasswordHash = hasherPassword.Hashear(acceso, passwordTemporal);
 
         var vinculo = new VinculoEmpresa
         {
@@ -92,28 +89,43 @@ public sealed class RegistrarEmpresaServicio(
             Estado = EstadoVinculo.Activo
         };
 
-        repositorio.Agregar(empresa, persona, usuario, acceso, vinculo);
+        var ahora = await reloj.AhoraAsync(cancellationToken);
+        var codigo = hashCodigo.Generar();
+        var verificacion = new VerificacionCorreo
+        {
+            Proposito = PropositoVerificacionCorreo.ActivacionCuenta,
+            Email = acceso.Email,
+            AccesoId = acceso.Id,
+            CodigoHash = hashCodigo.Hashear(codigo),
+            ExpiraEn = ahora.AddMinutes(VentanaEnvioCodigo.MinutosVigencia),
+            VentanaEnviosExpiraEn = ahora.AddMinutes(VentanaEnvioCodigo.MinutosVigencia)
+        };
+
+        repositorio.Agregar(empresa, persona, usuario, acceso, vinculo, verificacion);
         await unidadDeTrabajo.GuardarCambiosAsync(cancellationToken);
 
         var idEmpresaCifrado = cifrador.Cifrar(empresa.Id);
         var nombreRepresentante = persona.NombreCompleto;
         var urlBase = correoOpciones.Value.UrlBaseFrontend.TrimEnd('/');
-        var urlVerificacion = $"{urlBase}/verificar-cuenta";
+        var urlActivacion = $"{urlBase}/activar-cuenta";
 
         var variables = new Dictionary<string, string>
         {
             ["NombreRepresentante"] = nombreRepresentante,
+            ["EmpresaNombre"] = empresa.RazonSocial,
+            ["RolNombre"] = "Administrador",
             ["RazonSocial"] = empresa.RazonSocial,
             ["RTN"] = empresa.RTN,
             ["Email"] = acceso.Email,
-            ["PasswordTemporal"] = passwordTemporal,
+            ["Codigo"] = codigo,
+            ["Minutos"] = VentanaEnvioCodigo.MinutosVigencia.ToString(),
             ["IdEmpresa"] = idEmpresaCifrado,
             ["UrlLogin"] = urlBase,
-            ["UrlVerificacion"] = urlVerificacion
+            ["UrlActivacion"] = urlActivacion
         };
 
         var renderizado = await plantillas.RenderizarAsync(
-            CodigosPlantillaCorreo.BienvenidaEmpresa, variables, cancellationToken);
+            CodigosPlantillaCorreo.ActivacionCuenta, variables, cancellationToken);
         if (renderizado is null)
             return Errores.PlantillaCorreoNoEncontrada;
 

@@ -10,8 +10,9 @@ using Norvia.Tests.Infraestructura;
 namespace Norvia.Tests.Notificaciones;
 
 /// <summary>
-/// HU-118: bandeja de salida del correo con reintentos (RN-78). Las notificaciones salen de asignar tareas (HU-081).
-/// El proceso en segundo plano está apagado en las pruebas: cada una procesa la bandeja cuando le conviene.
+/// HU-118: al crear la notificación se intenta el correo de inmediato (RN-78); si falla, queda pendiente para
+/// el poller de fondo, que la usa como respaldo con reintentos. Las notificaciones salen de asignar tareas (HU-081).
+/// El poller está apagado en las pruebas: cada una lo dispara cuando le conviene (<see cref="ProcesarBandejaAsync"/>).
 /// </summary>
 [Collection(ColeccionApi.Nombre)]
 public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
@@ -22,21 +23,14 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
     private readonly Escenario _escenario = new(api);
 
     [Fact]
-    public async Task Asignar_una_tarea_deja_el_correo_pendiente_y_sale_al_procesar_la_bandeja()
+    public async Task Asignar_una_tarea_envia_el_correo_de_inmediato()
     {
         var (empresa, email, colaborador, tarea) = await TareaParaColaboradorAsync("Revisar <extintores> & señalización");
 
-        var pendiente = await NotificacionDeAsync(empresa.EmpresaId, tarea);
-        Assert.Equal(colaborador, pendiente.DestinatarioId);
-        Assert.Equal(TipoNotificacion.TareaAsignada, pendiente.Tipo);
-        Assert.Equal("Te asignaron una tarea", pendiente.Titulo);
-        Assert.Equal(EstadoCorreo.Pendiente, pendiente.CorreoEstado);
-        Assert.Equal(0, pendiente.CorreoIntentos);
-        Assert.Empty(api.Correos.Para(email).Where(EsDeNotificacion));
-
-        await ProcesarBandejaAsync();
-
         var enviada = await NotificacionDeAsync(empresa.EmpresaId, tarea);
+        Assert.Equal(colaborador, enviada.DestinatarioId);
+        Assert.Equal(TipoNotificacion.TareaAsignada, enviada.Tipo);
+        Assert.Equal("Te asignaron una tarea", enviada.Titulo);
         Assert.Equal(EstadoCorreo.Enviado, enviada.CorreoEstado);
         Assert.Equal(1, enviada.CorreoIntentos);
         Assert.NotNull(enviada.CorreoEnviadoEn);
@@ -49,23 +43,23 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
         Assert.DoesNotContain("<extintores>", correo.CuerpoHtml);
         Assert.Contains("/mis-tareas", correo.CuerpoHtml);
 
-        // Procesar otra vez no lo reenvía.
+        // El poller de fondo no reenvía lo que ya se envió de inmediato.
         await ProcesarBandejaAsync();
         Assert.Single(api.Correos.Para(email).Where(EsDeNotificacion));
     }
 
     [Fact]
-    public async Task Si_el_correo_falla_se_registra_el_intento_y_se_reintenta_despues_de_esperar()
+    public async Task Si_el_intento_inmediato_falla_queda_pendiente_y_el_poller_la_reintenta_despues_de_esperar()
     {
-        var (empresa, email, _, tarea) = await TareaParaColaboradorAsync("Señalizar salidas");
-
-        await ConSmtpCaidoAsync(ProcesarBandejaAsync);
+        var (empresa, email, colaborador) = await PrepararColaboradorAsync();
+        var tarea = await ConSmtpCaidoAsync(() => CrearTareaAsync(empresa, colaborador, "Señalizar salidas"));
 
         var fallida = await NotificacionDeAsync(empresa.EmpresaId, tarea);
         Assert.Equal(EstadoCorreo.Pendiente, fallida.CorreoEstado);
         Assert.Equal(1, fallida.CorreoIntentos);
         Assert.Equal("SMTP de prueba caído", fallida.CorreoUltimoError);
         Assert.True(fallida.CorreoProximoIntentoEn > DateTime.UtcNow, "El reintento espera un tiempo.");
+        Assert.Empty(api.Correos.Para(email).Where(EsDeNotificacion));
 
         // Antes de que venza la espera no se vuelve a intentar, aunque el SMTP ya funcione.
         await ProcesarBandejaAsync();
@@ -85,18 +79,25 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
     [Fact]
     public async Task La_espera_entre_intentos_crece_con_cada_fallo()
     {
-        var (empresa, _, _, tarea) = await TareaParaColaboradorAsync("Inspeccionar botiquines");
+        var (empresa, _, colaborador) = await PrepararColaboradorAsync();
+        var empresaId = empresa.EmpresaId;
         var esperas = new List<TimeSpan>();
 
         await ConSmtpCaidoAsync(async () =>
         {
-            for (var i = 0; i < 3; i++)
+            // El primer fallo es el intento inmediato al crear la tarea.
+            var tareaId = await CrearTareaAsync(empresa, colaborador, "Inspeccionar botiquines");
+            var primera = await NotificacionDeAsync(empresaId, tareaId);
+            esperas.Add(primera.CorreoProximoIntentoEn!.Value - DateTime.UtcNow);
+            await VencerEsperaAsync(empresaId, primera.Id);
+
+            for (var i = 0; i < 2; i++)
             {
                 var antes = DateTime.UtcNow;
                 await ProcesarBandejaAsync();
-                var n = await NotificacionDeAsync(empresa.EmpresaId, tarea);
+                var n = await NotificacionDeAsync(empresaId, tareaId);
                 esperas.Add(n.CorreoProximoIntentoEn!.Value - antes);
-                await VencerEsperaAsync(empresa.EmpresaId, n.Id);
+                await VencerEsperaAsync(empresaId, n.Id);
             }
         });
 
@@ -109,14 +110,16 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
     [Fact]
     public async Task Al_agotar_los_intentos_queda_fallido_sin_revertir_la_tarea_ni_ocultar_la_notificacion()
     {
-        var (empresa, email, colaborador, tarea) = await TareaParaColaboradorAsync("Capacitar brigada");
+        var (empresa, email, colaborador) = await PrepararColaboradorAsync();
+        var tarea = await ConSmtpCaidoAsync(() => CrearTareaAsync(empresa, colaborador, "Capacitar brigada"));
 
         await ConSmtpCaidoAsync(async () =>
         {
-            for (var i = 0; i < MaxIntentos; i++)
+            // El intento inmediato al crear la tarea ya gastó el primero.
+            for (var i = 1; i < MaxIntentos; i++)
             {
-                await ProcesarBandejaAsync();
                 await VencerEsperaAsync(empresa.EmpresaId, (await NotificacionDeAsync(empresa.EmpresaId, tarea)).Id);
+                await ProcesarBandejaAsync();
             }
         });
 
@@ -140,7 +143,11 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
     [Fact]
     public async Task No_escribe_a_quien_ya_no_tiene_acceso_a_la_empresa()
     {
-        var (empresa, email, colaborador, tarea) = await TareaParaColaboradorAsync("Revisar arneses");
+        // El intento inmediato falla (SMTP caído) para que la fila quede pendiente antes de suspender el vínculo.
+        var (empresa, email, colaborador) = await PrepararColaboradorAsync();
+        var tarea = await ConSmtpCaidoAsync(() => CrearTareaAsync(empresa, colaborador, "Revisar arneses"));
+        var pendiente = await NotificacionDeAsync(empresa.EmpresaId, tarea);
+
         await using (var db = api.NuevoContexto(empresa.EmpresaId))
         {
             var vinculo = await db.VinculoEmpresa.SingleAsync(v => v.Id == colaborador);
@@ -148,11 +155,12 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
             await db.SaveChangesAsync();
         }
 
+        await VencerEsperaAsync(empresa.EmpresaId, pendiente.Id);
         await ProcesarBandejaAsync();
 
         var n = await NotificacionDeAsync(empresa.EmpresaId, tarea);
         Assert.Equal(EstadoCorreo.Fallido, n.CorreoEstado);
-        Assert.Equal(0, n.CorreoIntentos);
+        Assert.Equal(1, n.CorreoIntentos);
         Assert.Empty(api.Correos.Para(email).Where(EsDeNotificacion));
     }
 
@@ -191,15 +199,26 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
     /// <summary>Empresa con un colaborador al que su administrador le crea una tarea manual (HU-043), ya asignada.</summary>
     private async Task<(EmpresaDePrueba Empresa, string Email, Guid Colaborador, Guid Tarea)> TareaParaColaboradorAsync(string titulo)
     {
+        var (empresa, email, colaborador) = await PrepararColaboradorAsync();
+        var tarea = await CrearTareaAsync(empresa, colaborador, titulo);
+        return (empresa, email, colaborador, tarea);
+    }
+
+    /// <summary>Empresa con un colaborador activo, sin tarea todavía (para controlar el SMTP solo durante la creación).</summary>
+    private async Task<(EmpresaDePrueba Empresa, string Email, Guid Colaborador)> PrepararColaboradorAsync()
+    {
         var empresa = await _escenario.CrearEmpresaAsync("Notificaciones");
         var email = $"c.{Guid.NewGuid():N}@pruebas.hn";
         var colaborador = await Escenario.AgregarColaboradorAsync(empresa, email);
+        return (empresa, email, colaborador);
+    }
 
+    private static async Task<Guid> CrearTareaAsync(EmpresaDePrueba empresa, Guid responsable, string titulo)
+    {
         var r = await empresa.Cliente.PostAsJsonAsync("/api/plan-trabajo/tareas",
-            new { titulo, prioridad = 1, responsableId = colaborador, fechaLimite = Futura });
+            new { titulo, prioridad = 1, responsableId = responsable, fechaLimite = Futura });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
-
-        return (empresa, email, colaborador, (await Escenario.Json(r)).GetProperty("id").GetGuid());
+        return (await Escenario.Json(r)).GetProperty("id").GetGuid();
     }
 
     private async Task<Notificacion> NotificacionDeAsync(Guid empresaId, Guid tareaId)
@@ -208,7 +227,7 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
         return await db.Notificacion.AsNoTracking().SingleAsync(n => n.TareaId == tareaId);
     }
 
-    /// <summary>Lo que hace el proceso en segundo plano en cada vuelta.</summary>
+    /// <summary>Lo que hace el poller de fondo en cada vuelta.</summary>
     private async Task ProcesarBandejaAsync()
     {
         using var scope = api.Services.CreateScope();
@@ -223,6 +242,19 @@ public sealed class CorreoNotificacionesTests(NorviaApiFactory api)
         if (n.CorreoProximoIntentoEn is null) return;
         n.CorreoProximoIntentoEn = DateTime.UtcNow.AddHours(-1);
         await db.SaveChangesAsync();
+    }
+
+    private async Task<T> ConSmtpCaidoAsync<T>(Func<Task<T>> accion)
+    {
+        api.Correos.Fallar = true;
+        try
+        {
+            return await accion();
+        }
+        finally
+        {
+            api.Correos.Fallar = false;
+        }
     }
 
     private async Task ConSmtpCaidoAsync(Func<Task> accion)

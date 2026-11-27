@@ -6,8 +6,7 @@ using Norvia.Application.Features.Auth.ReestablecerContrasena.DTOs;
 namespace Norvia.Application.Features.Auth.ReestablecerContrasena;
 
 /// <summary>
-/// Cambia la contraseña del Acceso de la sesión, cumpliendo la política de HU-114. Sirve también para
-/// reemplazar una contraseña temporal en el primer ingreso (<c>DebeCambiarPassword</c>).
+/// Cambia la contraseña del Acceso de la sesión, cumpliendo la política de HU-114.
 /// El Acceso es único por correo (RN-65), así que la nueva contraseña vale en todas sus empresas;
 /// por eso se cierran todas sus sesiones y hay que volver a iniciar sesión.
 /// </summary>
@@ -26,7 +25,6 @@ public sealed class ReestablecerContrasenaServicio(
         if (!hasher.Verificar(acceso, request.ContrasenaActual)) return Errores.ContrasenaActualIncorrecta;
 
         acceso.PasswordHash = hasher.Hashear(acceso, request.ContrasenaNueva);
-        acceso.DebeCambiarPassword = false;
         await repositorio.EliminarRefreshDelAccesoAsync(accesoId, cancellationToken);
         await unidadDeTrabajo.GuardarCambiosAsync(cancellationToken);
 

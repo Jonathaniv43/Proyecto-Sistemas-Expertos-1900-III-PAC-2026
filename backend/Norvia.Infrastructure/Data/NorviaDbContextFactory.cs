@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Norvia.Application.Common.Interfaces;
@@ -19,6 +20,14 @@ public sealed class NorviaDbContextFactory : IDesignTimeDbContextFactory<NorviaD
 {
     public NorviaDbContext CreateDbContext(string[] args)
     {
+        // dotnet ef no pasa por Program.cs (que carga el .env con Env.Load()), así que en local
+        // hay que cargarlo aquí. Cubre los dos directorios desde los que se corre el comando
+        // (backend/ o backend/Norvia.API/). En despliegue no hay .env y la variable ya está en el
+        // entorno, así que no hace nada.
+        var rutaEnv = new[] { ".env", Path.Combine("Norvia.API", ".env") }.FirstOrDefault(File.Exists);
+        if (rutaEnv is not null)
+            Env.Load(rutaEnv);
+
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgresConnection")
             ?? throw new InvalidOperationException("Falta ConnectionStrings__PostgresConnection en el entorno.");
 

@@ -20,7 +20,8 @@ namespace Norvia.Application.Features.Plan.AsignarTarea;
 /// HU-081: si cambia el responsable, se le avisa en Norvia y por correo (RN-77).
 /// </summary>
 public sealed class AsignarTareaServicio(
-    IAsignarTareaRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj, Notificador notificador, Auditor auditor)
+    IAsignarTareaRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj,
+    Notificador notificador, IEnvioInmediatoNotificacion envioInmediato, Auditor auditor)
     : IServicioCasoDeUso
 {
     public async Task<Resultado<TareaResponseDto>> EjecutarAsync(Guid tareaId, AsignarTareaRequestDto request, CancellationToken ct)
@@ -37,10 +38,11 @@ public sealed class AsignarTareaServicio(
         tarea.ResponsableId = responsable;
         tarea.FechaLimite = fecha;
         // Solo cambiar la fecha no es una asignación nueva: no se avisa de nuevo.
-        if (nuevoResponsable) notificador.TareaAsignada(tarea);
+        var notificacion = nuevoResponsable ? notificador.TareaAsignada(tarea) : null;
         auditor.Registrar(AccionesAuditoria.TareaAsignada, EntidadesAuditoria.Tarea, tarea.Id,
             new { tarea.Titulo, tarea.ResponsableId, tarea.FechaLimite });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
+        if (notificacion is not null) await envioInmediato.IntentarAsync(notificacion.Id, ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);
     }

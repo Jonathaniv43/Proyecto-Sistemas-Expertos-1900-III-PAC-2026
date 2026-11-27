@@ -25,13 +25,17 @@ public sealed class PlantillasCorreoSeeder(NorviaDbContext db, ILogger<Plantilla
 
     private async Task SincronizarAsync(CancellationToken ct)
     {
-        var vigentes = CatalogoPlantillasCorreo.Todas.ToDictionary(d => d.Codigo);
-        var enBd = await db.PlantillaCorreo.ToDictionaryAsync(p => p.Codigo, ct);
+        // Por Id (la llave real), no por Codigo: un código puede reemplazar a otro reutilizando su fila
+        // (p. ej. activacion_cuenta reemplazó a bienvenida_empresa con el mismo Id), y si se buscara por
+        // Codigo, esa fila no se encontraría y el Add explícito de Id chocaría con la que ya está rastreada.
+        var idsVigentes = CatalogoPlantillasCorreo.Todas.Select(d => d.Id).ToHashSet();
+        var enBd = await db.PlantillaCorreo.ToDictionaryAsync(p => p.Id, ct);
 
         foreach (var d in CatalogoPlantillasCorreo.Todas)
         {
-            if (enBd.TryGetValue(d.Codigo, out var fila))
+            if (enBd.TryGetValue(d.Id, out var fila))
             {
+                fila.Codigo = d.Codigo;
                 fila.Nombre = d.Nombre;
                 fila.Descripcion = d.Descripcion;
                 fila.Asunto = d.Asunto;
@@ -53,7 +57,7 @@ public sealed class PlantillasCorreoSeeder(NorviaDbContext db, ILogger<Plantilla
             }
         }
 
-        foreach (var fila in enBd.Values.Where(p => !vigentes.ContainsKey(p.Codigo)))
+        foreach (var fila in enBd.Values.Where(p => !idsVigentes.Contains(p.Id)))
             fila.Activo = false;
 
         await db.SaveChangesAsync(ct);

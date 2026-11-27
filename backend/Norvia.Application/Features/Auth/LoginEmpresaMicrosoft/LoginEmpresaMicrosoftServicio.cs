@@ -41,8 +41,7 @@ public sealed class LoginEmpresaMicrosoftServicio(
             return Errores.CredencialesInvalidas;
 
         var sesion = new SesionToken(acceso.Id, TipoSesion.Empresa, vinculo.Id, vinculo.EmpresaId, vinculo.Rol.Codigo, acceso.Email);
-        // DebeCambiarPassword solo aplica a contraseñas temporales: sin contraseña no hay nada que cambiar.
-        var (fila, respuesta) = emisor.Emitir(sesion, ahora, acceso.PasswordHash is not null && acceso.DebeCambiarPassword);
+        var (fila, respuesta) = emisor.Emitir(sesion, ahora);
 
         repo.AgregarRefresh(fila);
         await uow.GuardarCambiosAsync(cancellationToken);

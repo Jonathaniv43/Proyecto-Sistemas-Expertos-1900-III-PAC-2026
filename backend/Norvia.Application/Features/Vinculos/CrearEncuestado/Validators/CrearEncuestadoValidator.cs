@@ -1,5 +1,4 @@
 using FluentValidation;
-using Norvia.Application.Common.Validacion;
 using Norvia.Application.Features.Vinculos.CrearEncuestado.DTOs;
 
 namespace Norvia.Application.Features.Vinculos.CrearEncuestado.Validators;
@@ -13,6 +12,5 @@ public sealed class CrearEncuestadoValidator : AbstractValidator<CrearEncuestado
         RuleFor(x => x.SegundoNombre).MaximumLength(80);
         RuleFor(x => x.PrimerApellido).NotEmpty().MaximumLength(80);
         RuleFor(x => x.SegundoApellido).MaximumLength(80);
-        RuleFor(x => x.PasswordTemporal!).CumplePoliticaContrasena().When(x => x.PasswordTemporal is not null);
     }
 }
