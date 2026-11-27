@@ -81,7 +81,10 @@ public sealed class AuditoriaAccionesTests(NorviaApiFactory api)
         {
             tipo = "accidente",
             esGrave = false,
-            fechaHoraEvento = $"{Hoy:yyyy-MM-dd}T08:30:00-06:00",
+            // Relativa al momento real (no una hora de pared fija): un evento "futuro" según el
+            // reloj del servidor se rechaza (ReportarEventoServicio), y los runners de CI corren
+            // en UTC a cualquier hora del día.
+            fechaHoraEvento = DateTime.UtcNow.AddMinutes(-10).ToString("yyyy-MM-ddTHH:mm:ssK"),
             descripcion = "Tropiezo en pasillo"
         });
         Assert.Equal(HttpStatusCode.Created, crearEv.StatusCode);
