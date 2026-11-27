@@ -23,6 +23,9 @@ public sealed class AltaDeVinculoRepositorio(NorviaDbContext db) : IAltaDeVincul
     public Task<bool> TieneVinculoEnEmpresaActualAsync(Guid accesoId, CancellationToken ct) =>
         db.VinculoEmpresa.AnyAsync(v => v.AccesoId == accesoId, ct);
 
+    public Task<string> BuscarNombreEmpresaAsync(Guid empresaId, CancellationToken ct) =>
+        db.Empresa.Where(e => e.Id == empresaId).Select(e => e.RazonSocial).FirstAsync(ct);
+
     public void AgregarPersona(Persona persona, Usuario usuario)
     {
         db.Persona.Add(persona);
@@ -32,4 +35,6 @@ public sealed class AltaDeVinculoRepositorio(NorviaDbContext db) : IAltaDeVincul
     public void AgregarAcceso(Acceso acceso) => db.Acceso.Add(acceso);
 
     public void AgregarVinculo(VinculoEmpresa vinculo) => db.VinculoEmpresa.Add(vinculo);
+
+    public void AgregarVerificacionCorreo(VerificacionCorreo fila) => db.VerificacionCorreo.Add(fila);
 }

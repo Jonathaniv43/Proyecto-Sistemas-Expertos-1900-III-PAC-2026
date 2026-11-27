@@ -55,7 +55,7 @@ public sealed class AislamientoApiTests(NorviaApiFactory api)
         var r = await a.Cliente.PostAsJsonAsync("/api/vinculos", new
         {
             email = $"intruso.{Guid.NewGuid():N}@pruebas.hn", primerNombre = "X", primerApellido = "Y",
-            rolCodigo = "colaborador", passwordTemporal = "Temporal#2026", empresaId = b.EmpresaId
+            rolCodigo = "colaborador", empresaId = b.EmpresaId
         });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
         var id = (await Escenario.Json(r)).GetProperty("id").GetGuid();

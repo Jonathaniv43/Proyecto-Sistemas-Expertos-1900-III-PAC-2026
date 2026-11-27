@@ -6,7 +6,6 @@ import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
 import { useFormulario } from '@/shared/forms'
 import { DESCRIPCIONES_ROL_EMPRESA, ETIQUETAS_ROL, ROLES_EMPRESA, useSesion } from '@/shared/sesion'
-import { generarContrasenaTemporal } from '@/shared/validacion'
 import { Volver } from '@/shared/components/ui/Volver'
 import { crearVinculo } from '../api/vinculos'
 import { PersonaAgregada } from '../components/PersonaAgregada'
@@ -30,13 +29,13 @@ const VALORES_INICIALES = {
 
 /**
  * HU-020: el administrador da acceso a la empresa a una persona, con un rol. Si el correo ya tiene
- * cuenta en Norvia se reutiliza (también si trabaja en otras empresas); si no, se crea con una
- * contraseña temporal que se muestra una sola vez para entregársela.
+ * cuenta en Norvia se reutiliza (también si trabaja en otras empresas); si no, se crea la cuenta y le
+ * llega un código de 6 dígitos por correo para activarla y elegir su contraseña (HU-114, RN-86).
  */
 export function AgregarPersonaPage() {
   const sesion = useSesion()
   const empresa = sesion.estado === 'activa' ? sesion.usuario.empresa : null
-  const [resultado, setResultado] = useState<{ persona: CrearVinculoResponse; contrasena: string }>()
+  const [resultado, setResultado] = useState<CrearVinculoResponse>()
 
   const {
     register,
@@ -58,8 +57,7 @@ export function AgregarPersonaPage() {
         <Volver a="/personas" texto="Volver a personas" titulo="Persona agregada" />
         <h1 className="text-xl font-semibold">Persona agregada</h1>
         <PersonaAgregada
-          persona={resultado.persona}
-          contrasenaTemporal={resultado.contrasena}
+          persona={resultado}
           empresa={empresa}
           onAgregarOtra={() => {
             reset(VALORES_INICIALES)
@@ -84,11 +82,7 @@ export function AgregarPersonaPage() {
       <form
         noValidate
         className="grid gap-6 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6"
-        onSubmit={enviar(async (datos) => {
-          const contrasena = generarContrasenaTemporal()
-          const persona = await crearVinculo({ ...datos, passwordTemporal: contrasena })
-          setResultado({ persona, contrasena })
-        })}
+        onSubmit={enviar(async (datos) => setResultado(await crearVinculo(datos)))}
       >
         {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}
         <CampoTexto

@@ -285,7 +285,7 @@ export function RegistroEmpresaPage() {
             autoComplete="email"
             registro={register('email')}
             error={errors.email}
-            ayuda="Aquí te enviaremos tu contraseña temporal. Es el correo con el que vas a iniciar sesión."
+            ayuda="Aquí te enviaremos un código para activar tu cuenta. Es el correo con el que vas a iniciar sesión."
           />
         </fieldset>
 

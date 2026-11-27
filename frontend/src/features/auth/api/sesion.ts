@@ -13,7 +13,3 @@ export const iniciarSesionEmpresa = (datos: { email: string; password: string; i
 
 export const iniciarSesionPlataforma = (datos: { email: string; password: string }) =>
   api.post<SesionResponse>('/auth/login/plataforma', datos).then((r) => r.data)
-
-/** POST /api/auth/contrasena/reestablecer: cambia la contraseña y cierra todas las sesiones (204). */
-export const cambiarContrasena = (datos: { contrasenaActual: string; contrasenaNueva: string }) =>
-  api.post<void>('/auth/contrasena/reestablecer', datos)

@@ -1,13 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { CampanaNotificaciones } from '@/features/notificaciones/components/CampanaNotificaciones'
 import { EncabezadoSesion } from '@/shared/components/EncabezadoSesion'
-import { type EstadoLogin, leerUltimaEmpresa, RUTA_CAMBIAR_CONTRASENA, rutaActual, rutaLogin, useSesion } from '@/shared/sesion'
+import { type EstadoLogin, leerUltimaEmpresa, rutaActual, rutaLogin, useSesion } from '@/shared/sesion'
 import { SesionSinConexion, VerificandoSesion } from './PantallasSesion'
 
 /**
  * Rutas que requieren sesión. Sin sesión (o cuando vence) lleva al login recordando a dónde
- * volver; el login muestra por qué se pidió ingresar de nuevo. Con contraseña temporal, solo deja
- * usar la pantalla para cambiarla (HU-114).
+ * volver; el login muestra por qué se pidió ingresar de nuevo.
  */
 export function RutaPrivada() {
   const sesion = useSesion()
@@ -29,20 +28,16 @@ export function RutaPrivada() {
       const idEmpresa = ultima && ultima.rtn === sesion.rtn ? ultima.idEmpresa : undefined
       return <Navigate to={rutaLogin(idEmpresa)} replace state={estado} />
     }
-    case 'activa': {
-      const enCambio = location.pathname === RUTA_CAMBIAR_CONTRASENA
-      if (sesion.usuario.debeCambiarPassword && !enCambio) return <Navigate to={RUTA_CAMBIAR_CONTRASENA} replace />
-      if (!sesion.usuario.debeCambiarPassword && enCambio) return <Navigate to="/inicio" replace />
+    case 'activa':
       return (
         <>
           <EncabezadoSesion
             usuario={sesion.usuario}
-            // HU-117: solo las sesiones de empresa tienen bandeja; con contraseña temporal aún no se entra a ella.
-            acciones={sesion.usuario.tipo === 'empresa' && !sesion.usuario.debeCambiarPassword && <CampanaNotificaciones />}
+            // HU-117: solo las sesiones de empresa tienen bandeja.
+            acciones={sesion.usuario.tipo === 'empresa' && <CampanaNotificaciones />}
           />
           <Outlet />
         </>
       )
-    }
   }
 }

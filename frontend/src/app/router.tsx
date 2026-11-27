@@ -1,5 +1,4 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { CambiarContrasenaPage } from '@/features/auth/pages/CambiarContrasenaPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { MicrosoftCallbackPage } from '@/features/auth/pages/MicrosoftCallbackPage'
 import { LoginPlataformaPage } from '@/features/auth/pages/LoginPlataformaPage'
@@ -93,7 +92,6 @@ export const router = createBrowserRouter([
         element: <RutaPrivada />,
         children: [
           { path: 'inicio', element: <InicioPage /> },
-          { path: 'cambiar-contrasena', element: <CambiarContrasenaPage /> },
           { path: 'cuenta/contrasena', element: <SolicitarCambioContrasenaPage /> },
           {
             element: <RequiereRol roles={[ROLES.adminEmpresa]} />,

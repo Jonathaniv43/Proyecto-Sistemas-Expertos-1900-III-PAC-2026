@@ -178,7 +178,7 @@ public sealed class AuthController : ControllerBase
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
 
     /// <summary>
-    /// Verifica la cuenta con correo + contraseña temporal del alta y fija la contraseña definitiva (HU-114).
+    /// Verifica la cuenta con el código de 6 dígitos del alta y fija la contraseña definitiva (HU-114, RN-86).
     /// Anónimo: no hay JWT hasta que <c>Acceso.Verificado</c> sea true (RN-67).
     /// </summary>
     [AllowAnonymous]

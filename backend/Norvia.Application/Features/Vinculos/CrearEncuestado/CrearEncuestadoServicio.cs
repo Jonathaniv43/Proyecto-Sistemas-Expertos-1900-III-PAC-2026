@@ -19,15 +19,15 @@ public sealed class CrearEncuestadoServicio(AltaDeVinculo alta, IUnidadDeTrabajo
     {
         var datos = new DatosPersonaAlta(request.Email, request.PrimerNombre, request.SegundoNombre,
             request.PrimerApellido, request.SegundoApellido);
-        var preparado = await alta.PrepararAsync(datos, Rol.EncuestadoId, request.PasswordTemporal, generarSiFalta: true, ct);
+        var preparado = await alta.PrepararAsync(datos, Rol.EncuestadoId, "Encuestado", ct);
         if (!preparado.EsExito) return preparado.Error!;
 
-        var (vinculo, persona, acceso, cuentaNueva, generada) = preparado.Valor;
+        var (vinculo, persona, acceso, cuentaNueva, correoActivacionEnviado) = preparado.Valor;
         auditor.Registrar(AccionesAuditoria.EncuestadoCreado, EntidadesAuditoria.VinculoEmpresa, vinculo.Id,
             new { persona = persona.NombreCompleto, email = acceso.Email, rol = RolCodigo, cuentaNueva });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return new CrearEncuestadoResponseDto(vinculo.Id, persona.Id, acceso.Email, persona.NombreCompleto, RolCodigo,
-            vinculo.Estado, vinculo.CreadoEn, cuentaNueva, generada);
+            vinculo.Estado, vinculo.CreadoEn, cuentaNueva, correoActivacionEnviado);
     }
 }

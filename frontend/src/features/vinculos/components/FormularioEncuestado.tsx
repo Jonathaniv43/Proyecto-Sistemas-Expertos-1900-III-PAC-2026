@@ -6,7 +6,7 @@ import { crearEncuestado } from '../api/vinculos'
 import { encuestadoEsquema } from '../schemas/encuestados'
 import type { CrearEncuestadoResponse } from '../types/vinculos'
 
-/** Alta de un encuestado. La contraseña temporal de una cuenta nueva la genera el backend. */
+/** Alta de un encuestado. Si la cuenta es nueva, el backend envía el código de activación por correo. */
 export function FormularioEncuestado({ onCreado }: { onCreado: (encuestado: CrearEncuestadoResponse) => void }) {
   const {
     register,

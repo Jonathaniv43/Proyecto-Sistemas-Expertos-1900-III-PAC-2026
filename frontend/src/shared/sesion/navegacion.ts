@@ -18,8 +18,6 @@ export const RUTA_LOGIN = '/login'
 export const rutaLogin = (idEmpresa?: string | null) =>
   idEmpresa ? `${RUTA_LOGIN}?${new URLSearchParams({ empresa: idEmpresa })}` : RUTA_LOGIN
 export const RUTA_INICIO = '/inicio'
-/** Primer ingreso con contraseña temporal: se exige cambiarla antes de continuar. */
-export const RUTA_CAMBIAR_CONTRASENA = '/cambiar-contrasena'
 
 /**
  * A dónde ir al iniciar sesión: la página guardada (`desde`) o el inicio.

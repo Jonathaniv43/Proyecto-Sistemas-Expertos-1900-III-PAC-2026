@@ -13,7 +13,11 @@ public interface IAltaDeVinculoRepositorio
     /// <summary>Si el Acceso ya tiene un vínculo, en cualquier estado, con la empresa de la sesión.</summary>
     Task<bool> TieneVinculoEnEmpresaActualAsync(Guid accesoId, CancellationToken ct);
 
+    /// <summary>Razón social de la empresa, para el texto del correo de activación.</summary>
+    Task<string> BuscarNombreEmpresaAsync(Guid empresaId, CancellationToken ct);
+
     void AgregarPersona(Persona persona, Usuario usuario);
     void AgregarAcceso(Acceso acceso);
     void AgregarVinculo(VinculoEmpresa vinculo);
+    void AgregarVerificacionCorreo(VerificacionCorreo fila);
 }

@@ -2,10 +2,8 @@ using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Vinculos.CrearEncuestado.DTOs;
 
-/// <param name="PasswordTemporal">
-/// Solo si Norvia generó la contraseña (cuenta nueva sin <c>passwordTemporal</c>). Se muestra una única vez:
-/// el administrador la entrega a la persona, que debe cambiarla al entrar.
-/// </param>
+/// <param name="CuentaNueva">true si se creó la cuenta: le llegó un código de 6 dígitos para activarla.</param>
+/// <param name="CorreoActivacionEnviado">Solo tiene sentido si <paramref name="CuentaNueva"/> es true.</param>
 public sealed record CrearEncuestadoResponseDto(
     Guid Id,
     Guid PersonaId,
@@ -15,4 +13,4 @@ public sealed record CrearEncuestadoResponseDto(
     EstadoVinculo Estado,
     DateTime CreadoEn,
     bool CuentaNueva,
-    string? PasswordTemporal);
+    bool CorreoActivacionEnviado);

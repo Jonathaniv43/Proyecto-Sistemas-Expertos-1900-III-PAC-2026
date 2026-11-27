@@ -67,12 +67,11 @@ public static class DependencyInjection
         services.AddSingleton<ITokenIdentidadExterna, TokenIdentidadExterna>();
         services.AddHttpClient<IProveedorIdentidad, MicrosoftProveedorIdentidad>();
         services.AddSingleton<IHasherPassword, HasherPassword>();
-        services.AddSingleton<IGeneradorContrasenaTemporal, GeneradorContrasenaTemporal>();
 
         services.AddOptions<CorreoOpciones>()
             .Bind(configuration.GetSection(CorreoOpciones.Seccion));
         services.AddScoped<IPlantillasCorreo, PlantillasCorreoDb>();
-        services.AddSingleton<IEnvioCorreo, SmtpEnvioCorreo>();
+        services.AddHttpClient<IEnvioCorreo, ResendEnvioCorreo>(c => c.BaseAddress = new Uri("https://api.resend.com/"));
 
         // Notificaciones (M11): se crean con la operación de origen y el correo sale por la bandeja de salida (HU-118).
         services.AddOptions<NotificacionesOpciones>()
@@ -82,6 +81,7 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddScoped<IBandejaNotificaciones, BandejaNotificaciones>();
         services.AddScoped<EnvioNotificacionesPendientes>();
+        services.AddScoped<IEnvioInmediatoNotificacion, EnvioNotificacionesPendientes>();
         services.AddScoped<IRegistroAuditoria, RepositorioRegistroAuditoria>();
 
         // Repositorios por slice: I<CasoDeUso>Repositorio → <CasoDeUso>Repositorio.

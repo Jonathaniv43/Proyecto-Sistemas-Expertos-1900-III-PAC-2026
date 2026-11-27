@@ -14,8 +14,10 @@ public sealed class EnviarCodigoMicrosoftRepositorio(NorviaDbContext db) : IEnvi
     public Task<bool> ExisteEmailAsync(string emailNormalizado, CancellationToken cancellationToken) =>
         db.Acceso.AnyAsync(a => a.Email == emailNormalizado, cancellationToken);
 
-    public Task<VerificacionCorreoMicrosoft?> BuscarAsync(string email, string proveedorUserId, CancellationToken cancellationToken) =>
-        db.VerificacionCorreoMicrosoft.FirstOrDefaultAsync(v => v.Email == email && v.ProveedorUserId == proveedorUserId, cancellationToken);
+    public Task<VerificacionCorreo?> BuscarAsync(string email, string proveedorUserId, CancellationToken cancellationToken) =>
+        db.VerificacionCorreo.FirstOrDefaultAsync(
+            v => v.Proposito == PropositoVerificacionCorreo.Microsoft && v.Email == email && v.ProveedorUserId == proveedorUserId,
+            cancellationToken);
 
-    public void Agregar(VerificacionCorreoMicrosoft fila) => db.VerificacionCorreoMicrosoft.Add(fila);
+    public void Agregar(VerificacionCorreo fila) => db.VerificacionCorreo.Add(fila);
 }

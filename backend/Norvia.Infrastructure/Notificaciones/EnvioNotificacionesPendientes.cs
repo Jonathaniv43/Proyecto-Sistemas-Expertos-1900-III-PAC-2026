@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Norvia.Application.Common.Correo;
 using Norvia.Application.Common.Interfaces;
+using Norvia.Application.Common.Notificaciones;
 using Norvia.Domain.Entities.Notificaciones;
 using Norvia.Domain.Enums;
 using Norvia.Infrastructure.Data;
@@ -12,11 +13,16 @@ using Norvia.Infrastructure.Opciones;
 namespace Norvia.Infrastructure.Notificaciones;
 
 /// <summary>
-/// Bandeja de salida del correo (HU-118, RN-78, D28): envía los correos pendientes de las notificaciones y reintenta
-/// los que fallaron, con una espera que crece en cada intento. Cada intento queda registrado en la fila (intentos,
-/// último error) y en el log. Al agotar los intentos, el correo queda "fallido"; la notificación sigue visible en
-/// Norvia y la operación que la originó no se toca.
-/// <para>Lo llama cada cierto tiempo <c>ProcesadorCorreosPendientes</c> (API); las pruebas lo llaman directo.</para>
+/// Envía el correo de las notificaciones y reintenta los que fallaron, con una espera que crece en cada intento
+/// (HU-118, RN-78, D28). Cada intento queda registrado en la fila (intentos, último error) y en el log. Al agotar
+/// los intentos, el correo queda "fallido"; la notificación sigue visible en Norvia y la operación que la originó
+/// no se toca.
+/// <para>
+/// Un mismo método (<see cref="IntentarUnoAsync"/>) atiende los tres caminos que pueden intentar el envío de una
+/// fila: el intento inmediato al crearla, el botón "Reintentar" (<see cref="IntentarAsync"/>) y el poller de fondo
+/// <c>ProcesadorCorreosPendientes</c> (<see cref="ProcesarAsync"/>). Un guardo atómico (pasar a <c>en_proceso</c>
+/// solo si sigue <c>pendiente</c> o <c>fallido</c>) evita que dos de estos caminos envíen la misma fila a la vez.
+/// </para>
 /// </summary>
 public sealed class EnvioNotificacionesPendientes(
     NorviaDbContext db,
@@ -25,36 +31,70 @@ public sealed class EnvioNotificacionesPendientes(
     IEnvioCorreo envioCorreo,
     IOptions<NotificacionesOpciones> opciones,
     IOptions<CorreoOpciones> correo,
-    ILogger<EnvioNotificacionesPendientes> log)
+    ILogger<EnvioNotificacionesPendientes> log) : IEnvioInmediatoNotificacion
 {
     private const int LargoMaximoError = 1000;
 
-    /// <summary>Procesa un lote de correos vencidos. Devuelve cuántos intentó.</summary>
+    /// <summary>Procesa un lote de correos vencidos (poller de fondo). Devuelve cuántos intentó.</summary>
     public async Task<int> ProcesarAsync(CancellationToken ct)
     {
         var cfg = opciones.Value;
         var ahora = await reloj.AhoraAsync(ct);
 
         // Proceso de plataforma, sin sesión de empresa: recorre los pendientes de todas las empresas.
-        // Cada fila se envía solo a su destinatario, que es un vínculo de la misma empresa (FK compuesta).
-        var lote = await db.Notificacion.IgnoreQueryFilters()
-            .Include(n => n.Destinatario).ThenInclude(v => v.Acceso)
-            .Include(n => n.Destinatario).ThenInclude(v => v.Persona)
+        var ids = await db.Notificacion.IgnoreQueryFilters()
             .Where(n => n.CorreoEstado == EstadoCorreo.Pendiente
                         && (n.CorreoProximoIntentoEn == null || n.CorreoProximoIntentoEn <= ahora))
             .OrderBy(n => n.CorreoProximoIntentoEn ?? n.CreadaEn)
             .ThenBy(n => n.Id)
             .Take(cfg.LoteMaximo)
+            .Select(n => n.Id)
             .ToListAsync(ct);
 
-        foreach (var notificacion in lote)
+        var procesados = 0;
+        foreach (var id in ids)
         {
-            await IntentarAsync(notificacion, cfg, ct);
-            // Se guarda cada intento: si la API se apaga a mitad del lote, no se reenvía lo ya enviado.
-            await db.SaveChangesAsync(ct);
+            if (await IntentarUnoAsync(id, cfg, ct)) procesados++;
         }
+        return procesados;
+    }
 
-        return lote.Count;
+    /// <summary>Intento inmediato (al crearla) o reintento manual (botón). Nunca lanza.</summary>
+    public async Task IntentarAsync(Guid notificacionId, CancellationToken ct)
+    {
+        try
+        {
+            await IntentarUnoAsync(notificacionId, opciones.Value, ct);
+        }
+        catch (Exception ex)
+        {
+            log.LogError(ex, "No se pudo intentar el correo de la notificación {Id}.", notificacionId);
+        }
+    }
+
+    /// <summary>Toma la fila (guardo atómico), intenta el envío y guarda. false si otro camino ya la tenía o no existe.</summary>
+    private async Task<bool> IntentarUnoAsync(Guid id, NotificacionesOpciones cfg, CancellationToken ct)
+    {
+        var tomada = await db.Notificacion.IgnoreQueryFilters()
+            .Where(n => n.Id == id && (n.CorreoEstado == EstadoCorreo.Pendiente || n.CorreoEstado == EstadoCorreo.Fallido))
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.CorreoEstado, EstadoCorreo.EnProceso), ct);
+        if (tomada == 0) return false;
+
+        var n = await db.Notificacion.IgnoreQueryFilters()
+            .Include(x => x.Destinatario).ThenInclude(v => v.Acceso)
+            .Include(x => x.Destinatario).ThenInclude(v => v.Persona)
+            .FirstAsync(x => x.Id == id, ct);
+
+        // Si esta fila ya estaba rastreada en este mismo DbContext (p. ej. el intento inmediato, en el mismo
+        // scope que la creó), la consulta anterior devuelve esa instancia por resolución de identidad, con sus
+        // valores "originales" desactualizados: el UPDATE atómico de arriba no pasa por el rastreador. Sin este
+        // reload, un valor final que coincida con ese original desactualizado (p. ej. volver a "pendiente") no
+        // se seguiría viendo como un cambio y la fila quedaría en "en_proceso" para siempre.
+        await db.Entry(n).ReloadAsync(ct);
+
+        await IntentarAsync(n, cfg, ct);
+        await db.SaveChangesAsync(ct);
+        return true;
     }
 
     private async Task IntentarAsync(Notificacion n, NotificacionesOpciones cfg, CancellationToken ct)
@@ -89,6 +129,7 @@ public sealed class EnvioNotificacionesPendientes(
             return;
         }
 
+        n.CorreoEstado = EstadoCorreo.Pendiente;
         n.CorreoUltimoError = error;
         n.CorreoProximoIntentoEn = ahora + cfg.EsperaTras(n.CorreoIntentos);
         log.LogWarning("Correo de la notificación {Id} falló (intento {Intento} de {Max}); se reintenta desde {Proximo:o}: {Error}",

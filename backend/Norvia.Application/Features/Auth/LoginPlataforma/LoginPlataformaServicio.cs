@@ -28,7 +28,7 @@ public sealed class LoginPlataformaServicio(
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
         var sesion = new SesionToken(acceso.Id, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo, acceso.Email);
-        var (fila, respuesta) = emisor.Emitir(sesion, ahora, acceso.DebeCambiarPassword);
+        var (fila, respuesta) = emisor.Emitir(sesion, ahora);
 
         repo.AgregarRefresh(fila);
         await uow.GuardarCambiosAsync(cancellationToken);

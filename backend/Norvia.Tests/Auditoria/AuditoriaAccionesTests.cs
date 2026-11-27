@@ -318,11 +318,11 @@ public sealed class AuditoriaAccionesTests(NorviaApiFactory api)
             email,
             primerNombre = "Persona",
             primerApellido = "Auditoria",
-            rolCodigo,
-            passwordTemporal = password
+            rolCodigo
         });
         r.EnsureSuccessStatusCode();
         var vinculoId = (await Escenario.Json(r)).GetProperty("id").GetGuid();
+        await Escenario.ActivarCuentaAsync(empresa, email, password);
         var cliente = await _escenario.ClienteEmpresaAsync(email, password, empresa.IdEmpresaCifrado);
         return (cliente, vinculoId);
     }

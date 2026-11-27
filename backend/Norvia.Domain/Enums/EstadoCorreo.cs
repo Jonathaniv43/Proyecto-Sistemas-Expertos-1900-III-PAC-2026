@@ -8,5 +8,8 @@ public enum EstadoCorreo
     Enviado,
 
     /// <summary>Se agotaron los reintentos. La notificación sigue visible en Norvia.</summary>
-    Fallido
+    Fallido,
+
+    /// <summary>Un envío inmediato o un reintento manual la tiene tomada en este momento (guardo atómico, RN-78).</summary>
+    EnProceso
 }
