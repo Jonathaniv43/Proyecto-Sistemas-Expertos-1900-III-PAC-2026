@@ -25,7 +25,7 @@ export interface RegistrarEmpresaResponse {
   rtn: string
   vinculoId: string
   email: string
-  /** false si no se pudo enviar el correo con la contraseña temporal. */
+  /** false si no se pudo enviar el correo con el código de activación. */
   correoEnviado: boolean
 }
 

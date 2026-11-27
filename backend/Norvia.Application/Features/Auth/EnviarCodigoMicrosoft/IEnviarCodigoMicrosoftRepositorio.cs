@@ -9,8 +9,8 @@ public interface IEnviarCodigoMicrosoftRepositorio
     Task<bool> ExisteEmailAsync(string emailNormalizado, CancellationToken cancellationToken);
 
     /// <summary>La fila de esa persona y correo (RN-86), rastreada para poder modificarla, o null.</summary>
-    Task<VerificacionCorreoMicrosoft?> BuscarAsync(string email, string proveedorUserId, CancellationToken cancellationToken);
+    Task<VerificacionCorreo?> BuscarAsync(string email, string proveedorUserId, CancellationToken cancellationToken);
 
     /// <summary>Deja la fila pendiente; no guarda.</summary>
-    void Agregar(VerificacionCorreoMicrosoft fila);
+    void Agregar(VerificacionCorreo fila);
 }

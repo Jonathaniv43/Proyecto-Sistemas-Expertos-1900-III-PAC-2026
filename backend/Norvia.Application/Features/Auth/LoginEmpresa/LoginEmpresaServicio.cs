@@ -35,7 +35,7 @@ public sealed class LoginEmpresaServicio(
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
         var sesion = new SesionToken(acceso.Id, TipoSesion.Empresa, vinculo.Id, vinculo.EmpresaId, vinculo.Rol.Codigo, acceso.Email);
-        var (fila, respuesta) = emisor.Emitir(sesion, ahora, acceso.DebeCambiarPassword);
+        var (fila, respuesta) = emisor.Emitir(sesion, ahora);
 
         repo.AgregarRefresh(fila);
         await uow.GuardarCambiosAsync(cancellationToken);

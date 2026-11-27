@@ -5,6 +5,7 @@ using Norvia.Application.Features.Notificaciones.DTOs;
 using Norvia.Application.Features.Notificaciones.ListarMisNotificaciones;
 using Norvia.Application.Features.Notificaciones.ListarMisNotificaciones.DTOs;
 using Norvia.Application.Features.Notificaciones.MarcarNotificacionLeida;
+using Norvia.Application.Features.Notificaciones.ReintentarCorreo;
 
 namespace Norvia.API.Controllers;
 
@@ -33,5 +34,15 @@ public sealed class NotificacionesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarcarLeida(
         Guid id, [FromServices] MarcarNotificacionLeidaServicio servicio, CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
+
+    /// <summary>
+    /// Reintenta de inmediato el correo de una notificación propia, en vez de esperar al poller de fondo (RN-78).
+    /// </summary>
+    [HttpPost("{id:guid}/reintentar-correo")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ReintentarCorreo(
+        Guid id, [FromServices] ReintentarCorreoServicio servicio, CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(id, cancellationToken)).AHttp(this);
 }

@@ -1,7 +1,7 @@
 namespace Norvia.Application.Common.Interfaces;
 
 /// <summary>
-/// Genera y comprueba el código de 6 dígitos de <see cref="Norvia.Domain.Entities.Acceso.VerificacionCorreoMicrosoft"/>
+/// Genera y comprueba el código de 6 dígitos de <see cref="Norvia.Domain.Entities.Acceso.VerificacionCorreo"/>
 /// (D29, RN-86). El código en claro nunca se guarda: solo viaja en el correo y se compara contra su hash.
 /// </summary>
 public interface IHashCodigoVerificacion

@@ -2,15 +2,17 @@ using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Correo;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
+using Norvia.Application.Common.Seguridad;
 using Norvia.Application.Features.Auth.EnviarCodigoMicrosoft.DTOs;
 using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Auth.EnviarCodigoMicrosoft;
 
 /// <summary>
 /// Envía al correo de la cuenta de Microsoft el código de 6 dígitos que prueba que es de quien se registra (RN-86).
 /// Solo aplica cuando ese correo todavía no tiene cuenta en Norvia: es el único caso en que se crea una cuenta
-/// confiando en el correo que dice el proveedor. La fila de <see cref="VerificacionCorreoMicrosoft"/> guarda el
+/// confiando en el correo que dice el proveedor. La fila de <see cref="VerificacionCorreo"/> guarda el
 /// código (con hash), su vencimiento y los envíos de la ventana actual; no se borra sola, VerificarCodigoMicrosoft
 /// la elimina al confirmar.
 /// </summary>
@@ -24,8 +26,6 @@ public sealed class EnviarCodigoMicrosoftServicio(
     IReloj reloj) : IServicioCasoDeUso
 {
     public const int MinutosVigencia = 10;
-    private const int MaximoEnviosPorVentana = 3;
-    private static readonly TimeSpan VentanaEnvios = TimeSpan.FromMinutes(MinutosVigencia);
 
     public async Task<Resultado<EnviarCodigoMicrosoftResponseDto>> EjecutarAsync(
         EnviarCodigoMicrosoftRequestDto request, CancellationToken cancellationToken)
@@ -41,25 +41,16 @@ public sealed class EnviarCodigoMicrosoftServicio(
         var fila = await repo.BuscarAsync(identidad.Email, identidad.ProveedorUserId, cancellationToken);
         if (fila is null)
         {
-            fila = new VerificacionCorreoMicrosoft { Email = identidad.Email, ProveedorUserId = identidad.ProveedorUserId };
+            fila = new VerificacionCorreo
+            {
+                Proposito = PropositoVerificacionCorreo.Microsoft,
+                Email = identidad.Email,
+                ProveedorUserId = identidad.ProveedorUserId
+            };
             repo.Agregar(fila);
         }
 
-        if (fila.VentanaEnviosExpiraEn <= ahora)
-        {
-            // Ventana nueva (fila recién creada o la anterior ya venció): un envío abre la cuenta de la ventana.
-            fila.EnviosEnVentana = 1;
-            fila.VentanaEnviosExpiraEn = ahora.Add(VentanaEnvios);
-        }
-        else if (fila.EnviosEnVentana >= MaximoEnviosPorVentana)
-        {
-            // Evita usar la API para llenar un buzón ajeno de correos.
-            return Errores.DemasiadosIntentos;
-        }
-        else
-        {
-            fila.EnviosEnVentana++;
-        }
+        if (!VentanaEnvioCodigo.PuedeEnviar(fila, ahora)) return Errores.DemasiadosIntentos;
 
         var codigo = hashCodigo.Generar();
         var renderizado = await plantillas.RenderizarAsync(

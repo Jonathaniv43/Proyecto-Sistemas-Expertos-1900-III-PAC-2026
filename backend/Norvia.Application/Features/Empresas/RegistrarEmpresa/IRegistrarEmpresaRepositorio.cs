@@ -11,5 +11,5 @@ public interface IRegistrarEmpresaRepositorio
     Task<bool> ExisteDocumentoAsync(TipoDocumentoIdentidad tipoDocumento, string numeroDocumento, CancellationToken cancellationToken);
     Task<bool> TipoDocumentoIdentidadExisteAsync(string codigo, CancellationToken cancellationToken);
     Task<short?> BuscarRubroIdActivoAsync(string codigo, CancellationToken cancellationToken);
-    void Agregar(Empresa empresa, Persona persona, Usuario usuario, Acceso acceso, VinculoEmpresa vinculo);
+    void Agregar(Empresa empresa, Persona persona, Usuario usuario, Acceso acceso, VinculoEmpresa vinculo, VerificacionCorreo verificacion);
 }

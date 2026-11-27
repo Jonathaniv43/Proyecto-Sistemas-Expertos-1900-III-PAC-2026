@@ -1,8 +1,7 @@
-import { CircleAlert, Download } from 'lucide-react'
+import { CircleAlert } from 'lucide-react'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import type { EmpresaSesion } from '@/shared/api'
-import { descargarCsv } from '../lote/descargarCsv'
 import type { ResultadoEnvio } from './LoteEncuestados'
 
 interface ResultadoLoteProps {
@@ -25,12 +24,7 @@ export function ResultadoLote({ resultado, empresa, onCorregir, onNuevaLista }: 
   ].sort((a, b) => a.linea.linea - b.linea.linea)
 
   const nuevas = respuesta.cuentas.filter((c) => c.cuentaNueva)
-
-  const descargar = () =>
-    descargarCsv('contraseñas-encuestados.csv', [
-      ['Correo', 'Nombre', 'Contraseña temporal', 'RTN de la empresa'],
-      ...nuevas.map((c) => [c.email, c.nombreCompleto, c.passwordTemporal ?? '', empresa?.rtn ?? '']),
-    ])
+  const sinCorreo = nuevas.filter((c) => !c.correoActivacionEnviado)
 
   return (
     <div className="grid gap-6">
@@ -51,23 +45,22 @@ export function ResultadoLote({ resultado, empresa, onCorregir, onNuevaLista }: 
 
       {respuesta.cuentas.length > 0 && (
         <section className="grid gap-3" aria-labelledby="titulo-con-acceso">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="titulo-con-acceso" className="text-md font-semibold">
-              Con acceso
-            </h2>
-            {nuevas.length > 0 && (
-              <Boton variante="secundario" onClick={descargar}>
-                <Download aria-hidden size={16} strokeWidth={1.5} />
-                Descargar contraseñas (CSV)
-              </Boton>
-            )}
-          </div>
+          <h2 id="titulo-con-acceso" className="text-md font-semibold">
+            Con acceso
+          </h2>
           {nuevas.length > 0 && (
             <p className="text-text-secondary">
-              Entrega a cada persona su correo, su contraseña temporal
-              {empresa ? <> y el RTN {empresa.rtn}</> : null}. La cambiarán la primera vez que entren. Las contraseñas no se
-              volverán a mostrar: descárgalas antes de salir.
+              A cada cuenta nueva le llegó un correo con un código de 6 dígitos para activarse y elegir su propia
+              contraseña (RN-86).
             </p>
+          )}
+          {sinCorreo.length > 0 && (
+            <Aviso tipo="advertencia">
+              {sinCorreo.length === 1
+                ? 'A 1 persona no se le pudo enviar el correo de activación.'
+                : `A ${sinCorreo.length} personas no se les pudo enviar el correo de activación.`}{' '}
+              Pueden pedir uno nuevo con "Reenviar verificación" en la pantalla de activación.
+            </Aviso>
           )}
           <div className="tabla-contenedor">
             <table className="tabla">
@@ -76,7 +69,7 @@ export function ResultadoLote({ resultado, empresa, onCorregir, onNuevaLista }: 
                   <th scope="col">Línea</th>
                   <th scope="col">Correo</th>
                   <th scope="col">Nombre</th>
-                  <th scope="col">Contraseña temporal</th>
+                  <th scope="col">Cómo entra</th>
                 </tr>
               </thead>
               <tbody>
@@ -86,10 +79,12 @@ export function ResultadoLote({ resultado, empresa, onCorregir, onNuevaLista }: 
                     <td>{c.email}</td>
                     <td>{c.nombreCompleto}</td>
                     <td>
-                      {c.cuentaNueva ? (
-                        <code className="rounded-sm bg-bg-subtle px-2 py-1 font-medium tracking-wide">{c.passwordTemporal}</code>
-                      ) : (
+                      {!c.cuentaNueva ? (
                         <span className="text-text-secondary">Ya tenía cuenta: usa su contraseña</span>
+                      ) : c.correoActivacionEnviado ? (
+                        <span className="text-text-secondary">Código de activación enviado</span>
+                      ) : (
+                        <span className="text-error-text">No se pudo enviar el correo</span>
                       )}
                     </td>
                   </tr>

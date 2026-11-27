@@ -30,7 +30,6 @@ public sealed class ConfirmarCambioContrasenaServicio(
         if (hasher.Verificar(acceso, request.ContrasenaNueva)) return Errores.ContrasenaIgualActual;
 
         acceso.PasswordHash = hasher.Hashear(acceso, request.ContrasenaNueva);
-        acceso.DebeCambiarPassword = false;
         await repositorio.EliminarRefreshDelAccesoAsync(acceso.Id, cancellationToken);
         await unidadDeTrabajo.GuardarCambiosAsync(cancellationToken);
         return Resultado.Exito();

@@ -13,12 +13,4 @@ export {
 export { SiRol } from './SiRol'
 export { leerUltimaEmpresa, recordarEmpresa, type EmpresaLogin } from './ultimaEmpresa'
 export { useSesion, useTieneRol } from './useSesion'
-export {
-  destinoSeguro,
-  RUTA_CAMBIAR_CONTRASENA,
-  RUTA_INICIO,
-  RUTA_LOGIN,
-  rutaActual,
-  rutaLogin,
-  type EstadoLogin,
-} from './navegacion'
+export { destinoSeguro, RUTA_INICIO, RUTA_LOGIN, rutaActual, rutaLogin, type EstadoLogin } from './navegacion'

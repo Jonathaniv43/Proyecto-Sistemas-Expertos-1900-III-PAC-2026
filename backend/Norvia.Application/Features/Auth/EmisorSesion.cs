@@ -12,7 +12,7 @@ namespace Norvia.Application.Features.Auth;
 /// </summary>
 public sealed class EmisorSesion(ITokenServicio tokens)
 {
-    public (RefreshToken Fila, SesionResponseDto Respuesta) Emitir(SesionToken sesion, DateTime ahoraUtc, bool debeCambiarPassword)
+    public (RefreshToken Fila, SesionResponseDto Respuesta) Emitir(SesionToken sesion, DateTime ahoraUtc)
     {
         var (plano, hash) = tokens.CrearRefresh();
 
@@ -25,7 +25,7 @@ public sealed class EmisorSesion(ITokenServicio tokens)
             ExpiraEn = ahoraUtc.Add(tokens.RefreshDuracion)
         };
 
-        var respuesta = new SesionResponseDto(tokens.CrearAccess(sesion, ahoraUtc), plano, tokens.AccessSegundos, debeCambiarPassword);
+        var respuesta = new SesionResponseDto(tokens.CrearAccess(sesion, ahoraUtc), plano, tokens.AccessSegundos);
         return (fila, respuesta);
     }
 }

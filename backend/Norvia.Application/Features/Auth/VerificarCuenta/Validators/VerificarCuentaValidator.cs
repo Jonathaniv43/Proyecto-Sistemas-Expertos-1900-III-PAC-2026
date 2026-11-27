@@ -9,11 +9,8 @@ public sealed class VerificarCuentaValidator : AbstractValidator<VerificarCuenta
     public VerificarCuentaValidator()
     {
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(254);
-        RuleFor(x => x.ContrasenaTemporal).NotEmpty().WithMessage("Ingrese la contraseña temporal.");
-        RuleFor(x => x.ContrasenaNueva)
-            .CumplePoliticaContrasena()
-            .NotEqual(x => x.ContrasenaTemporal)
-            .WithMessage("La contraseña nueva debe ser distinta de la temporal.");
+        RuleFor(x => x.Codigo).NotEmpty().Length(6).WithMessage("Ingrese el código de 6 dígitos que le enviamos.");
+        RuleFor(x => x.ContrasenaNueva).CumplePoliticaContrasena();
         RuleFor(x => x.ContrasenaNuevaRepetida)
             .Equal(x => x.ContrasenaNueva)
             .WithMessage("La confirmación de la contraseña no coincide.");

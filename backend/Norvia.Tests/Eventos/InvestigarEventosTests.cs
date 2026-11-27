@@ -135,10 +135,11 @@ public sealed class InvestigarEventosTests(NorviaApiFactory api)
         var email = $"sst.{Guid.NewGuid():N}@pruebas.hn";
         var r = await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
         {
-            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo = "responsable_sst", passwordTemporal = "Temporal#2026"
+            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo = "responsable_sst"
         });
         r.EnsureSuccessStatusCode();
         var vinculo = (await Escenario.Json(r)).GetProperty("id").GetGuid();
+        await Escenario.ActivarCuentaAsync(empresa, email, "Temporal#2026");
         return (empresa, await _escenario.ClienteEmpresaAsync(email, "Temporal#2026", empresa.IdEmpresaCifrado), vinculo);
     }
 

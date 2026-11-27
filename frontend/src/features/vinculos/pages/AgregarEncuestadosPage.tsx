@@ -12,7 +12,7 @@ type Forma = 'uno' | 'varios'
 
 /**
  * HU-115: el administrador da acceso como encuestados a los trabajadores, de a uno o con una lista.
- * Las cuentas nuevas reciben una contraseña temporal (generada por Norvia) que cambian al entrar.
+ * Las cuentas nuevas reciben un correo con un código de 6 dígitos para activarse (HU-114, RN-86).
  */
 export function AgregarEncuestadosPage() {
   const sesion = useSesion()
@@ -49,7 +49,6 @@ export function AgregarEncuestadosPage() {
       {uno ? (
         <PersonaAgregada
           persona={uno}
-          contrasenaTemporal={uno.passwordTemporal ?? ''}
           empresa={empresa}
           textoAgregarOtra="Agregar otro encuestado"
           onAgregarOtra={() => reiniciar()}

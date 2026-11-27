@@ -10,7 +10,7 @@ namespace Norvia.Application.Features.Vinculos.CrearEncuestadosLote;
 /// <summary>
 /// Alta de encuestados por lote (HU-115). Cada fila válida crea o reutiliza la cuenta y recibe el rol
 /// <c>encuestado</c>; las filas con problemas se informan y no detienen a las demás. Las cuentas nuevas
-/// reciben una contraseña temporal generada, que se devuelve una sola vez. Todo se guarda en una transacción.
+/// reciben un código de 6 dígitos por correo para activarlas. Todo se guarda en una transacción.
 /// </summary>
 public sealed class CrearEncuestadosLoteServicio(
     AltaDeVinculo alta,
@@ -51,7 +51,7 @@ public sealed class CrearEncuestadosLoteServicio(
             }
 
             var datos = new DatosPersonaAlta(fila.Email, fila.PrimerNombre, fila.SegundoNombre, fila.PrimerApellido, fila.SegundoApellido);
-            var preparado = await alta.PrepararAsync(datos, Rol.EncuestadoId, passwordTemporal: null, generarSiFalta: true, ct);
+            var preparado = await alta.PrepararAsync(datos, Rol.EncuestadoId, "Encuestado", ct);
             if (preparado.EsExito)
                 preparados.Add((numero, preparado.Valor));
             else
@@ -70,7 +70,7 @@ public sealed class CrearEncuestadosLoteServicio(
 
         var cuentas = preparados
             .Select(p => new EncuestadoCreadoDto(p.Fila, p.Datos.Vinculo.Id, p.Datos.Acceso.Email,
-                p.Datos.Persona.NombreCompleto, p.Datos.CuentaNueva, p.Datos.PasswordGenerada))
+                p.Datos.Persona.NombreCompleto, p.Datos.CuentaNueva, p.Datos.CorreoActivacionEnviado))
             .ToList();
         return new CrearEncuestadosLoteResponseDto(cuentas.Count, cuentas, errores);
     }

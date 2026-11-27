@@ -33,11 +33,6 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<bool>("DebeCambiarPassword")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(254)
@@ -485,10 +480,13 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.ToTable("Usuario");
                 });
 
-            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VerificacionCorreoMicrosoft", b =>
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VerificacionCorreo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AccesoId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("CodigoHash")
@@ -519,8 +517,12 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .HasColumnType("smallint")
                         .HasDefaultValue((short)0);
 
-                    b.Property<string>("ProveedorUserId")
+                    b.Property<string>("Proposito")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ProveedorUserId")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -529,10 +531,18 @@ namespace Norvia.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email", "ProveedorUserId")
-                        .IsUnique();
+                    b.HasIndex("AccesoId")
+                        .IsUnique()
+                        .HasFilter("\"AccesoId\" IS NOT NULL");
 
-                    b.ToTable("VerificacionCorreoMicrosoft");
+                    b.HasIndex("Email", "ProveedorUserId")
+                        .IsUnique()
+                        .HasFilter("\"ProveedorUserId\" IS NOT NULL");
+
+                    b.ToTable("VerificacionCorreo", t =>
+                        {
+                            t.HasCheckConstraint("CK_VerificacionCorreo_Proposito", "(\"Proposito\" = 'microsoft' AND \"ProveedorUserId\" IS NOT NULL AND \"AccesoId\" IS NULL) OR (\"Proposito\" = 'activacion_cuenta' AND \"AccesoId\" IS NOT NULL AND \"ProveedorUserId\" IS NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VinculoEmpresa", b =>
@@ -1820,7 +1830,7 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("CK_Notificacion_CorreoEnviadoEn", "(\"CorreoEnviadoEn\" IS NOT NULL) = (\"CorreoEstado\" = 'enviado')");
 
-                            t.HasCheckConstraint("CK_Notificacion_CorreoEstado", "\"CorreoEstado\" IN ('pendiente', 'enviado', 'fallido')");
+                            t.HasCheckConstraint("CK_Notificacion_CorreoEstado", "\"CorreoEstado\" IN ('pendiente', 'enviado', 'fallido', 'en_proceso')");
 
                             t.HasCheckConstraint("CK_Notificacion_CorreoIntentos", "\"CorreoIntentos\" >= 0");
 
@@ -2234,6 +2244,16 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Persona");
+                });
+
+            modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VerificacionCorreo", b =>
+                {
+                    b.HasOne("Norvia.Domain.Entities.Acceso.Acceso", "Acceso")
+                        .WithMany("VerificacionesCorreo")
+                        .HasForeignKey("AccesoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Acceso");
                 });
 
             modelBuilder.Entity("Norvia.Domain.Entities.Acceso.VinculoEmpresa", b =>
@@ -2995,6 +3015,8 @@ namespace Norvia.Infrastructure.Persistence.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Staff");
+
+                    b.Navigation("VerificacionesCorreo");
 
                     b.Navigation("Vinculos");
                 });

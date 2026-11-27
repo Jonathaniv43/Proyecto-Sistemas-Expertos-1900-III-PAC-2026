@@ -51,7 +51,8 @@ public sealed class AprobarDocumentoTests(NorviaApiFactory api)
         {
             Assert.Equal(TipoNotificacion.PoliticaPublicada, n.Tipo);
             Assert.Equal("Nueva política: Política SST 2026", n.Titulo);
-            Assert.Equal(EstadoCorreo.Pendiente, n.CorreoEstado);
+            // El correo se intenta de inmediato al aprobar (RN-78); con el SMTP de prueba funcionando, ya sale enviado.
+            Assert.Equal(EstadoCorreo.Enviado, n.CorreoEstado);
         });
 
         // Ya no se edita (RN-50) ni se aprueba otra vez.
