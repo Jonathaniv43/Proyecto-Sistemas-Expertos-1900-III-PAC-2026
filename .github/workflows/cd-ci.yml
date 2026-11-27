@@ -27,3 +27,29 @@ jobs:
 
       - name: Correr pruebas (Testcontainers)
         run: dotnet test backend/Norvia.slnx --no-build
+
+    deploy:
+    needs: test
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código del repo
+        uses: actions/checkout@v4
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.401'
+
+      - name: Instalar dotnet-ef
+        run: dotnet tool restore
+
+      - name: Aplicar migraciones
+        run: dotnet ef database update -p backend/Norvia.Infrastructure -s backend/Norvia.API
+        env:
+          ConnectionStrings__PostgresConnection: ${{ secrets.ConnectionStrings__PostgresConnection }}
+
+      - name: Disparar despliegue en Render (backend)
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
