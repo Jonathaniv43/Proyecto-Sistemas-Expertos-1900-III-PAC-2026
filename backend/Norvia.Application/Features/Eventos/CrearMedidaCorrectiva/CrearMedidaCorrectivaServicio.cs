@@ -22,6 +22,7 @@ public sealed class CrearMedidaCorrectivaServicio(
     IReloj reloj,
     ITenantActual sesion,
     Notificador notificador,
+    IEnvioInmediatoNotificacion envioInmediato,
     Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<MedidaCorrectivaResponseDto>> EjecutarAsync(
@@ -46,10 +47,11 @@ public sealed class CrearMedidaCorrectivaServicio(
             CreadaPorId = vinculoId
         };
         repositorio.Agregar(tarea);
-        notificador.TareaAsignada(tarea);
+        var notificacion = notificador.TareaAsignada(tarea);
         auditor.Registrar(AccionesAuditoria.MedidaCorrectivaCreada, EntidadesAuditoria.Accidente, evento.Id,
             new { tareaId = tarea.Id, tarea.Titulo, tarea.Prioridad, tarea.ResponsableId });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
+        if (notificacion is not null) await envioInmediato.IntentarAsync(notificacion.Id, ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);
     }

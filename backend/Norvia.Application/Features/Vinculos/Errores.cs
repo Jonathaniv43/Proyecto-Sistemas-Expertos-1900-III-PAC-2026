@@ -10,9 +10,6 @@ public static class Errores
 
     public static readonly Error RolInvalido = new("vinculos.rol_invalido", "El rol indicado no existe.", TipoError.Validacion);
 
-    public static readonly Error PasswordTemporalRequerida = new("vinculos.password_temporal_requerida",
-        "El correo no tiene una cuenta en Norvia: indique una contraseña temporal para crearla.", TipoError.Validacion);
-
     public static readonly Error VinculoNoEncontrado = new("vinculos.no_encontrado",
         "La persona no tiene acceso a esta empresa.", TipoError.NoEncontrado);
 

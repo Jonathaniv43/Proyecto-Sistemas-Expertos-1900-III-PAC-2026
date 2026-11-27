@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Domain.Entities.Acceso;
@@ -12,7 +13,7 @@ namespace Norvia.Tests.Infraestructura;
 
 /// <summary>Una empresa de prueba con su administrador y una sesión abierta.</summary>
 public sealed record EmpresaDePrueba(
-    Guid EmpresaId, string IdEmpresaCifrado, Guid AdminVinculoId, string AdminEmail, HttpClient Cliente);
+    Guid EmpresaId, string IdEmpresaCifrado, Guid AdminVinculoId, string AdminEmail, HttpClient Cliente, CorreosCapturados Correos);
 
 /// <summary>
 /// Prepara datos y sesiones. Las empresas se crean directo en la base (con los servicios reales de hash y
@@ -47,7 +48,7 @@ public sealed class Escenario(NorviaApiFactory api)
 
         var idCifrado = cifrador.Cifrar(empresa.Id);
         var cliente = await ClienteEmpresaAsync(acceso.Email, PasswordAdmin, idCifrado);
-        return new EmpresaDePrueba(empresa.Id, idCifrado, vinculo.Id, acceso.Email, cliente);
+        return new EmpresaDePrueba(empresa.Id, idCifrado, vinculo.Id, acceso.Email, cliente, api.Correos);
     }
 
     public async Task<HttpResponseMessage> LoginEmpresaAsync(string email, string password, string idEmpresa) =>
@@ -68,41 +69,59 @@ public sealed class Escenario(NorviaApiFactory api)
         return await ConToken(respuesta);
     }
 
-    /// <summary>Agrega una persona con el rol indicado (HU-020) y abre su sesión en esa empresa.</summary>
+    public const string PasswordColaborador = "Temporal#2026";
+
+    /// <summary>Agrega una persona con el rol indicado (HU-020), activa la cuenta con el código que le llegó por correo (si es nueva) y abre su sesión en esa empresa.</summary>
     public async Task<HttpClient> ClienteConRolAsync(EmpresaDePrueba empresa, string rolCodigo)
     {
         var email = $"{rolCodigo}.{Guid.NewGuid():N}@pruebas.hn";
         var r = await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
         {
-            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo, passwordTemporal = "Temporal#2026"
+            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo
         });
         r.EnsureSuccessStatusCode();
-        return await ClienteEmpresaAsync(email, "Temporal#2026", empresa.IdEmpresaCifrado);
+        if ((await Json(r)).GetProperty("cuentaNueva").GetBoolean())
+            await ActivarCuentaAsync(empresa, email, PasswordColaborador);
+        return await ClienteEmpresaAsync(email, PasswordColaborador, empresa.IdEmpresaCifrado);
     }
 
-    /// <summary>Agrega un colaborador con cuenta nueva usando la API (HU-020) y devuelve el id del vínculo.</summary>
+    /// <summary>Agrega un colaborador con cuenta nueva usando la API (HU-020), la activa (si es nueva) y devuelve el id del vínculo.</summary>
     public static async Task<Guid> AgregarColaboradorAsync(EmpresaDePrueba empresa, string email)
     {
         var r = await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
         {
-            email, primerNombre = "Colaborador", primerApellido = "Prueba",
-            rolCodigo = "colaborador", passwordTemporal = "Temporal#2026"
+            email, primerNombre = "Colaborador", primerApellido = "Prueba", rolCodigo = "colaborador"
         });
         r.EnsureSuccessStatusCode();
-        return (await Json(r)).GetProperty("id").GetGuid();
+        var json = await Json(r);
+        if (json.GetProperty("cuentaNueva").GetBoolean())
+            await ActivarCuentaAsync(empresa, email, PasswordColaborador);
+        return json.GetProperty("id").GetGuid();
     }
 
-    /// <summary>Agrega un responsable SST y devuelve un cliente autenticado con ese rol.</summary>
+    /// <summary>Agrega un responsable SST, activa su cuenta (si es nueva) y devuelve un cliente autenticado con ese rol.</summary>
     public async Task<HttpClient> ClienteResponsableSstAsync(EmpresaDePrueba empresa, string email)
     {
-        const string password = "Temporal#2026";
         var r = await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
         {
-            email, primerNombre = "Responsable", primerApellido = "Sst",
-            rolCodigo = "responsable_sst", passwordTemporal = password
+            email, primerNombre = "Responsable", primerApellido = "Sst", rolCodigo = "responsable_sst"
         });
         r.EnsureSuccessStatusCode();
-        return await ClienteEmpresaAsync(email, password, empresa.IdEmpresaCifrado);
+        if ((await Json(r)).GetProperty("cuentaNueva").GetBoolean())
+            await ActivarCuentaAsync(empresa, email, PasswordColaborador);
+        return await ClienteEmpresaAsync(email, PasswordColaborador, empresa.IdEmpresaCifrado);
+    }
+
+    /// <summary>Toma el código de activación del correo capturado (test SMTP) y fija la contraseña definitiva.</summary>
+    internal static async Task ActivarCuentaAsync(EmpresaDePrueba empresa, string email, string contrasenaNueva)
+    {
+        var correo = empresa.Correos.Para(email)[^1];
+        var codigo = Regex.Match(correo.CuerpoHtml, @">(\d{6})<").Groups[1].Value;
+        var r = await empresa.Cliente.PostAsJsonAsync("/api/auth/cuenta/verificar", new
+        {
+            email, codigo, contrasenaNueva, contrasenaNuevaRepetida = contrasenaNueva
+        });
+        r.EnsureSuccessStatusCode();
     }
 
     public static async Task<JsonElement> Json(HttpResponseMessage r) =>

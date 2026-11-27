@@ -8,7 +8,4 @@ public sealed record CrearEncuestadoRequestDto
     public string? SegundoNombre { get; init; }
     public string PrimerApellido { get; init; } = string.Empty;
     public string? SegundoApellido { get; init; }
-
-    /// <summary>Opcional. Si la cuenta es nueva y no se envía, Norvia genera una y la devuelve.</summary>
-    public string? PasswordTemporal { get; init; }
 }

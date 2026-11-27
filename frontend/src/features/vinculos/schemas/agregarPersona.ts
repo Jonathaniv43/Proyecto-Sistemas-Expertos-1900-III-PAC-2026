@@ -1,7 +1,7 @@
 import { ROLES_EMPRESA } from '@/shared/sesion'
 import { correo, textoOpcional, textoRequerido, z } from '@/shared/validacion'
 
-/** Espejo de CrearVinculoValidator (backend). La contraseña temporal la genera la página. */
+/** Espejo de CrearVinculoValidator (backend). Si la cuenta es nueva, el código de activación lo envía el backend. */
 export const agregarPersonaEsquema = z.object({
   email: correo(),
   primerNombre: textoRequerido(80),

@@ -1,19 +1,26 @@
 using Microsoft.Extensions.Options;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Correo;
+using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
+using Norvia.Application.Common.Seguridad;
 using Norvia.Application.Features.Auth.ReenviarVerificacionCuenta.DTOs;
+using Norvia.Domain.Entities.Acceso;
+using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Auth.ReenviarVerificacionCuenta;
 
 /// <summary>
-/// Reenvía instrucciones de verificación. Siempre responde igual (no enumera cuentas).
-/// No rota la contraseña temporal (solo está el hash en BD); el correo recuerda usar la del alta.
+/// Reenvía el código de activación con un código nuevo (mismo mecanismo que el código de Microsoft, RN-86).
+/// Siempre responde igual (no enumera cuentas). La ventana anti-spam (RN-86) limita cuántas veces se puede pedir.
 /// </summary>
 public sealed class ReenviarVerificacionCuentaServicio(
     IReenviarVerificacionCuentaRepositorio repositorio,
+    IUnidadDeTrabajo unidadDeTrabajo,
+    IHashCodigoVerificacion hashCodigo,
     IPlantillasCorreo plantillas,
     IEnvioCorreo envioCorreo,
+    IReloj reloj,
     IOptions<CorreoOpciones> correoOpciones) : IServicioCasoDeUso
 {
     private static readonly ReenviarVerificacionCuentaResponseDto RespuestaGenerica = new(
@@ -27,21 +34,48 @@ public sealed class ReenviarVerificacionCuentaServicio(
 
         if (acceso is not null && !acceso.Verificado)
         {
-            var urlBase = correoOpciones.Value.UrlBaseFrontend.TrimEnd('/');
-            var variables = new Dictionary<string, string>
+            var ahora = await reloj.AhoraAsync(cancellationToken);
+            var verificacion = await repositorio.BuscarVerificacionAsync(acceso.Id, cancellationToken);
+            if (verificacion is null)
             {
-                ["Email"] = acceso.Email,
-                ["UrlVerificacion"] = $"{urlBase}/verificar-cuenta"
-            };
-
-            var renderizado = await plantillas.RenderizarAsync(
-                CodigosPlantillaCorreo.ReenvioVerificacion, variables, cancellationToken);
-            if (renderizado is not null)
-            {
-                await envioCorreo.EnviarAsync(
-                    new MensajeCorreo(acceso.Email, renderizado.Asunto, renderizado.CuerpoHtml),
-                    cancellationToken);
+                verificacion = new VerificacionCorreo
+                {
+                    Proposito = PropositoVerificacionCorreo.ActivacionCuenta,
+                    Email = acceso.Email,
+                    AccesoId = acceso.Id
+                };
+                repositorio.AgregarVerificacion(verificacion);
             }
+
+            if (VentanaEnvioCodigo.PuedeEnviar(verificacion, ahora))
+            {
+                var codigo = hashCodigo.Generar();
+                var urlBase = correoOpciones.Value.UrlBaseFrontend.TrimEnd('/');
+                var variables = new Dictionary<string, string>
+                {
+                    ["Email"] = acceso.Email,
+                    ["Codigo"] = codigo,
+                    ["Minutos"] = VentanaEnvioCodigo.MinutosVigencia.ToString(),
+                    ["UrlActivacion"] = $"{urlBase}/activar-cuenta"
+                };
+
+                var renderizado = await plantillas.RenderizarAsync(
+                    CodigosPlantillaCorreo.ActivacionCuenta, variables, cancellationToken);
+                if (renderizado is not null)
+                {
+                    var envio = await envioCorreo.EnviarAsync(
+                        new MensajeCorreo(acceso.Email, renderizado.Asunto, renderizado.CuerpoHtml), cancellationToken);
+                    if (envio.Enviado)
+                    {
+                        // Solo se guarda tras el envío correcto: un correo fallido no gasta un intento de la ventana.
+                        verificacion.CodigoHash = hashCodigo.Hashear(codigo);
+                        verificacion.Intentos = 0;
+                        verificacion.ExpiraEn = ahora.AddMinutes(VentanaEnvioCodigo.MinutosVigencia);
+                    }
+                }
+            }
+
+            await unidadDeTrabajo.GuardarCambiosAsync(cancellationToken);
         }
 
         return RespuestaGenerica;

@@ -7,7 +7,6 @@ public class Acceso
     public string Email { get; set; } = string.Empty;
     /// <summary>Nulo en cuentas creadas con un proveedor de identidad (RN-81: debe haber contraseña o proveedor).</summary>
     public string? PasswordHash { get; set; }
-    public bool DebeCambiarPassword { get; set; }
     public bool Verificado { get; set; }
     public DateTime CreadoEn { get; set; }
 
@@ -15,4 +14,5 @@ public class Acceso
     public ICollection<AccesoProveedor> Proveedores { get; set; } = new List<AccesoProveedor>();
     public StaffPlataforma? Staff { get; set; }
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+    public ICollection<VerificacionCorreo> VerificacionesCorreo { get; set; } = new List<VerificacionCorreo>();
 }

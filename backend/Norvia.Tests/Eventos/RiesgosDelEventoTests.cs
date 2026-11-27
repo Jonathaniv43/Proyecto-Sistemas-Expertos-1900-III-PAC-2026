@@ -125,8 +125,9 @@ public sealed class RiesgosDelEventoTests(NorviaApiFactory api)
         var email = $"sst.{Guid.NewGuid():N}@pruebas.hn";
         (await empresa.Cliente.PostAsJsonAsync("/api/vinculos", new
         {
-            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo = "responsable_sst", passwordTemporal = "Temporal#2026"
+            email, primerNombre = "Persona", primerApellido = "Prueba", rolCodigo = "responsable_sst"
         })).EnsureSuccessStatusCode();
+        await Escenario.ActivarCuentaAsync(empresa, email, "Temporal#2026");
         return (empresa, await _escenario.ClienteEmpresaAsync(email, "Temporal#2026", empresa.IdEmpresaCifrado));
     }
 

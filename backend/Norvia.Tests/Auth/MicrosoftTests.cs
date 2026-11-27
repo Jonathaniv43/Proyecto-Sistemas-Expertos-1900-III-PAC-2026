@@ -51,8 +51,6 @@ public sealed class MicrosoftTests(NorviaApiFactory api)
         var login = await api.CreateClient().PostAsJsonAsync("/api/auth/login/empresa/microsoft",
             new { tokenIdentidad = tokenConfirmado, idEmpresa });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
-        var sesion = await Escenario.Json(login);
-        Assert.False(sesion.GetProperty("debeCambiarPassword").GetBoolean());
     }
 
     [Fact]

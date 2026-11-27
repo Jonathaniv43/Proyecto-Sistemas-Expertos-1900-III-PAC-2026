@@ -10,13 +10,13 @@ using Norvia.Tests.Infraestructura;
 
 namespace Norvia.Tests.Auth;
 
-/// <summary>Verificación de cuenta sin token (correo + temporal + nueva; RN-67).</summary>
+/// <summary>Verificación de cuenta sin token (correo + código de 6 dígitos + nueva contraseña; RN-67, RN-86).</summary>
 [Collection(ColeccionApi.Nombre)]
 public sealed class VerificarCuentaTests(NorviaApiFactory api)
 {
     private readonly Escenario _escenario = new(api);
 
-    private const string Temporal = "Temporal#Alta2026";
+    private const string Codigo = "123456";
     private const string Nueva = "SeguraEmpresa9!";
 
     [Fact]
@@ -24,13 +24,10 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
     {
         var (email, idEmpresa) = await CrearAccesoPendienteAsync("VerifOk");
 
-        Assert.Equal(HttpStatusCode.Unauthorized,
-            (await _escenario.LoginEmpresaAsync(email, Temporal, idEmpresa)).StatusCode);
-
         var verificar = await api.CreateClient().PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email,
-            contrasenaTemporal = Temporal,
+            codigo = Codigo,
             contrasenaNueva = Nueva,
             contrasenaNuevaRepetida = Nueva
         });
@@ -41,23 +38,23 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
     }
 
     [Fact]
-    public async Task Temporal_incorrecta_o_email_desconocido_devuelve_credenciales_invalidas()
+    public async Task Codigo_incorrecto_o_email_desconocido_devuelve_error()
     {
         var (email, _) = await CrearAccesoPendienteAsync("VerifBad");
 
-        var malaTemporal = await api.CreateClient().PostAsJsonAsync("/api/auth/cuenta/verificar", new
+        var malCodigo = await api.CreateClient().PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email,
-            contrasenaTemporal = "OtraTemporal9!",
+            codigo = "000000",
             contrasenaNueva = Nueva,
             contrasenaNuevaRepetida = Nueva
         });
-        Assert.Equal(HttpStatusCode.Unauthorized, malaTemporal.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, malCodigo.StatusCode);
 
         var desconocido = await api.CreateClient().PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email = "no.existe@pruebas.hn",
-            contrasenaTemporal = Temporal,
+            codigo = Codigo,
             contrasenaNueva = Nueva,
             contrasenaNuevaRepetida = Nueva
         });
@@ -73,7 +70,7 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
         var ok = await cliente.PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email,
-            contrasenaTemporal = Temporal,
+            codigo = Codigo,
             contrasenaNueva = Nueva,
             contrasenaNuevaRepetida = Nueva
         });
@@ -82,7 +79,7 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
         var otra = await cliente.PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email,
-            contrasenaTemporal = Nueva,
+            codigo = Codigo,
             contrasenaNueva = "OtraSegura9!",
             contrasenaNuevaRepetida = "OtraSegura9!"
         });
@@ -99,7 +96,7 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
         var corta = await api.CreateClient().PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email,
-            contrasenaTemporal = Temporal,
+            codigo = Codigo,
             contrasenaNueva = "corta",
             contrasenaNuevaRepetida = "corta"
         });
@@ -108,7 +105,7 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
         var noCoincide = await api.CreateClient().PostAsJsonAsync("/api/auth/cuenta/verificar", new
         {
             email,
-            contrasenaTemporal = Temporal,
+            codigo = Codigo,
             contrasenaNueva = Nueva,
             contrasenaNuevaRepetida = "OtraSegura9!"
         });
@@ -134,14 +131,13 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
     private async Task<(string Email, string IdEmpresaCifrado)> CrearAccesoPendienteAsync(string nombre)
     {
         using var scope = api.Services.CreateScope();
-        var hasher = scope.ServiceProvider.GetRequiredService<IHasherPassword>();
+        var hashCodigo = scope.ServiceProvider.GetRequiredService<IHashCodigoVerificacion>();
         var cifrador = scope.ServiceProvider.GetRequiredService<ICifradorEmpresaId>();
 
         var empresa = new Empresa { RazonSocial = $"{nombre} S. de R.L.", RTN = RtnUnico(), Estado = EstadoEmpresa.Activa };
         var persona = new Persona { PrimerNombre = "Pendiente", PrimerApellido = nombre };
         var email = $"pendiente.{Guid.NewGuid():N}@pruebas.hn";
-        var acceso = new Acceso { Email = email, Verificado = false, DebeCambiarPassword = true };
-        acceso.PasswordHash = hasher.Hashear(acceso, Temporal);
+        var acceso = new Acceso { Email = email, Verificado = false };
         var vinculo = new VinculoEmpresa
         {
             EmpresaId = empresa.Id,
@@ -150,10 +146,19 @@ public sealed class VerificarCuentaTests(NorviaApiFactory api)
             RolId = Rol.AdminEmpresaId,
             Estado = EstadoVinculo.Activo
         };
+        var verificacion = new VerificacionCorreo
+        {
+            Proposito = PropositoVerificacionCorreo.ActivacionCuenta,
+            Email = email,
+            AccesoId = acceso.Id,
+            CodigoHash = hashCodigo.Hashear(Codigo),
+            ExpiraEn = DateTime.UtcNow.AddMinutes(10),
+            VentanaEnviosExpiraEn = DateTime.UtcNow.AddMinutes(10)
+        };
 
         await using (var db = api.NuevoContexto(empresaId: null))
         {
-            db.AddRange(empresa, persona, new Usuario { PersonaId = persona.Id }, acceso, vinculo);
+            db.AddRange(empresa, persona, new Usuario { PersonaId = persona.Id }, acceso, vinculo, verificacion);
             await db.SaveChangesAsync();
         }
 

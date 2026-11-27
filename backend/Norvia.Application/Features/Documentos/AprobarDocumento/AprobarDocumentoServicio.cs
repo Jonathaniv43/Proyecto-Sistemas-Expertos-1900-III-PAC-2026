@@ -4,6 +4,7 @@ using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Notificaciones;
 using Norvia.Application.Common.Resultados;
 using Norvia.Application.Features.Documentos.DTOs;
+using Norvia.Domain.Entities.Notificaciones;
 using Norvia.Domain.Enums;
 
 namespace Norvia.Application.Features.Documentos.AprobarDocumento;
@@ -24,6 +25,7 @@ public sealed class AprobarDocumentoServicio(
     IReloj reloj,
     ITenantActual sesion,
     Notificador notificador,
+    IEnvioInmediatoNotificacion envioInmediato,
     Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<DocumentoDetalleResponseDto>> EjecutarAsync(Guid documentoId, CancellationToken ct)
@@ -39,6 +41,8 @@ public sealed class AprobarDocumentoServicio(
             ? await repositorio.VinculosActivosAsync(ct)
             : [];
 
+        IReadOnlyList<Notificacion> notificaciones = [];
+
         // La base solo admite una vigente por documento (RN-51) y revisa cada UPDATE por separado: la anterior deja de
         // ser vigente antes de que el borrador lo sea. Los dos pasos se confirman juntos.
         await unidadDeTrabajo.EnTransaccionAsync(async t =>
@@ -51,7 +55,7 @@ public sealed class AprobarDocumentoServicio(
             borrador.Estado = EstadoVersionDocumento.Vigente;
             borrador.AprobadaPorId = vinculoId;
             borrador.AprobadaEn = aprobadaEn;
-            notificador.PoliticaPublicada(borrador.Id, borrador.Documento.Titulo, destinatarios);
+            notificaciones = notificador.PoliticaPublicada(borrador.Id, borrador.Documento.Titulo, destinatarios);
             auditor.Registrar(AccionesAuditoria.DocumentoAprobado, EntidadesAuditoria.Documento, borrador.DocumentoId, new
             {
                 titulo = borrador.Documento.Titulo,
@@ -62,6 +66,8 @@ public sealed class AprobarDocumentoServicio(
             });
             await unidadDeTrabajo.GuardarCambiosAsync(t);
         }, ct);
+
+        foreach (var notificacion in notificaciones) await envioInmediato.IntentarAsync(notificacion.Id, ct);
 
         return await repositorio.DetalleAsync(documentoId, ct);
     }

@@ -97,7 +97,7 @@ public sealed class RegistrarEmpresaMicrosoftServicio(
             };
             var usuario = new Usuario { PersonaId = persona.Id, Activo = true };
             // RN-81 y RN-84: sin contraseña, verificada porque el proveedor ya confirmó el correo.
-            acceso = new Acceso { Email = identidad.Email, Verificado = true, DebeCambiarPassword = false };
+            acceso = new Acceso { Email = identidad.Email, Verificado = true };
             var proveedor = new AccesoProveedor
             {
                 AccesoId = acceso.Id,

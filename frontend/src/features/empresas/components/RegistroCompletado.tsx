@@ -23,13 +23,13 @@ export function RegistroCompletado({ registro }: { registro: RegistrarEmpresaRes
         </h2>
         {registro.correoEnviado ? (
           <p className="text-text-secondary">
-            Te enviamos un correo a <strong className="font-medium text-text-primary">{registro.email}</strong> con tu
-            contraseña temporal. Úsala para activar tu cuenta y elegir tu contraseña definitiva.
+            Te enviamos un correo a <strong className="font-medium text-text-primary">{registro.email}</strong> con un
+            código de 6 dígitos. Úsalo para activar tu cuenta y elegir tu contraseña.
           </p>
         ) : (
           <Aviso tipo="advertencia" titulo="No pudimos enviarte el correo">
-            Tu empresa quedó registrada, pero el correo con tu contraseña temporal no se envió. Comunícate con el equipo
-            de Norvia para activar tu cuenta.
+            Tu empresa quedó registrada, pero el correo con tu código de activación no se envió. Comunícate con el
+            equipo de Norvia para activar tu cuenta.
           </Aviso>
         )}
         <dl className="grid gap-1">

@@ -19,8 +19,6 @@ export interface SesionResponse {
   refreshToken: string
   /** Segundos de vida del access token. */
   expiresIn: number
-  /** La cuenta tiene contraseña temporal: hay que pedir el cambio antes de continuar (HU-114). */
-  debeCambiarPassword: boolean
 }
 
 /**
@@ -46,7 +44,6 @@ export interface UsuarioSesion {
   rol: string | null
   /** VinculoEmpresa de la sesión; solo en sesiones de empresa. */
   vinculoId: string | null
-  debeCambiarPassword: boolean
   /** Correo de la cuenta (claim `email`): a dónde se envía el enlace para cambiar la contraseña (HU-022). */
   email: string | null
   /** Solo en sesiones de empresa iniciadas desde este navegador. */
@@ -119,7 +116,7 @@ function leerClaims(token: string): Record<string, unknown> | null {
   }
 }
 
-function usuarioDe(token: string, debeCambiarPassword: boolean): UsuarioSesion | null {
+function usuarioDe(token: string): UsuarioSesion | null {
   const claims = leerClaims(token)
   if (!claims) return null
   const texto = (valor: unknown) => (typeof valor === 'string' ? valor : null)
@@ -127,7 +124,6 @@ function usuarioDe(token: string, debeCambiarPassword: boolean): UsuarioSesion |
     tipo: claims.tipo_sesion === 'plataforma' ? 'plataforma' : 'empresa',
     rol: texto(claims.role) ?? texto(claims[CLAIM_ROL_LARGO]),
     vinculoId: texto(claims.vinculo_id),
-    debeCambiarPassword,
     email: texto(claims.email),
     empresa: claims.tipo_sesion === 'plataforma' ? null : leerEmpresa(),
   }
@@ -152,7 +148,7 @@ export const sesion = {
     escribir(CLAVE_SESION_ID, sesionIdPropio)
     escribir(CLAVE_EMPRESA, empresa ? JSON.stringify(empresa) : null)
     accessToken = respuesta.accessToken
-    usuario = usuarioDe(respuesta.accessToken, respuesta.debeCambiarPassword)
+    usuario = usuarioDe(respuesta.accessToken)
     escribirRefresh(respuesta.refreshToken)
     avisarCambio()
   },
@@ -162,7 +158,7 @@ export const sesion = {
    * inició sesión en otra empresa), no los usa: termina esta sesión y devuelve false.
    */
   renovar(respuesta: SesionResponse): boolean {
-    const nuevo = usuarioDe(respuesta.accessToken, respuesta.debeCambiarPassword)
+    const nuevo = usuarioDe(respuesta.accessToken)
     const otraSesion = usuario !== null && (nuevo?.vinculoId !== usuario.vinculoId || nuevo?.tipo !== usuario.tipo)
     if (otraSesion) {
       // El refresh nuevo pertenece a la otra pestaña: se conserva para ella.
@@ -185,14 +181,6 @@ export const sesion = {
     escribir(CLAVE_EMPRESA, JSON.stringify(empresa))
     usuario = { ...usuario, empresa }
     avisarCambio()
-  },
-
-  /** Marca que ya se cambió la contraseña temporal (HU-114). */
-  marcarContrasenaCambiada() {
-    if (usuario?.debeCambiarPassword) {
-      usuario = { ...usuario, debeCambiarPassword: false }
-      avisarCambio()
-    }
   },
 
   /**

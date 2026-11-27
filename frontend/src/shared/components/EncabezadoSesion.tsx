@@ -27,12 +27,10 @@ export function EncabezadoSesion({ usuario, acciones }: { usuario: UsuarioSesion
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {acciones}
-        {!usuario.debeCambiarPassword && (
-          <Link to="/cuenta/contrasena" className={clasesBoton('secundario')}>
-            <KeyRound aria-hidden size={16} strokeWidth={1.5} />
-            Cambiar contraseña
-          </Link>
-        )}
+        <Link to="/cuenta/contrasena" className={clasesBoton('secundario')}>
+          <KeyRound aria-hidden size={16} strokeWidth={1.5} />
+          Cambiar contraseña
+        </Link>
         <Boton
           variante="secundario"
           cargando={cerrando}

@@ -11,7 +11,6 @@ public class AccesoConfiguration : IEntityTypeConfiguration<EntidadAcceso>
         b.HasKey(a => a.Id);
         b.Property(a => a.Email).HasMaxLength(254).IsRequired();
         b.Property(a => a.PasswordHash).HasMaxLength(255);
-        b.Property(a => a.DebeCambiarPassword).PorDefectoFalse();
         b.Property(a => a.Verificado).PorDefectoFalse();
         b.Property(a => a.CreadoEn).FechaDelServidor();
 

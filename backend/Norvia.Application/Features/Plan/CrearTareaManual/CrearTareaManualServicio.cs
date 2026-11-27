@@ -21,6 +21,7 @@ public sealed class CrearTareaManualServicio(
     IReloj reloj,
     ITenantActual sesion,
     Notificador notificador,
+    IEnvioInmediatoNotificacion envioInmediato,
     Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<TareaResponseDto>> EjecutarAsync(CrearTareaManualRequestDto request, CancellationToken ct)
@@ -41,10 +42,11 @@ public sealed class CrearTareaManualServicio(
             CreadaPorId = vinculoId
         };
         repositorio.Agregar(tarea);
-        notificador.TareaAsignada(tarea);
+        var notificacion = notificador.TareaAsignada(tarea);
         auditor.Registrar(AccionesAuditoria.TareaCreada, EntidadesAuditoria.Tarea, tarea.Id,
             new { tarea.Titulo, tarea.Prioridad, tarea.ResponsableId, tarea.FechaLimite });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
+        if (notificacion is not null) await envioInmediato.IntentarAsync(notificacion.Id, ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);
     }

@@ -27,12 +27,13 @@ public sealed class RegistrarEmpresaRepositorio(NorviaDbContext db) : IRegistrar
             .Select(r => (short?)r.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public void Agregar(Empresa empresa, Persona persona, Usuario usuario, Acceso acceso, VinculoEmpresa vinculo)
+    public void Agregar(Empresa empresa, Persona persona, Usuario usuario, Acceso acceso, VinculoEmpresa vinculo, VerificacionCorreo verificacion)
     {
         db.Empresa.Add(empresa);
         db.Persona.Add(persona);
         db.Usuario.Add(usuario);
         db.Acceso.Add(acceso);
         db.VinculoEmpresa.Add(vinculo);
+        db.VerificacionCorreo.Add(verificacion);
     }
 }
