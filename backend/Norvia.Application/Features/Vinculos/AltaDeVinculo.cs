@@ -112,7 +112,7 @@ public sealed class AltaDeVinculo(
                 ["RolNombre"] = rolNombre,
                 ["Codigo"] = codigo,
                 ["Minutos"] = VentanaEnvioCodigo.MinutosVigencia.ToString(),
-                ["UrlActivacion"] = $"{urlBase}/activar-cuenta"
+                ["UrlActivacion"] = $"{urlBase}/verificar-cuenta?correo={Uri.EscapeDataString(acceso.Email)}"
             },
             ct);
         if (renderizado is null) return false;
