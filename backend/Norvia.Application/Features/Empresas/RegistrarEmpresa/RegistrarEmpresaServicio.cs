@@ -107,7 +107,8 @@ public sealed class RegistrarEmpresaServicio(
         var idEmpresaCifrado = cifrador.Cifrar(empresa.Id);
         var nombreRepresentante = persona.NombreCompleto;
         var urlBase = correoOpciones.Value.UrlBaseFrontend.TrimEnd('/');
-        var urlActivacion = $"{urlBase}/activar-cuenta";
+        var urlActivacion =
+            $"{urlBase}/verificar-cuenta?correo={Uri.EscapeDataString(acceso.Email)}&empresa={Uri.EscapeDataString(idEmpresaCifrado)}";
 
         var variables = new Dictionary<string, string>
         {
