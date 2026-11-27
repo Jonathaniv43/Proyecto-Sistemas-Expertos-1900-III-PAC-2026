@@ -1,4 +1,4 @@
-import { BookOpen, Building2, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { BookOpen, Building2, ScrollText, Megaphone, Siren, ClipboardCheck, ClipboardList, Contact, FileText, History, ListChecks, ListTodo, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -41,6 +41,10 @@ export function InicioPage() {
             <BookOpen aria-hidden size={16} strokeWidth={1.5} />
             Catálogos
           </Link>
+          <Link to="/empresas" className={clasesBoton('secundario')}>
+            <Building2 aria-hidden size={16} strokeWidth={1.5} />
+            Empresas
+          </Link>
         </div>
       </SiRol>
       <SiRol roles={ROLES_EMPRESA}>
@@ -52,6 +56,10 @@ export function InicioPage() {
           <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
             <Megaphone aria-hidden size={16} strokeWidth={1.5} />
             Reportar un evento
+          </Link>
+          <Link to="/documentos-vigentes" className={clasesBoton('secundario')}>
+            <ScrollText aria-hidden size={16} strokeWidth={1.5} />
+            Políticas y procedimientos
           </Link>
           <SiRol roles={ROLES_TAREAS}>
             <Link to="/mis-tareas" className={clasesBoton('secundario')}>
@@ -79,9 +87,17 @@ export function InicioPage() {
             <ListChecks aria-hidden size={16} strokeWidth={1.5} />
             Plan de trabajo
           </Link>
+          <Link to="/documentos" className={clasesBoton('secundario')}>
+            <FileText aria-hidden size={16} strokeWidth={1.5} />
+            Documentos
+          </Link>
           <Link to="/empresa" className={clasesBoton('secundario')}>
             <Building2 aria-hidden size={16} strokeWidth={1.5} />
             Perfil de la empresa
+          </Link>
+          <Link to="/auditoria" className={clasesBoton('secundario')}>
+            <History aria-hidden size={16} strokeWidth={1.5} />
+            Auditoría
           </Link>
         </div>
       </SiRol>

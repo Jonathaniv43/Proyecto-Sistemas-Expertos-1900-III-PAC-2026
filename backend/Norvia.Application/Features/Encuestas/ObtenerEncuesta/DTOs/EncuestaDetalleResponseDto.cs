@@ -11,4 +11,5 @@ public sealed record EncuestaDetalleResponseDto(
     DateTime CreadaEn,
     DateTime? CerradaEn,
     EncuestaVersionResponseDto? VersionPublicada,
-    EncuestaVersionResponseDto? VersionBorrador);
+    EncuestaVersionResponseDto? VersionBorrador,
+    IReadOnlyList<VersionEncuestaResumenResponseDto> VersionesPublicadas);

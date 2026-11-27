@@ -4,6 +4,8 @@ using Norvia.API.Extensiones;
 using Norvia.Application.Features.Empresas.ActualizarPerfilEmpresa;
 using Norvia.Application.Features.Empresas.ActualizarPerfilEmpresa.DTOs;
 using Norvia.Application.Features.Empresas.DTOs;
+using Norvia.Application.Features.Empresas.ListarEmpresasPlataforma;
+using Norvia.Application.Features.Empresas.ListarEmpresasPlataforma.DTOs;
 using Norvia.Application.Features.Empresas.ListarRubrosRegistro;
 using Norvia.Application.Features.Empresas.ListarRubrosRegistro.DTOs;
 using Norvia.Application.Features.Empresas.ObtenerPerfilEmpresa;
@@ -87,4 +89,14 @@ public sealed class EmpresasController : ControllerBase
         [FromServices] ActualizarPerfilEmpresaServicio servicio,
         CancellationToken cancellationToken) =>
         (await servicio.EjecutarAsync(request, cancellationToken)).AHttp(this);
+
+    /// <summary>HU-024: empresas registradas en la plataforma y cantidad de vínculos vigentes (sin datos SST).</summary>
+    [HttpGet("/api/plataforma/empresas")]
+    [ProducesResponseType(typeof(IReadOnlyList<EmpresaResumenResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ListarPlataforma(
+        [FromQuery] FiltrosEmpresasPlataformaDto filtros,
+        [FromServices] ListarEmpresasPlataformaServicio servicio,
+        CancellationToken cancellationToken) =>
+        (await servicio.EjecutarAsync(filtros, cancellationToken)).AHttp(this);
 }

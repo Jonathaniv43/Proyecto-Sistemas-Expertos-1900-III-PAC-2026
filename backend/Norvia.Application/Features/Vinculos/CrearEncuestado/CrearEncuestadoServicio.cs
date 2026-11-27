@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -10,7 +11,7 @@ namespace Norvia.Application.Features.Vinculos.CrearEncuestado;
 /// Alta individual de un encuestado (HU-115, RN-74): rol fijo <c>encuestado</c>, que solo responde encuestas,
 /// ve sus notificaciones y consulta las políticas vigentes.
 /// </summary>
-public sealed class CrearEncuestadoServicio(AltaDeVinculo alta, IUnidadDeTrabajo unidadDeTrabajo) : IServicioCasoDeUso
+public sealed class CrearEncuestadoServicio(AltaDeVinculo alta, IUnidadDeTrabajo unidadDeTrabajo, Auditor auditor) : IServicioCasoDeUso
 {
     public const string RolCodigo = "encuestado";
 
@@ -21,9 +22,11 @@ public sealed class CrearEncuestadoServicio(AltaDeVinculo alta, IUnidadDeTrabajo
         var preparado = await alta.PrepararAsync(datos, Rol.EncuestadoId, request.PasswordTemporal, generarSiFalta: true, ct);
         if (!preparado.EsExito) return preparado.Error!;
 
+        var (vinculo, persona, acceso, cuentaNueva, generada) = preparado.Valor;
+        auditor.Registrar(AccionesAuditoria.EncuestadoCreado, EntidadesAuditoria.VinculoEmpresa, vinculo.Id,
+            new { persona = persona.NombreCompleto, email = acceso.Email, rol = RolCodigo, cuentaNueva });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
-        var (vinculo, persona, acceso, cuentaNueva, generada) = preparado.Valor;
         return new CrearEncuestadoResponseDto(vinculo.Id, persona.Id, acceso.Email, persona.NombreCompleto, RolCodigo,
             vinculo.Estado, vinculo.CreadoEn, cuentaNueva, generada);
     }

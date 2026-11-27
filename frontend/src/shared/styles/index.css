@@ -699,6 +699,13 @@
     overflow-y: auto;
   }
 
+  /* Editor de documento (design-system.md § Editor de documento): el área de texto crece con el documento, sin desplazamiento propio. */
+  .editor-documento .area-texto {
+    min-height: 384px;
+    max-height: none;
+    overflow-y: hidden;
+  }
+
   /* Tabla (design-system.css § Tabla): contenedor con borde y desplazamiento horizontal en pantallas chicas. */
   /* position: relative: así lo absoluto de adentro (p. ej. un encabezado sr-only) no se escapa del scroll y no ensancha la página. */
   .tabla-contenedor {
@@ -760,5 +767,72 @@
     .spinner {
       animation-duration: 2s;
     }
+  }
+}
+
+/*
+ * Documento vigente (HU-074) y matriz de riesgos (HU-075): "Descargar PDF" abre la impresión del navegador.
+ * Se imprime solo el área imprimible correspondiente, sin barra de la app ni botones de navegación.
+ */
+@page matriz {
+  size: landscape;
+  margin: 12mm;
+}
+
+@media print {
+  body:has(.documento-imprimible) *,
+  body:has(.matriz-imprimible) * {
+    visibility: hidden;
+  }
+
+  /* Mismo prefijo que la regla de arriba, para que pese más que ella. */
+  body:has(.documento-imprimible) .documento-imprimible,
+  body:has(.documento-imprimible) .documento-imprimible *,
+  body:has(.matriz-imprimible) .matriz-imprimible,
+  body:has(.matriz-imprimible) .matriz-imprimible * {
+    visibility: visible;
+  }
+
+  .documento-imprimible,
+  .matriz-imprimible {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+
+  .matriz-imprimible {
+    page: matriz;
+  }
+
+  .documento-imprimible .no-imprimir,
+  .matriz-imprimible .no-imprimir {
+    display: none;
+  }
+
+  .documento-imprimible article {
+    border: 0;
+    padding: 0;
+  }
+
+  .matriz-imprimible .tabla-contenedor {
+    overflow: visible;
+  }
+
+  .matriz-imprimible .tabla td,
+  .matriz-imprimible .tabla th {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    white-space: normal;
+  }
+
+  .matriz-imprimible .tabla tr,
+  .matriz-imprimible .bloque-impresion {
+    break-inside: avoid;
+  }
+
+  .matriz-imprimible .cuadro-riesgo,
+  .matriz-imprimible .insignia {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

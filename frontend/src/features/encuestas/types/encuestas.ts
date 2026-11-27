@@ -91,6 +91,16 @@ export interface VersionEncuesta {
   preguntas: PreguntaEncuestaVersion[]
 }
 
+/** Resumen de una versión publicada o reemplazada de una encuesta (HU-030, HU-034). */
+export interface VersionEncuestaResumen {
+  id: string
+  numeroVersion: number
+  estado: EstadoVersion
+  publicadaEn: string | null
+  totalRespuestasAnonimas: number
+  categorias: string[]
+}
+
 /** GET /api/encuestas/{id} */
 export interface EncuestaDetalle {
   id: string
@@ -102,6 +112,7 @@ export interface EncuestaDetalle {
   cerradaEn: string | null
   versionPublicada: VersionEncuesta | null
   versionBorrador: VersionEncuesta | null
+  versionesPublicadas: VersionEncuestaResumen[]
 }
 
 /** PUT /api/encuestas/{id}/borrador: el estado completo del borrador (secciones + preguntas). */
@@ -156,12 +167,12 @@ export interface ResponderEncuestaRequest {
   respuestas: { preguntaId: string; opcionId?: string; textoLibre?: string; opcionIds?: string[] }[]
 }
 
-/** GET /api/encuestas/{id}/reporte (HU-032): resultados anónimos de la versión publicada vigente. */
+/** GET /api/encuestas/{id}/reporte (HU-032, HU-034): resultados anónimos de la versión indicada o vigente. */
 export interface ReporteEncuesta {
   encuestaId: string
   /** Personas que respondieron la encuesta (todas sus versiones). */
   totalParticipaciones: number
-  /** Respuestas registradas en la versión vigente. */
+  /** Respuestas registradas en la versión consultada. */
   totalRespuestasAnonimas: number
   periodoDesde: string | null
   periodoHasta: string | null
@@ -176,6 +187,86 @@ export interface ReporteEncuesta {
     /** Respuesta breve: los textos, sin autor. */
     textosBreves: string[] | null
   }[]
+  versionId: string
+  numeroVersion: number
+  estadoVersion: EstadoVersion
+}
+
+/** GET /api/encuestas/historial (HU-034) */
+export interface EncuestaHistorial {
+  id: string
+  titulo: string
+  estado: EstadoEncuesta
+  creadaEn: string
+  cerradaEn: string | null
+  ultimaPublicacionEn: string | null
+  categorias: string[]
+  resumen: {
+    participaciones: number
+    respuestasAnonimas: number
+  }
+  versiones: VersionEncuestaResumen[]
+}
+
+export interface LadoComparacion {
+  encuestaId: string
+  titulo: string
+  estadoEncuesta: EstadoEncuesta
+  versionId: string
+  numeroVersion: number
+  estadoVersion: EstadoVersion
+  publicadaEn: string | null
+  cerradaEn: string | null
+  participaciones: number
+  totalRespuestasAnonimas: number
+  periodoDesde: string | null
+  periodoHasta: string | null
+  detalleOculto: boolean
+  categorias: string[]
+  cantidadRespuestasBreves: number
+}
+
+export interface OpcionComparada {
+  etiqueta: string
+  cantidadBase: number
+  porcentajeBase: number
+  cantidadComparar: number
+  porcentajeComparar: number
+  diferenciaPuntosPorcentuales: number
+}
+
+export interface PreguntaComparada {
+  claveEmparejamiento: 'catalogo' | 'texto' | string
+  textoBase: string
+  textoComparar: string
+  tipoRespuesta: TipoRespuesta | string
+  respondieronBase: number
+  respondieronComparar: number
+  opciones: OpcionComparada[]
+}
+
+export interface PeligroComparado {
+  peligroId: string
+  peligroNombre: string
+  respuestasBase: number
+  porcentajeBase: number
+  estadoEnEncuestaBase: EstadoRiesgo | null
+  respuestasComparar: number
+  porcentajeComparar: number
+  estadoEnEncuestaComparar: EstadoRiesgo | null
+  diferenciaPuntosPorcentuales: number
+}
+
+/** GET /api/encuestas/comparacion (HU-034) */
+export interface ComparacionEncuestas {
+  base: LadoComparacion
+  comparar: LadoComparacion
+  minimoRespuestas: number
+  comparacionOculta: boolean
+  preguntasComparadas: PreguntaComparada[]
+  preguntasSoloBase: ReporteEncuesta['preguntas']
+  preguntasSoloComparar: ReporteEncuesta['preguntas']
+  peligrosComparados: PeligroComparado[]
 }
 
 /** Estado del riesgo que registra cada sugerencia (RN-18). Se confirma o descarta en HU-035. */

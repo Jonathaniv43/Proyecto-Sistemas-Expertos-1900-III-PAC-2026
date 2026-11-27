@@ -31,8 +31,23 @@ public static class CatalogoPermisos
         Empresa("notificacion.leer", "Marcar una notificación como leída", "PATCH", "api/notificaciones/{id}/lectura",
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
-        // Acceso mínimo del encuestado (además de pendientes/responder).
-        Empresa("politica.vigentes", "Consultar políticas vigentes", "GET", "api/politicas/vigentes", "encuestado"),
+        // HU-070: generar políticas y procedimientos desde una plantilla (Responsable SST); el admin consulta.
+        Empresa("documento.plantillas", "Ver las plantillas de documento del rubro", "GET", "api/documentos/plantillas", "responsable_sst"),
+        Empresa("documento.generar", "Generar un documento desde una plantilla", "POST", "api/documentos/generacion", "responsable_sst"),
+        Empresa("documento.listar", "Ver los documentos de la empresa", "GET", "api/documentos", "admin_empresa", "responsable_sst"),
+        Empresa("documento.ver", "Ver un documento", "GET", "api/documentos/{id}", "admin_empresa", "responsable_sst"),
+        // HU-071: solo el Responsable SST edita el borrador.
+        Empresa("documento.editar", "Editar el borrador de un documento", "PUT", "api/documentos/{id}/borrador", "responsable_sst"),
+        Empresa("documento.aprobar", "Aprobar el borrador de un documento", "POST", "api/documentos/{id}/aprobacion", "responsable_sst"),
+        // HU-073: crear versión nueva (solo Responsable SST) y consultar versiones anteriores (también el admin).
+        Empresa("documento.version.crear", "Crear una versión nueva de un documento", "POST", "api/documentos/{id}/versiones", "responsable_sst"),
+        Empresa("documento.version.listar", "Ver el historial de versiones de un documento", "GET", "api/documentos/{id}/versiones", "admin_empresa", "responsable_sst"),
+        Empresa("documento.version.ver", "Ver una versión de un documento", "GET", "api/documentos/{id}/versiones/{versionId}", "admin_empresa", "responsable_sst"),
+        // HU-074: las versiones vigentes, para todas las personas de la empresa (también el encuestado, RN-74).
+        Empresa("documento.vigentes", "Ver los documentos vigentes", "GET", "api/documentos/vigentes",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        Empresa("documento.vigente.ver", "Ver un documento vigente", "GET", "api/documentos/vigentes/{id}",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
         // HU-033: peligros sugeridos por las respuestas.
         Empresa("encuesta.peligros_sugeridos", "Ver peligros sugeridos por la encuesta", "GET", "api/encuestas/{id}/peligros-sugeridos",
@@ -50,6 +65,9 @@ public static class CatalogoPermisos
         Empresa("riesgo.crear", "Agregar un riesgo a la matriz", "POST", "api/riesgos", "admin_empresa", "responsable_sst"),
         // HU-038: mapa de la matriz.
         Empresa("riesgo.matriz", "Ver el mapa de la matriz de riesgos", "GET", "api/riesgos/matriz", "admin_empresa", "responsable_sst"),
+        // HU-075: reporte consolidado de la matriz de riesgos para imprimir o PDF.
+        Empresa("riesgo.matriz.reporte", "Obtener reporte de la matriz de riesgos", "GET", "api/riesgos/matriz/reporte",
+            "admin_empresa", "responsable_sst"),
         // HU-037: evaluar un riesgo.
         Empresa("riesgo.evaluar", "Evaluar un riesgo", "POST", "api/riesgos/{id}/evaluaciones", "admin_empresa", "responsable_sst"),
         // HU-042: plan de trabajo.
@@ -122,6 +140,15 @@ public static class CatalogoPermisos
         Empresa("encuesta.publicar", "Publicar versión de encuesta", "POST", "api/encuestas/{id}/versiones/{versionId}/publicacion",
             "admin_empresa", "responsable_sst"),
         Empresa("encuesta.cerrar", "Cerrar encuesta", "POST", "api/encuestas/{id}/cierre", "admin_empresa", "responsable_sst"),
+        // HU-034: historial y comparación de encuestas y versiones (RN-12, D8).
+        Empresa("encuesta.historial", "Consultar encuestas anteriores", "GET", "api/encuestas/historial",
+            "admin_empresa", "responsable_sst"),
+        Empresa("encuesta.comparar", "Comparar resultados entre encuestas o versiones", "GET", "api/encuestas/comparacion",
+            "admin_empresa", "responsable_sst"),
+
+        // HU-099: consulta del registro inalterable de auditoría.
+        Empresa("auditoria.listar", "Consultar auditoría de acciones", "GET", "api/auditoria",
+            "admin_empresa", "responsable_sst"),
 
         // HU-047: reporte anónimo (RN-27, RN-74) y consulta básica de eventos (M6).
         // Pendiente HU-100: evento.evidencias (POST api/eventos/{id}/evidencias).
@@ -170,6 +197,10 @@ public static class CatalogoPermisos
         Plataforma("catalogo.plantilla_tarea.crear", "Crear plantilla de tarea", "POST", "api/plantillas-tarea", "admin_plataforma"),
         Plataforma("catalogo.plantilla_tarea.actualizar", "Editar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}", "admin_plataforma"),
         Plataforma("catalogo.plantilla_tarea.estado", "Activar o desactivar plantilla de tarea", "PATCH", "api/plantillas-tarea/{id}/estado", "admin_plataforma"),
+
+        // HU-024: consultar empresas registradas y personas con acceso vigente (sin datos SST, alcance plataforma).
+        Plataforma("empresa.listar", "Consultar empresas registradas", "GET", "api/plataforma/empresas",
+            "admin_plataforma", "soporte_plataforma"),
 
         // TEMPORALES para probar el middleware (borrar junto con PruebaController).
         Plataforma("prueba.plataforma", "Prueba plataforma", "GET", "api/prueba/plataforma", "admin_plataforma"),

@@ -10,7 +10,8 @@ using Norvia.Infrastructure.Opciones;
 namespace Norvia.Infrastructure.Persistence.Seed;
 
 /// <summary>
-/// Carga el contenido SST inicial (<see cref="CatalogoSst"/>, HU-097) en los catálogos globales.
+/// Carga el contenido SST inicial (<see cref="CatalogoSst"/>, HU-097) en los catálogos globales, también las
+/// plantillas de documento iniciales (HU-070).
 /// <list type="bullet">
 /// <item><b>Solo agrega lo que falta:</b> cada elemento tiene un Id estable derivado de su clave, así una carga repetida
 /// no duplica nada y no pisa lo que el staff haya editado o desactivado (HU-023).</item>
@@ -129,6 +130,20 @@ public sealed class CatalogoSstSeeder(NorviaDbContext db, IOptions<CatalogoSstOp
                 db.PreguntaExploratoria.Add(pregunta);
                 agregados++;
             }
+        }
+
+        // Plantillas de documento (HU-070): si ya hay una con el mismo código (cargada a mano), se respeta.
+        var plantillasDocumento = await db.PlantillaDocumento.AsNoTracking().Select(p => new { p.Id, p.Codigo }).ToListAsync(ct);
+        foreach (var d in CatalogoSst.PlantillasDocumento)
+        {
+            var id = IdDe($"plantilla_documento:{d.Codigo}");
+            if (plantillasDocumento.Any(p => p.Id == id || p.Codigo == d.Codigo)) continue;
+            db.PlantillaDocumento.Add(new PlantillaDocumento
+            {
+                Id = id, Codigo = d.Codigo, Titulo = d.Titulo, TipoDocumento = d.Tipo,
+                RubroId = d.RubroCodigo is null ? null : rubros[d.RubroCodigo], Contenido = d.Contenido
+            });
+            agregados++;
         }
 
         if (agregados > 0) await db.SaveChangesAsync(ct);

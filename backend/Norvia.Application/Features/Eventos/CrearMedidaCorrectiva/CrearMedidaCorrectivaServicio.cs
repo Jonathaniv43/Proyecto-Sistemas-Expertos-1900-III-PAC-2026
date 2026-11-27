@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Notificaciones;
@@ -20,7 +21,8 @@ public sealed class CrearMedidaCorrectivaServicio(
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
     ITenantActual sesion,
-    Notificador notificador) : IServicioCasoDeUso
+    Notificador notificador,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<MedidaCorrectivaResponseDto>> EjecutarAsync(
         Guid eventoId, CrearMedidaCorrectivaRequestDto request, CancellationToken ct)
@@ -45,6 +47,8 @@ public sealed class CrearMedidaCorrectivaServicio(
         };
         repositorio.Agregar(tarea);
         notificador.TareaAsignada(tarea);
+        auditor.Registrar(AccionesAuditoria.MedidaCorrectivaCreada, EntidadesAuditoria.Accidente, evento.Id,
+            new { tareaId = tarea.Id, tarea.Titulo, tarea.Prioridad, tarea.ResponsableId });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);

@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -22,7 +23,8 @@ public sealed class CrearRiesgoServicio(
     ICrearRiesgoRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<RiesgoResponseDto>> EjecutarAsync(CrearRiesgoRequestDto request, CancellationToken ct)
     {
@@ -53,6 +55,8 @@ public sealed class CrearRiesgoServicio(
             RevisadoEn = await reloj.AhoraAsync(ct)
         };
         repositorio.Agregar(riesgo);
+        auditor.Registrar(AccionesAuditoria.RiesgoCreado, EntidadesAuditoria.RiesgoEmpresa, riesgo.Id,
+            new { peligro = peligro?.Nombre ?? riesgo.DescripcionPeligro, riesgo.Actividad, riesgo.AccidenteId });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return new RiesgoResponseDto(riesgo.Id, riesgo.Estado, riesgo.PeligroId, peligro?.Nombre, peligro?.Clasificacion, riesgo.DescripcionPeligro,

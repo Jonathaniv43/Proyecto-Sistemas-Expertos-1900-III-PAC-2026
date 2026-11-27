@@ -126,3 +126,39 @@ export interface CrearControlRequest {
   descripcion: string
   plantillaId?: string
 }
+
+/** Datos empresariales de cabecera en el reporte oficial de matriz (HU-075). */
+export interface EmpresaReporteMatriz {
+  razonSocial: string
+  rtn: string
+  rubroNombre: string | null
+  actividadEconomica: string | null
+  direccion: string | null
+  trabajadoresPermanentes: number | null
+  fechaInicioOperaciones: string | null
+}
+
+/** Riesgo confirmado con su evaluación inicial, residual y lista completa de controles (HU-075). */
+export interface RiesgoReporteMatriz {
+  id: string
+  peligroId: string | null
+  peligroNombre: string | null
+  peligroClasificacion: ClasificacionPeligro | null
+  descripcionPeligro: string | null
+  actividad: string | null
+  encuestaId: string | null
+  encuestaTitulo: string | null
+  accidenteId: string | null
+  creadoEn: string
+  evaluacion: Evaluacion | null
+  evaluacionResidual: Evaluacion | null
+  controles: Control[]
+}
+
+/** GET /api/riesgos/matriz/reporte (HU-075): reporte generado al solicitarse sin persistirse. */
+export interface ReporteMatriz {
+  generadoEn: string
+  empresa: EmpresaReporteMatriz
+  matriz: MatrizRiesgos
+  riesgos: RiesgoReporteMatriz[]
+}

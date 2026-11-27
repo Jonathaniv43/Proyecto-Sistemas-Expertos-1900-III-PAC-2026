@@ -1,3 +1,5 @@
+using Norvia.Domain.Enums;
+
 namespace Norvia.Application.Features.Encuestas.ObtenerReporteEncuesta.DTOs;
 
 public sealed record DistribucionOpcionResponseDto(
@@ -20,4 +22,7 @@ public sealed record ReporteEncuestaResponseDto(
     DateOnly? PeriodoDesde,
     DateOnly? PeriodoHasta,
     bool DetalleOculto,
-    IReadOnlyList<PreguntaReporteResponseDto> Preguntas);
+    IReadOnlyList<PreguntaReporteResponseDto> Preguntas,
+    Guid VersionId,
+    int NumeroVersion,
+    EstadoVersionEncuesta EstadoVersion);

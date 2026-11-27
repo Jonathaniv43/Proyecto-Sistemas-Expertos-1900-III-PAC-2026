@@ -7,10 +7,13 @@ import { RestablecerContrasenaPage } from '@/features/auth/pages/RestablecerCont
 import { SolicitarCambioContrasenaPage } from '@/features/auth/pages/SolicitarCambioContrasenaPage'
 import { VerificarCuentaPage } from '@/features/auth/pages/VerificarCuentaPage'
 import { PerfilEmpresaPage } from '@/features/empresas/pages/PerfilEmpresaPage'
+import { EmpresasRegistradasPage } from '@/features/empresas/pages/EmpresasRegistradasPage'
 import { RegistroEmpresaPage } from '@/features/empresas/pages/RegistroEmpresaPage'
 import { InicioPage } from '@/features/inicio/pages/InicioPage'
+import { CompararEncuestasPage } from '@/features/encuestas/pages/CompararEncuestasPage'
 import { EncuestaPage } from '@/features/encuestas/pages/EncuestaPage'
 import { EncuestasPage } from '@/features/encuestas/pages/EncuestasPage'
+import { HistorialEncuestasPage } from '@/features/encuestas/pages/HistorialEncuestasPage'
 import { MisEncuestasPage } from '@/features/encuestas/pages/MisEncuestasPage'
 import { ResponderEncuestaPage } from '@/features/encuestas/pages/ResponderEncuestaPage'
 import { ResultadosEncuestaPage } from '@/features/encuestas/pages/ResultadosEncuestaPage'
@@ -25,6 +28,14 @@ import { PeligrosPage } from '@/features/catalogos/pages/PeligrosPage'
 import { PreguntaPage } from '@/features/catalogos/pages/PreguntaPage'
 import { PreguntasPage } from '@/features/catalogos/pages/PreguntasPage'
 import { RubrosPage } from '@/features/catalogos/pages/RubrosPage'
+import { DocumentoPage as DocumentoEmpresaPage } from '@/features/documentos/pages/DocumentoPage'
+import { DocumentosPage as DocumentosEmpresaPage } from '@/features/documentos/pages/DocumentosPage'
+import { DocumentoVigentePage } from '@/features/documentos/pages/DocumentoVigentePage'
+import { DocumentosVigentesPage } from '@/features/documentos/pages/DocumentosVigentesPage'
+import { AuditoriaPage } from '@/features/auditoria/pages/AuditoriaPage'
+import { EditarBorradorPage } from '@/features/documentos/pages/EditarBorradorPage'
+import { GenerarDocumentoPage } from '@/features/documentos/pages/GenerarDocumentoPage'
+import { VersionDocumentoPage } from '@/features/documentos/pages/VersionDocumentoPage'
 import { EstadisticasEventosPage } from '@/features/eventos/pages/EstadisticasEventosPage'
 import { EventoPage } from '@/features/eventos/pages/EventoPage'
 import { EventosPage } from '@/features/eventos/pages/EventosPage'
@@ -33,6 +44,7 @@ import { MisTareasPage } from '@/features/plan/pages/MisTareasPage'
 import { NotificacionesPage } from '@/features/notificaciones/pages/NotificacionesPage'
 import { NuevaTareaPage } from '@/features/plan/pages/NuevaTareaPage'
 import { PlanTrabajoPage } from '@/features/plan/pages/PlanTrabajoPage'
+import { ImprimirMatrizPage } from '@/features/riesgos/pages/ImprimirMatrizPage'
 import { NuevoRiesgoPage } from '@/features/riesgos/pages/NuevoRiesgoPage'
 import { RiesgoPage } from '@/features/riesgos/pages/RiesgoPage'
 import { RiesgosPage } from '@/features/riesgos/pages/RiesgosPage'
@@ -98,14 +110,18 @@ export const router = createBrowserRouter([
               { path: 'mis-encuestas/:id', element: <ResponderEncuestaPage /> },
               // HU-117: la bandeja propia (RN-79).
               { path: 'notificaciones', element: <NotificacionesPage /> },
+              // HU-074: los documentos vigentes, para todas las personas de la empresa.
+              { path: 'documentos-vigentes', element: <DocumentosVigentesPage /> },
+              { path: 'documentos-vigentes/:id', element: <DocumentoVigentePage /> },
               // HU-047: cualquier persona de la empresa reporta, de forma anónima.
               { path: 'eventos/reportar', element: <ReportarEventoPage /> },
             ],
           },
           {
-            // HU-023: catálogos de la plataforma (staff de Norvia; soporte solo consulta).
+            // HU-023 y HU-024: catálogos y consulta de empresas de la plataforma (staff de Norvia).
             element: <RequiereRol roles={ROLES_PLATAFORMA} />,
             children: [
+              { path: 'empresas', element: <EmpresasRegistradasPage /> },
               {
                 path: 'catalogos',
                 element: <CatalogosLayout />,
@@ -135,6 +151,7 @@ export const router = createBrowserRouter([
               { path: 'empresa', element: <PerfilEmpresaPage /> },
               { path: 'riesgos', element: <RiesgosPage /> },
               { path: 'riesgos/nuevo', element: <NuevoRiesgoPage /> },
+              { path: 'riesgos/imprimir', element: <ImprimirMatrizPage /> },
               { path: 'riesgos/:id', element: <RiesgoPage /> },
               { path: 'plan-de-trabajo', element: <PlanTrabajoPage /> },
               { path: 'eventos', element: <EventosPage /> },
@@ -143,8 +160,24 @@ export const router = createBrowserRouter([
               { path: 'plan-de-trabajo/nueva', element: <NuevaTareaPage /> },
               { path: 'encuestas', element: <EncuestasPage /> },
               { path: 'encuestas/nueva', element: <NuevaEncuestaPage /> },
+              { path: 'encuestas/historial', element: <HistorialEncuestasPage /> },
+              { path: 'encuestas/comparar', element: <CompararEncuestasPage /> },
               { path: 'encuestas/:id', element: <EncuestaPage /> },
               { path: 'encuestas/:id/resultados', element: <ResultadosEncuestaPage /> },
+              // HU-070 y HU-073: políticas, procedimientos y sus versiones; el admin consulta.
+              { path: 'documentos', element: <DocumentosEmpresaPage /> },
+              { path: 'documentos/:id', element: <DocumentoEmpresaPage /> },
+              // HU-099: registro inalterable de acciones; solo gestión.
+              { path: 'auditoria', element: <AuditoriaPage /> },
+              { path: 'documentos/:id/versiones/:versionId', element: <VersionDocumentoPage /> },
+            ],
+          },
+          {
+            // HU-070 y HU-071: solo el Responsable SST genera documentos y edita el borrador.
+            element: <RequiereRol roles={[ROLES.responsableSst]} />,
+            children: [
+              { path: 'documentos/generar', element: <GenerarDocumentoPage /> },
+              { path: 'documentos/:id/editar', element: <EditarBorradorPage /> },
             ],
           },
         ],

@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -21,7 +22,8 @@ public sealed class EvaluarRiesgoResidualServicio(
     IEvaluarRiesgoResidualRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<EvaluacionResponseDto>> EjecutarAsync(Guid riesgoId, EvaluarRiesgoResidualRequestDto request, CancellationToken ct)
     {
@@ -42,6 +44,14 @@ public sealed class EvaluarRiesgoResidualServicio(
             EvaluadoEn = await reloj.AhoraAsync(ct)
         };
         repositorio.Agregar(evaluacion);
+        auditor.Registrar(AccionesAuditoria.RiesgoEvaluadoResidual, EntidadesAuditoria.EvaluacionRiesgo, evaluacion.Id, new
+        {
+            riesgoId,
+            evaluacion.Tipo,
+            evaluacion.Probabilidad,
+            evaluacion.Severidad,
+            nivel = evaluacion.Probabilidad * evaluacion.Severidad
+        });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return EvaluacionResponseDto.De(evaluacion, await repositorio.NombreDelVinculoAsync(vinculoId, ct));

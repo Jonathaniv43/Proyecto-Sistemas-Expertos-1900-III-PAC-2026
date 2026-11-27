@@ -4,7 +4,9 @@ using Norvia.Application.Common.Interfaces;
 using Norvia.Domain.Common;
 using Norvia.Domain.Entities.Acceso;
 using Norvia.Domain.Entities.Accidentes;
+using Norvia.Domain.Entities.Auditoria;
 using Norvia.Domain.Entities.Catalogos;
+using Norvia.Domain.Entities.Documentos;
 using Norvia.Domain.Entities.Empresas;
 using Norvia.Domain.Entities.Encuestas;
 using Norvia.Domain.Entities.Notificaciones;
@@ -84,8 +86,15 @@ public class NorviaDbContext(DbContextOptions<NorviaDbContext> options, ITenantA
     // Plan de trabajo (M5)
     public DbSet<Tarea> Tarea => Set<Tarea>();
 
+    // Documentos (M9)
+    public DbSet<Documento> Documento => Set<Documento>();
+    public DbSet<VersionDocumento> VersionDocumento => Set<VersionDocumento>();
+
     // Notificaciones (M11)
     public DbSet<Notificacion> Notificacion => Set<Notificacion>();
+
+    // Auditoría (HU-099)
+    public DbSet<RegistroAuditoria> RegistroAuditoria => Set<RegistroAuditoria>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

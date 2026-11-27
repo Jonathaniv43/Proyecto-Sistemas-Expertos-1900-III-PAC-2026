@@ -8,12 +8,16 @@ namespace Norvia.Infrastructure.Persistence.Repositorios.Encuestas;
 
 public sealed class ObtenerReporteEncuestaRepositorio(NorviaDbContext db) : IObtenerReporteEncuestaRepositorio
 {
-    public Task<Encuesta?> BuscarConVersionPublicadaAsync(Guid encuestaId, CancellationToken ct) =>
+    public Task<Encuesta?> BuscarConVersionAsync(Guid encuestaId, Guid? versionId, CancellationToken ct) =>
         db.Encuesta.AsNoTracking()
-            .Include(e => e.Versiones.Where(v => v.Estado == EstadoVersionEncuesta.Publicada))
+            .Include(e => e.Versiones.Where(v => versionId == null
+                ? v.Estado == EstadoVersionEncuesta.Publicada
+                : v.Id == versionId))
                 .ThenInclude(v => v.Preguntas)
                     .ThenInclude(p => p.Opciones)
-            .Include(e => e.Versiones.Where(v => v.Estado == EstadoVersionEncuesta.Publicada))
+            .Include(e => e.Versiones.Where(v => versionId == null
+                ? v.Estado == EstadoVersionEncuesta.Publicada
+                : v.Id == versionId))
                 .ThenInclude(v => v.Preguntas)
                     .ThenInclude(p => p.TipoRespuestaPregunta)
             .AsSplitQuery()

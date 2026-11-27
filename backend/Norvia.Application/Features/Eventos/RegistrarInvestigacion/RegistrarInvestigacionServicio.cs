@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -14,7 +15,7 @@ namespace Norvia.Application.Features.Eventos.RegistrarInvestigacion;
 /// No se cierra solo: cerrar es aparte y pide además medidas correctivas (RN-28).
 /// </summary>
 public sealed class RegistrarInvestigacionServicio(
-    IRegistrarInvestigacionRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj) : IServicioCasoDeUso
+    IRegistrarInvestigacionRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj, Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<EventoDetalleResponseDto>> EjecutarAsync(Guid id, RegistrarInvestigacionRequestDto request, CancellationToken ct)
     {
@@ -40,6 +41,8 @@ public sealed class RegistrarInvestigacionServicio(
         investigacion.InvestigadaPorId = investigador;
         investigacion.FechaInvestigacion = fecha;
         evento.Estado = EstadoAccidente.EnInvestigacion;
+        auditor.Registrar(AccionesAuditoria.EventoInvestigado, EntidadesAuditoria.Accidente, evento.Id,
+            new { evento.Tipo, fechaInvestigacion = fecha, investigadaPorId = investigador });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
 
         return await repositorio.DetalleAsync(evento.Id, ct);

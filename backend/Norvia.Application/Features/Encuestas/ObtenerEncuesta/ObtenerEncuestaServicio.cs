@@ -16,6 +16,7 @@ public sealed class ObtenerEncuestaServicio(IObtenerEncuestaRepositorio reposito
 
         var publicada = encuesta.Versiones.FirstOrDefault(v => v.Estado == EstadoVersionEncuesta.Publicada);
         var borrador = encuesta.Versiones.FirstOrDefault(v => v.Estado == EstadoVersionEncuesta.Borrador);
+        var versionesPublicadas = await repositorio.ListarVersionesPublicadasAsync(id, ct);
 
         return new EncuestaDetalleResponseDto(
             encuesta.Id,
@@ -25,6 +26,7 @@ public sealed class ObtenerEncuestaServicio(IObtenerEncuestaRepositorio reposito
             encuesta.CreadaEn,
             encuesta.CerradaEn,
             publicada is null ? null : EncuestaVersionResponseDto.De(publicada),
-            borrador is null ? null : EncuestaVersionResponseDto.De(borrador));
+            borrador is null ? null : EncuestaVersionResponseDto.De(borrador),
+            versionesPublicadas);
     }
 }

@@ -26,7 +26,9 @@ public class NotificacionConfiguration : IEntityTypeConfiguration<Notificacion>
         b.HasOne(n => n.Tarea).WithMany()
             .HasForeignKey(n => new { n.EmpresaId, n.TareaId })
             .HasPrincipalKey(t => new { t.EmpresaId, t.Id });
-        // VersionDocumentoId: la FK compuesta hacia VersionDocumento se agrega con HU-070, cuando exista la tabla.
+        b.HasOne(n => n.VersionDocumento).WithMany()
+            .HasForeignKey(n => new { n.EmpresaId, n.VersionDocumentoId })
+            .HasPrincipalKey(v => new { v.EmpresaId, v.Id });
 
         // El origen corresponde al tipo: una política tiene versión y no tarea; una tarea, al revés.
         b.Check("Origen",

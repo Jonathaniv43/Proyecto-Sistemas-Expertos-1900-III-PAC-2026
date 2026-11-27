@@ -158,4 +158,85 @@ public sealed class AislamientoBaseDatosTests(NorviaApiFactory api)
         var pg = Assert.IsType<PostgresException>(error.InnerException);
         Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, pg.SqlState);
     }
+
+    [Fact]
+    public async Task El_filtro_global_y_fk_compuesta_protegen_auditoria_entre_empresas()
+    {
+        var a = await _escenario.CrearEmpresaAsync("AudA");
+        var b = await _escenario.CrearEmpresaAsync("AudB");
+
+        Guid registroBId;
+        await using (var dbB = api.NuevoContexto(b.EmpresaId))
+        {
+            var regB = new Norvia.Domain.Entities.Auditoria.RegistroAuditoria
+            {
+                VinculoEmpresaId = b.AdminVinculoId,
+                Accion = "vinculo_actualizado",
+                Entidad = "VinculoEmpresa",
+                EntidadId = b.AdminVinculoId
+            };
+            dbB.RegistroAuditoria.Add(regB);
+            await dbB.SaveChangesAsync();
+            registroBId = regB.Id;
+        }
+
+        await using (var dbA = api.NuevoContexto(a.EmpresaId))
+        {
+            var idsEnA = await dbA.RegistroAuditoria.Select(r => r.Id).ToListAsync();
+            Assert.DoesNotContain(registroBId, idsEnA);
+        }
+
+        // FK compuesta (EmpresaId, VinculoEmpresaId) -> VinculoEmpresa impide vincular un autor de B a un registro de A.
+        await using var dbCruce = api.NuevoContexto(a.EmpresaId);
+        dbCruce.RegistroAuditoria.Add(new Norvia.Domain.Entities.Auditoria.RegistroAuditoria
+        {
+            EmpresaId = a.EmpresaId,
+            VinculoEmpresaId = b.AdminVinculoId,
+            Accion = "vinculo_actualizado",
+            Entidad = "VinculoEmpresa",
+            EntidadId = b.AdminVinculoId
+        });
+
+        var error = await Assert.ThrowsAsync<DbUpdateException>(() => dbCruce.SaveChangesAsync());
+        var pg = Assert.IsType<PostgresException>(error.InnerException);
+        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, pg.SqlState);
+    }
+
+    [Fact]
+    public async Task ProtegerRegistroAuditoriaInterceptor_impide_modificar_o_eliminar_registros()
+    {
+        var a = await _escenario.CrearEmpresaAsync("AudInmutable");
+        Guid id;
+        await using (var db = api.NuevoContexto(a.EmpresaId))
+        {
+            var reg = new Norvia.Domain.Entities.Auditoria.RegistroAuditoria
+            {
+                VinculoEmpresaId = a.AdminVinculoId,
+                Accion = "vinculo_actualizado",
+                Entidad = "VinculoEmpresa",
+                EntidadId = a.AdminVinculoId
+            };
+            db.RegistroAuditoria.Add(reg);
+            await db.SaveChangesAsync();
+            id = reg.Id;
+        }
+
+        await using (var dbMod = api.NuevoContexto(a.EmpresaId))
+        {
+            var fila = await dbMod.RegistroAuditoria.SingleAsync(r => r.Id == id);
+            fila.Accion = "accion_alterada";
+            await Assert.ThrowsAsync<InvalidOperationException>(() => dbMod.SaveChangesAsync());
+        }
+
+        await using (var dbDel = api.NuevoContexto(a.EmpresaId))
+        {
+            var fila = await dbDel.RegistroAuditoria.SingleAsync(r => r.Id == id);
+            dbDel.RegistroAuditoria.Remove(fila);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => dbDel.SaveChangesAsync());
+        }
+
+        await using var dbCheck = api.NuevoContexto(a.EmpresaId);
+        var intacto = await dbCheck.RegistroAuditoria.AsNoTracking().SingleAsync(r => r.Id == id);
+        Assert.Equal("vinculo_actualizado", intacto.Accion);
+    }
 }

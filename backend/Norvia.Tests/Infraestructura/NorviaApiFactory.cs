@@ -82,7 +82,7 @@ public sealed class NorviaApiFactory : WebApplicationFactory<Program>, IAsyncLif
         var tenant = new TenantFijo(empresaId);
         var opciones = new DbContextOptionsBuilder<NorviaDbContext>()
             .UseNpgsql(CadenaConexion)
-            .AddInterceptors(new AsignarEmpresaInterceptor(tenant))
+            .AddInterceptors(new AsignarEmpresaInterceptor(tenant), new ProtegerRegistroAuditoriaInterceptor())
             .Options;
         return new NorviaDbContext(opciones, tenant);
     }

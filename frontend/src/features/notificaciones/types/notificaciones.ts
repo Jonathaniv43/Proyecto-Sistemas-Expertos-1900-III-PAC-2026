@@ -13,6 +13,8 @@ export interface Notificacion {
   leidaEn: string | null
   tareaId: string | null
   versionDocumentoId: string | null
+  /** Documento de la política publicada: abre su versión vigente (HU-074). */
+  documentoId: string | null
 }
 
 export interface MisNotificaciones {

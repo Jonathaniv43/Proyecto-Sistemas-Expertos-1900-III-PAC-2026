@@ -15,7 +15,8 @@ public sealed class ListarMisNotificacionesRepositorio(NorviaDbContext db) : ILi
             .ThenByDescending(n => n.Id)
             .Take(limite)
             .Select(n => new NotificacionResponseDto(
-                n.Id, n.Tipo, n.Titulo, n.Mensaje, n.CreadaEn, n.LeidaEn, n.TareaId, n.VersionDocumentoId))
+                n.Id, n.Tipo, n.Titulo, n.Mensaje, n.CreadaEn, n.LeidaEn, n.TareaId, n.VersionDocumentoId,
+                n.VersionDocumento != null ? n.VersionDocumento.DocumentoId : null))
             .ToListAsync(ct);
 
     public Task<int> ContarNoLeidasAsync(Guid destinatarioId, CancellationToken ct) =>

@@ -77,14 +77,23 @@ const TEXTOS: [patron: string, texto: string][] = [
   ['/mis-encuestas', 'Volver a mis encuestas'],
   ['/mis-encuestas/:id', 'Volver a la encuesta'],
   ['/empresa', 'Volver al perfil de la empresa'],
+  ['/empresas', 'Volver a empresas'],
   ['/riesgos', 'Volver a la matriz'],
   ['/riesgos/nuevo', 'Volver a agregar riesgo'],
+  ['/riesgos/imprimir', 'Volver a imprimir la matriz'],
   ['/riesgos/:id', 'Volver al riesgo'],
   ['/encuestas', 'Volver a encuestas'],
   ['/encuestas/nueva', 'Volver a nueva encuesta'],
+  ['/encuestas/historial', 'Volver a encuestas anteriores'],
+  ['/encuestas/comparar', 'Volver a comparar resultados'],
   ['/encuestas/:id', 'Volver a la encuesta'],
   ['/encuestas/:id/resultados', 'Volver a los resultados'],
   ['/notificaciones', 'Volver a notificaciones'],
+  ['/documentos', 'Volver a documentos'],
+  ['/documentos/:id', 'Volver al documento'],
+  ['/documentos-vigentes', 'Volver a políticas y procedimientos'],
+  ['/documentos-vigentes/:id', 'Volver al documento'],
+  ['/auditoria', 'Volver a auditoría'],
 ]
 
 function textoPara(anterior: URL, actual: Location): string | undefined {

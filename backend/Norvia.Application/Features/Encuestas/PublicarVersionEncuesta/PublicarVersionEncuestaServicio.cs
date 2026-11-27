@@ -1,3 +1,4 @@
+using Norvia.Application.Common.Auditoria;
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
@@ -14,7 +15,8 @@ public sealed class PublicarVersionEncuestaServicio(
     IPublicarVersionEncuestaRepositorio repositorio,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj,
-    ITenantActual sesion) : IServicioCasoDeUso
+    ITenantActual sesion,
+    Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<EncuestaVersionResponseDto>> EjecutarAsync(
         Guid encuestaId, Guid versionId, CancellationToken ct)
@@ -49,6 +51,13 @@ public sealed class PublicarVersionEncuestaServicio(
         objetivo.PublicadaEn = ahora;
         encuesta.Estado = EstadoEncuesta.Publicada;
 
+        auditor.Registrar(AccionesAuditoria.EncuestaPublicada, EntidadesAuditoria.Encuesta, encuesta.Id, new
+        {
+            titulo = encuesta.Titulo,
+            versionId = objetivo.Id,
+            numeroVersion = objetivo.NumeroVersion,
+            versionReemplazadaId = anterior?.Id
+        });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
         return EncuestaVersionResponseDto.De(objetivo);
     }
