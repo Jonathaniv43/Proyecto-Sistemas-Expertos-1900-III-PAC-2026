@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { TriangleAlert } from 'lucide-react'
 import { AreaTexto } from '@/shared/components/ui/AreaTexto'
 import { Aviso } from '@/shared/components/ui/Aviso'
+import { Volver } from '@/shared/components/ui/Volver'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoFecha } from '@/shared/components/ui/CampoFecha'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
@@ -35,6 +36,7 @@ export function NuevaTareaPage() {
 
   return (
     <div className="grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/plan-de-trabajo" texto="Volver al plan de trabajo" titulo="Nueva tarea" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Nueva tarea</h1>
         <p className="text-text-secondary">

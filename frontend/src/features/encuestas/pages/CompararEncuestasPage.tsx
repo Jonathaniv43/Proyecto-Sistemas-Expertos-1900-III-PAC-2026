@@ -130,7 +130,7 @@ export function CompararEncuestasPage() {
       <Volver a="/encuestas/historial" texto="Volver a encuestas anteriores" titulo="Comparar resultados" ancho="layout" />
 
       <header className="grid gap-2">
-        <h1 className="text-xl font-semibold">Comparar resultados de encuestas</h1>
+        <h1 className="text-xl font-semibold">Comparar resultados</h1>
         <p className="flex items-start gap-2 text-text-secondary">
           <ShieldCheck aria-hidden size={16} strokeWidth={1.5} className="mt-1 shrink-0" />
           Compara cómo cambian las respuestas y la exposición a peligros entre encuestas o versiones distintas (RN-12, D8).
