@@ -76,7 +76,7 @@ export function PlanTrabajoPage() {
   const error = propuesta.error ?? tareas.error
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="grid gap-1">
           <h1 className="text-xl font-semibold">Plan de trabajo</h1>

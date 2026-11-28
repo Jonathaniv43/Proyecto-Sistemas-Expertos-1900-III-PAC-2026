@@ -40,7 +40,7 @@ export function DocumentoPage() {
   const listo = !!rubros.datos && (!id || !!documento)
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <div>
         <Link to="/catalogos/documentos" className="inline-flex items-center gap-1 text-sm">
           <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />

@@ -8,7 +8,6 @@ import { CampoFecha } from '@/shared/components/ui/CampoFecha'
 import { CampoSelect } from '@/shared/components/ui/CampoSelect'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { Insignia } from '@/shared/components/ui/Insignia'
-import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { hoyHonduras, textoAIso } from '@/shared/validacion'
@@ -99,8 +98,7 @@ export function AuditoriaPage() {
   const datos = peticion.datos
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Auditoría" ancho="layout" />
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Auditoría de acciones</h1>
         <p className="text-text-secondary">

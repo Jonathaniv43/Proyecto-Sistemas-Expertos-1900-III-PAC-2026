@@ -34,7 +34,7 @@ export function NuevaTareaPage() {
   }, [cargar])
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Nueva tarea</h1>
         <p className="text-text-secondary">

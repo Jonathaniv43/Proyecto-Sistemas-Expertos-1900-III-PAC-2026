@@ -26,7 +26,7 @@ export function ResponderEncuestaPage() {
 
   if (pendientes.error) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />
@@ -41,7 +41,7 @@ export function ResponderEncuestaPage() {
   }
   if (pendientes.cargando || !pendientes.datos) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
         <div aria-busy="true" aria-label="Cargando encuesta" className="grid gap-3">
           {cargandoVisible && [0, 1, 2].map((i) => <div key={i} className="h-table-row animate-pulse rounded-sm bg-bg-subtle motion-reduce:animate-none" />)}
@@ -57,7 +57,7 @@ export function ResponderEncuestaPage() {
 /** La encuesta no está entre las pendientes: ya se respondió, se cerró o no existe para esta persona. */
 function YaNoPendiente() {
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
       <section className="flex flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
         <ClipboardX aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
@@ -100,7 +100,7 @@ function Formulario({ encuesta }: { encuesta: EncuestaPendiente }) {
 
   if (enviada) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/mis-encuestas" texto="Volver a mis encuestas" />
         <section className="flex flex-col items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <CircleCheck aria-hidden size={32} strokeWidth={1.5} className="text-success-icon" />
@@ -118,7 +118,7 @@ function Formulario({ encuesta }: { encuesta: EncuestaPendiente }) {
   const bloqueada = cambio !== undefined
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/mis-encuestas" texto="Volver a mis encuestas" titulo={encuesta.titulo} />
 
       <form

@@ -5,7 +5,6 @@ import { Indicador } from '@/shared/components/datos/Indicador'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { Insignia } from '@/shared/components/ui/Insignia'
-import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { listarEmpresasPlataforma } from '../api/plataforma'
@@ -45,8 +44,7 @@ export function EmpresasRegistradasPage() {
   const totalVinculos = empresas?.reduce((acumulado, e) => acumulado + e.vinculosActivos, 0) ?? 0
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Empresas registradas" ancho="layout" />
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Empresas registradas</h1>
         <p className="text-text-secondary">

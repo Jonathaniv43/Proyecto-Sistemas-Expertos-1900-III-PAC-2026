@@ -71,7 +71,7 @@ export function ResultadosEncuestaPage() {
     (reporte.error && reporte.error.codigo !== 'encuestas.sin_version_publicada' ? reporte.error : undefined)
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a={`/encuestas/${id}`} texto="Volver a la encuesta" titulo={encuesta.datos?.titulo} />
 
       {errorBloqueante ? (

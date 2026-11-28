@@ -34,7 +34,7 @@ export function NuevoRiesgoPage() {
   }, [cargar])
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/riesgos" texto="Volver a la matriz" titulo="Agregar riesgo" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Agregar riesgo</h1>

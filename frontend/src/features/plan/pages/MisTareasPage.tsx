@@ -65,7 +65,7 @@ export function MisTareasPage() {
   const terminadas = tareas.filter((t) => !abierta(t))
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Mis tareas</h1>
         <p className="text-text-secondary">Las tareas que tienes a cargo. Marca tu avance para que el plan esté al día.</p>

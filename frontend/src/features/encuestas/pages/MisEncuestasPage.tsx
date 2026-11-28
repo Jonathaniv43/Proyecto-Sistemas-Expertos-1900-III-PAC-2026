@@ -5,7 +5,6 @@ import { Boton } from '@/shared/components/ui/Boton'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { Volver } from '@/shared/components/ui/Volver'
 import { listarPendientes } from '../api/encuestas'
 
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
@@ -21,8 +20,7 @@ export function MisEncuestasPage() {
   }, [cargar])
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Mis encuestas" />
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Mis encuestas</h1>
         <p className="text-text-secondary">Tus respuestas son anónimas: nadie en la empresa puede ver quién respondió qué.</p>

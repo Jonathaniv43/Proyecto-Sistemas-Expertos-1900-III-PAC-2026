@@ -50,7 +50,7 @@ export function RiesgoPage() {
   if (peticion.error?.status === 404) return <NotFoundPage />
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/riesgos" texto="Volver a la matriz" titulo={riesgo && nombrePeligro(riesgo)} />
 
       {peticion.error && !riesgo ? (

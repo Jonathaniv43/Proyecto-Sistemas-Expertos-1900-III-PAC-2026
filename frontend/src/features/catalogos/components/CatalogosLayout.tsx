@@ -17,7 +17,7 @@ const SECCIONES = [
 export function CatalogosLayout() {
   const puedeEditar = usePuedeEditar()
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Catálogos</h1>
         <p className="text-text-secondary">

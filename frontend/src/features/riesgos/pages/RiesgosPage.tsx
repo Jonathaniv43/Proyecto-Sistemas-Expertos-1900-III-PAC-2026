@@ -11,7 +11,6 @@ import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { Volver } from '@/shared/components/ui/Volver'
 import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { listarRiesgos, obtenerMatriz } from '../api/riesgos'
 import { EtiquetaRiesgo } from '@/shared/riesgo/EtiquetaRiesgo'
@@ -101,8 +100,7 @@ export function RiesgosPage() {
   const sinRiesgos = matriz.datos?.total === 0 && !hayFiltros && riesgos.datos?.length === 0
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Matriz de riesgos" ancho="layout" />
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="grid gap-1">
           <h1 className="text-xl font-semibold">Matriz de riesgos</h1>
@@ -325,7 +323,7 @@ function Origen({ riesgo }: { riesgo: Riesgo }) {
   if (!riesgo.encuestaId) return <span className="text-text-secondary">Agregado a mano</span>
   return (
     <span className="text-text-secondary">
-      Encuesta <Link to={`/encuestas/${riesgo.encuestaId}/resultados`} state={estadoVolver('/riesgos', 'Volver a la matriz')}>{riesgo.encuestaTitulo ?? 'sin título'}</Link>
+      Encuesta <Link to={`/encuestas/${riesgo.encuestaId}/resultados`} state={estadoVolver('/riesgos', 'Volver a la matriz de riesgos')}>{riesgo.encuestaTitulo ?? 'sin título'}</Link>
     </span>
   )
 }

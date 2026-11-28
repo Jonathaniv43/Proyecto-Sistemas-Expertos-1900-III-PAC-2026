@@ -126,7 +126,7 @@ export function CompararEncuestasPage() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-layout gap-6">
+    <div className="grid w-full max-w-layout gap-6">
       <Volver a="/encuestas/historial" texto="Volver a encuestas anteriores" titulo="Comparar resultados" ancho="layout" />
 
       <header className="grid gap-2">

@@ -28,7 +28,7 @@ export function ReportarEventoPage() {
   const [vez, setVez] = useState(0)
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Reportar un evento</h1>
         <p className="text-text-secondary">

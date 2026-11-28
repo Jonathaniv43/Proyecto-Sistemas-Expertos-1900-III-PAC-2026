@@ -52,19 +52,24 @@ import { AgregarPersonaPage } from '@/features/vinculos/pages/AgregarPersonaPage
 import { PersonasPage } from '@/features/vinculos/pages/PersonasPage'
 import { AppLayout } from '@/shared/components/AppLayout'
 import { ErrorInesperado } from '@/shared/components/ErrorInesperado'
-import { NotFoundPage } from '@/shared/components/NotFoundPage'
+import { LayoutPublico } from '@/shared/components/layout'
 import { registrarHistorial } from '@/shared/components/ui/historialVolver'
 import { ROLES, ROLES_EMPRESA, ROLES_GESTION, ROLES_PLATAFORMA, ROLES_TAREAS } from '@/shared/sesion'
 import { RequiereRol } from './rutas/RequiereRol'
+import { RutaNoEncontrada } from './rutas/RutaNoEncontrada'
 import { RutaPrivada } from './rutas/RutaPrivada'
 import { SoloSinSesion } from './rutas/SoloSinSesion'
 
 /**
  * Rutas de la app. Solo app/ importa páginas de las features.
  *
+ * Layouts (design-system.md § Layouts y navegación): las públicas van en LayoutPublico; las privadas, en el layout
+ * de sesión que pone RutaPrivada (menú del rol). Cada pantalla nueva se agrega también a shared/navegacion/pantallas.ts.
+ *
  * - Públicas: landing.
  * - SoloSinSesion: login, registro de empresa y activación de cuenta (con sesión activa redirige).
  * - RutaPrivada: requieren sesión; sin ella llevan al login.
+ * - RutaNoEncontrada: el 404, en el layout de la sesión si la hay.
  * - RequiereRol (./rutas/RequiereRol, dentro de RutaPrivada): solo para ciertos roles, p. ej.
  *   { element: <RequiereRol roles={ROLES_GESTION} />, children: [{ path: 'personas', element: <PersonasPage /> }] }
  */
@@ -73,19 +78,24 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <ErrorInesperado />,
     children: [
-      { index: true, element: <LandingPage /> },
-      // HU-022: el enlace del correo; funciona con o sin sesión.
-      { path: 'restablecer-contrasena', element: <RestablecerContrasenaPage /> },
       {
-        element: <SoloSinSesion />,
+        element: <LayoutPublico />,
         children: [
-          { path: 'login', element: <LoginPage /> },
-          { path: 'plataforma', element: <LoginPlataformaPage /> },
-          { path: 'registro', element: <RegistroEmpresaPage /> },
-          // D29, HU-119/120: retorno de Microsoft (OAuth con PKCE).
-          { path: 'auth/microsoft/callback', element: <MicrosoftCallbackPage /> },
-          { path: 'verificar-cuenta', element: <VerificarCuentaPage /> },
-          { path: 'recuperar-contrasena', element: <SolicitarCambioContrasenaPage /> },
+          { index: true, element: <LandingPage /> },
+          // HU-022: el enlace del correo; funciona con o sin sesión.
+          { path: 'restablecer-contrasena', element: <RestablecerContrasenaPage /> },
+          {
+            element: <SoloSinSesion />,
+            children: [
+              { path: 'login', element: <LoginPage /> },
+              { path: 'plataforma', element: <LoginPlataformaPage /> },
+              { path: 'registro', element: <RegistroEmpresaPage /> },
+              // D29, HU-119/120: retorno de Microsoft (OAuth con PKCE).
+              { path: 'auth/microsoft/callback', element: <MicrosoftCallbackPage /> },
+              { path: 'verificar-cuenta', element: <VerificarCuentaPage /> },
+              { path: 'recuperar-contrasena', element: <SolicitarCambioContrasenaPage /> },
+            ],
+          },
         ],
       },
       {
@@ -180,7 +190,7 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      { path: '*', element: <NotFoundPage /> },
+      { path: '*', element: <RutaNoEncontrada /> },
     ],
   },
 ])

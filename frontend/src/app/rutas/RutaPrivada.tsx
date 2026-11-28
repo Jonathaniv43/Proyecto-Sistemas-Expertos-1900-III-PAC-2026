@@ -1,12 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { CampanaNotificaciones } from '@/features/notificaciones/components/CampanaNotificaciones'
-import { EncabezadoSesion } from '@/shared/components/EncabezadoSesion'
 import { type EstadoLogin, leerUltimaEmpresa, rutaActual, rutaLogin, useSesion } from '@/shared/sesion'
+import { MarcoSesion } from './MarcoSesion'
 import { SesionSinConexion, VerificandoSesion } from './PantallasSesion'
 
 /**
- * Rutas que requieren sesión. Sin sesión (o cuando vence) lleva al login recordando a dónde
- * volver; el login muestra por qué se pidió ingresar de nuevo.
+ * Rutas que requieren sesión, dentro del layout de sesión (menú del rol). Sin sesión (o cuando vence) lleva al
+ * login recordando a dónde volver; el login muestra por qué se pidió ingresar de nuevo.
  */
 export function RutaPrivada() {
   const sesion = useSesion()
@@ -14,9 +13,17 @@ export function RutaPrivada() {
 
   switch (sesion.estado) {
     case 'verificando':
-      return <VerificandoSesion />
+      return (
+        <div className="pagina mx-auto w-full max-w-layout">
+          <VerificandoSesion />
+        </div>
+      )
     case 'sin_conexion':
-      return <SesionSinConexion />
+      return (
+        <div className="pagina mx-auto w-full max-w-layout">
+          <SesionSinConexion />
+        </div>
+      )
     case 'sin_sesion': {
       // Se vuelve a la página donde estaba solo si la sesión se cortó sola (venció, se reemplazó o
       // nunca hubo). Tras cerrar sesión o cambiar la contraseña, el próximo ingreso empieza en el inicio:
@@ -30,14 +37,9 @@ export function RutaPrivada() {
     }
     case 'activa':
       return (
-        <>
-          <EncabezadoSesion
-            usuario={sesion.usuario}
-            // HU-117: solo las sesiones de empresa tienen bandeja.
-            acciones={sesion.usuario.tipo === 'empresa' && <CampanaNotificaciones />}
-          />
+        <MarcoSesion usuario={sesion.usuario}>
           <Outlet />
-        </>
+        </MarcoSesion>
       )
   }
 }

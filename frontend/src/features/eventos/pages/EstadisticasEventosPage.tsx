@@ -73,7 +73,7 @@ export function EstadisticasEventosPage() {
   const datos = peticion.datos
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <div>
         <Link to="/eventos" className="inline-flex items-center gap-1 text-sm">
           <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />

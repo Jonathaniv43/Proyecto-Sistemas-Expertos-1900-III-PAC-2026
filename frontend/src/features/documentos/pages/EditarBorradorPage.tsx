@@ -33,7 +33,7 @@ export function EditarBorradorPage() {
   const d = peticion.datos?.id === id ? peticion.datos : undefined
 
   return (
-    <div className="mx-auto grid w-full max-w-layout gap-6">
+    <div className="grid w-full max-w-layout gap-6">
       <Volver a={`/documentos/${id}`} texto="Volver al documento" titulo="Editar borrador" ancho="layout" />
       {peticion.error && !d ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
