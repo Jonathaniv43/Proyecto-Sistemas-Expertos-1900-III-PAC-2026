@@ -2,6 +2,7 @@ import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { useFormulario } from '@/shared/forms'
+import { esIdentidadVencida } from '@/shared/microsoft/flujo'
 import { vincularMicrosoft } from '../api/microsoft'
 import { vincularMicrosoftEsquema } from '../schemas/microsoft'
 
@@ -10,10 +11,12 @@ interface VincularMicrosoftFormProps {
   email: string
   /** La cuenta de Microsoft quedó vinculada: sigue el flujo que la persona había empezado. */
   onVinculada: () => void
+  /** El token de Microsoft venció antes de confirmar: quien usa el formulario ofrece volver a Microsoft. */
+  onVencida: () => void
 }
 
 /** HU-120, RN-83: el correo ya tiene cuenta con contraseña; se confirma esa contraseña para vincular Microsoft. */
-export function VincularMicrosoftForm({ tokenIdentidad, email, onVinculada }: VincularMicrosoftFormProps) {
+export function VincularMicrosoftForm({ tokenIdentidad, email, onVinculada, onVencida }: VincularMicrosoftFormProps) {
   const {
     register,
     formState: { errors, isSubmitting },
@@ -31,7 +34,13 @@ export function VincularMicrosoftForm({ tokenIdentidad, email, onVinculada }: Vi
       noValidate
       className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6"
       onSubmit={enviar(async ({ password }) => {
-        await vincularMicrosoft({ tokenIdentidad, password })
+        try {
+          await vincularMicrosoft({ tokenIdentidad, password })
+        } catch (causa) {
+          if (!esIdentidadVencida(causa)) throw causa
+          onVencida()
+          return
+        }
         onVinculada()
       })}
     >

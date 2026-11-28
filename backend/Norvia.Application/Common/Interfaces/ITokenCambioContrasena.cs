@@ -10,11 +10,12 @@ public sealed record EnlaceCambioContrasena(Guid AccesoId, DateTime ExpiraUtc, b
 /// </summary>
 public interface ITokenCambioContrasena
 {
-    string Crear(Guid accesoId, string passwordHashActual, DateTime expiraUtc);
+    /// <param name="passwordHashActual">Nulo si la cuenta todavía no tiene contraseña (creada con Microsoft): el enlace sirve para agregarla.</param>
+    string Crear(Guid accesoId, string? passwordHashActual, DateTime expiraUtc);
 
     /// <summary>null si el token está mal formado o la firma no es válida.</summary>
     EnlaceCambioContrasena? Leer(string token);
 
     /// <summary>true si el sello corresponde a la contraseña que el Acceso tiene ahora.</summary>
-    bool SelloVigente(EnlaceCambioContrasena enlace, string passwordHashActual);
+    bool SelloVigente(EnlaceCambioContrasena enlace, string? passwordHashActual);
 }

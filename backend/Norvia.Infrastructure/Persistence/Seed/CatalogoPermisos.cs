@@ -30,6 +30,9 @@ public static class CatalogoPermisos
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
         Empresa("notificacion.leer", "Marcar una notificación como leída", "PATCH", "api/notificaciones/{id}/lectura",
             "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
+        // RN-78: reintentar de inmediato el correo de una notificación propia.
+        Empresa("notificacion.reintentar_correo", "Reintentar el correo de una notificación", "POST", "api/notificaciones/{id}/reintentar-correo",
+            "admin_empresa", "responsable_sst", "colaborador", "encuestado"),
 
         // HU-070: generar políticas y procedimientos desde una plantilla (Responsable SST); el admin consulta.
         Empresa("documento.plantillas", "Ver las plantillas de documento del rubro", "GET", "api/documentos/plantillas", "responsable_sst"),

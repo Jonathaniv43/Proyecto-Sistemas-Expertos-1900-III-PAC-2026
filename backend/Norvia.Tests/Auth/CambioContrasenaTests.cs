@@ -125,6 +125,32 @@ public sealed partial class CambioContrasenaTests(NorviaApiFactory api)
         Assert.Equal(empresa.AdminEmail, jwt.Claims.Single(c => c.Type == JwtRegisteredClaimNames.Email).Value);
     }
 
+    [Fact]
+    public async Task Una_cuenta_sin_contrasena_como_la_de_Microsoft_puede_agregar_una_con_el_enlace()
+    {
+        var empresa = await _escenario.CrearEmpresaAsync("AgregarContrasena");
+        await using (var db = api.NuevoContexto(empresaId: null))
+        {
+            // Igual que una cuenta creada con Microsoft (D29): verificada y sin contraseña.
+            var acceso = await db.Acceso.SingleAsync(a => a.Email == empresa.AdminEmail);
+            acceso.PasswordHash = null;
+            await db.SaveChangesAsync();
+        }
+
+        Assert.Equal(HttpStatusCode.Accepted, (await Solicitar(empresa.AdminEmail)).StatusCode);
+        Assert.Contains("agregar una contraseña", api.Correos.Para(empresa.AdminEmail)[^1].CuerpoHtml);
+        var token = TokenDe(empresa.AdminEmail);
+
+        Assert.Equal(HttpStatusCode.NoContent, (await Confirmar(token, Nueva)).StatusCode);
+        var login = await _escenario.LoginEmpresaAsync(empresa.AdminEmail, Nueva, empresa.IdEmpresaCifrado);
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+        var jwt = new JwtSecurityTokenHandler().ReadJwtToken((await Escenario.Json(login)).GetProperty("accessToken").GetString());
+        Assert.Equal("true", jwt.Claims.Single(c => c.Type == "tiene_password").Value);
+
+        // Con la contraseña ya puesta, el sello cambió: el mismo enlace ya no sirve.
+        Assert.Equal(HttpStatusCode.Gone, (await Confirmar(token, "Otra#Distinta2026")).StatusCode);
+    }
+
     private Task<HttpResponseMessage> Solicitar(string email) =>
         api.CreateClient().PostAsJsonAsync("/api/auth/contrasena/solicitud", new { email });
 

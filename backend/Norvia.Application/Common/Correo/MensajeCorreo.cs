@@ -1,4 +1,4 @@
 namespace Norvia.Application.Common.Correo;
 
-/// <summary>Mensaje listo para enviar; no es contrato HTTP.</summary>
-public sealed record MensajeCorreo(string Destino, string Asunto, string CuerpoHtml);
+/// <param name="ClaveIdempotencia">Si se repite en un reenvío, el proveedor no manda el correo dos veces.</param>
+public sealed record MensajeCorreo(string Destino, string Asunto, string CuerpoHtml, string? ClaveIdempotencia = null);

@@ -19,12 +19,12 @@ public sealed class TokenCambioContrasena(IOptions<JwtOpciones> opciones) : ITok
 
     private readonly byte[] _clave = SHA256.HashData(Encoding.UTF8.GetBytes("norvia:cambio-contrasena:" + opciones.Value.Key));
 
-    public string Crear(Guid accesoId, string passwordHashActual, DateTime expiraUtc)
+    public string Crear(Guid accesoId, string? passwordHashActual, DateTime expiraUtc)
     {
         var datos = new byte[LargoDatos];
         accesoId.TryWriteBytes(datos.AsSpan(0, 16));
         BinaryPrimitives.WriteInt64BigEndian(datos.AsSpan(16, 8), new DateTimeOffset(expiraUtc, TimeSpan.Zero).ToUnixTimeSeconds());
-        Sello(passwordHashActual).CopyTo(datos.AsSpan(24, 16));
+        Sello(accesoId, passwordHashActual).CopyTo(datos.AsSpan(24, 16));
         return Base64Url([.. datos, .. HMACSHA256.HashData(_clave, datos)]);
     }
 
@@ -52,10 +52,12 @@ public sealed class TokenCambioContrasena(IOptions<JwtOpciones> opciones) : ITok
             datos.Slice(24, 16).ToArray());
     }
 
-    public bool SelloVigente(EnlaceCambioContrasena enlace, string passwordHashActual) =>
-        CryptographicOperations.FixedTimeEquals(enlace.Sello, Sello(passwordHashActual));
+    public bool SelloVigente(EnlaceCambioContrasena enlace, string? passwordHashActual) =>
+        CryptographicOperations.FixedTimeEquals(enlace.Sello, Sello(enlace.AccesoId, passwordHashActual));
 
-    private static byte[] Sello(string passwordHash) => SHA256.HashData(Encoding.UTF8.GetBytes(passwordHash))[..16];
+    // Sin contraseña, el sello sale del Id: al agregar la contraseña cambia y el enlace queda usado. No es una contraseña.
+    private static byte[] Sello(Guid accesoId, string? passwordHash) =>
+        SHA256.HashData(Encoding.UTF8.GetBytes(passwordHash ?? $"sin-contrasena:{accesoId:N}"))[..16];
 
     private static string Base64Url(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 }

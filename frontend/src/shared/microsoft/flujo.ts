@@ -4,6 +4,8 @@
  * el backend. Aquí nunca hay un secreto: `VITE_MICROSOFT_CLIENT_ID` y la URL de retorno son públicos.
  */
 
+import { extraerError } from '@/shared/api'
+
 export type PropositoMicrosoft = 'login' | 'registro'
 
 /** Lo que hay que recordar mientras la persona está en Microsoft (sessionStorage: solo esta pestaña). */
@@ -68,3 +70,6 @@ export function tomarPendiente(state: string | null): Pendiente | null {
     return null
   }
 }
+
+/** El backend responde `auth.identidad_invalida` cuando el token de identidad de Microsoft venció (30 minutos). */
+export const esIdentidadVencida = (causa: unknown) => extraerError(causa).codigo === 'auth.identidad_invalida'
