@@ -55,7 +55,7 @@ public sealed class ReenviarVerificacionCuentaServicio(
                 {
                     ["Email"] = acceso.Email,
                     ["Codigo"] = codigo,
-                    ["Minutos"] = VentanaEnvioCodigo.MinutosVigencia.ToString(),
+                    ["Vigencia"] = VentanaEnvioCodigo.TextoVigenciaCorta,
                     ["UrlActivacion"] = $"{urlBase}/verificar-cuenta?correo={Uri.EscapeDataString(acceso.Email)}"
                 };
 

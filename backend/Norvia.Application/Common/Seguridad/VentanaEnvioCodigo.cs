@@ -9,8 +9,18 @@ namespace Norvia.Application.Common.Seguridad;
 /// </summary>
 public static class VentanaEnvioCodigo
 {
+    /// <summary>Vigencia del código cuando la persona lo pidió y lo está esperando, y duración de la ventana de envíos.</summary>
     public const int MinutosVigencia = 10;
     public const int MaximoEnviosPorVentana = 3;
+
+    /// <summary>
+    /// Vigencia del código de activación que se manda al dar de alta a otra persona (vínculo o encuestado, RN-87):
+    /// le llega un correo que no esperaba y puede abrirlo horas después. Un reenvío lo pide la propia persona,
+    /// que está frente a la pantalla, y vuelve a la vigencia corta.
+    /// </summary>
+    public static readonly TimeSpan VigenciaActivacionPorAlta = TimeSpan.FromHours(48);
+    public const string TextoVigenciaActivacionPorAlta = "48 horas";
+    public static readonly string TextoVigenciaCorta = $"unos {MinutosVigencia} minutos";
     private static readonly TimeSpan Ventana = TimeSpan.FromMinutes(MinutosVigencia);
 
     /// <summary>

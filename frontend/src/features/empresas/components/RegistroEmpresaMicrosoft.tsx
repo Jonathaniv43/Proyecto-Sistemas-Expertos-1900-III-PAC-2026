@@ -1,8 +1,10 @@
 import { Lock } from 'lucide-react'
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import type { IdentidadMicrosoft } from '@/shared/microsoft/identidadGuardada'
+import { esIdentidadVencida } from '@/shared/microsoft/flujo'
+import { AvisoMicrosoftVencido } from '@/shared/microsoft/MicrosoftVencido'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoSelect } from '@/shared/components/ui/CampoSelect'
@@ -68,26 +70,33 @@ export function RegistroEmpresaMicrosoft({ identidad, onCancelar, onRegistrada }
       'empresas.rtn_duplicado': { campo: 'rtn' },
       'empresas.documento_duplicado': { campo: 'numeroDocumento' },
       'empresas.rubro_invalido': { campo: 'rubroCodigo', mensaje: 'Ese rubro ya no está disponible. Elige otro.' },
-      'auth.identidad_invalida': { mensaje: 'La validación con Microsoft venció. Vuelve a empezar.' },
     },
   })
 
   const tipoDocumento = useWatch({ control, name: 'tipoDocumento' })
   const opcionesRubro = (rubros.datos ?? []).map((r) => ({ valor: r.codigo, texto: r.nombre }))
+  const [vencida, setVencida] = useState(false)
+
+  if (vencida) return <AvisoMicrosoftVencido proposito="registro" />
 
   return (
     <form
       noValidate
       className="grid gap-8 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6"
-      onSubmit={enviar(async (datos) =>
-        onRegistrada(
-          await registrarEmpresaMicrosoft({
-            ...datos,
-            tokenIdentidad: identidad.tokenIdentidad,
-            tipoDocumento: datos.tipoDocumento || undefined,
-          }),
-        ),
-      )}
+      onSubmit={enviar(async (datos) => {
+        try {
+          onRegistrada(
+            await registrarEmpresaMicrosoft({
+              ...datos,
+              tokenIdentidad: identidad.tokenIdentidad,
+              tipoDocumento: datos.tipoDocumento || undefined,
+            }),
+          )
+        } catch (causa) {
+          if (!esIdentidadVencida(causa)) throw causa
+          setVencida(true)
+        }
+      })}
     >
       {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}
 

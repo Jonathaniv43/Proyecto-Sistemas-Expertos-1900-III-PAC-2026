@@ -21,7 +21,7 @@ namespace Norvia.Application.Features.Plan.AsignarTarea;
 /// </summary>
 public sealed class AsignarTareaServicio(
     IAsignarTareaRepositorio repositorio, IUnidadDeTrabajo unidadDeTrabajo, IReloj reloj,
-    Notificador notificador, IEnvioInmediatoNotificacion envioInmediato, Auditor auditor)
+    Notificador notificador, IAvisoCorreosPendientes avisoCorreos, Auditor auditor)
     : IServicioCasoDeUso
 {
     public async Task<Resultado<TareaResponseDto>> EjecutarAsync(Guid tareaId, AsignarTareaRequestDto request, CancellationToken ct)
@@ -42,7 +42,7 @@ public sealed class AsignarTareaServicio(
         auditor.Registrar(AccionesAuditoria.TareaAsignada, EntidadesAuditoria.Tarea, tarea.Id,
             new { tarea.Titulo, tarea.ResponsableId, tarea.FechaLimite });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
-        if (notificacion is not null) await envioInmediato.IntentarAsync(notificacion.Id, ct);
+        if (notificacion is not null) avisoCorreos.Avisar();
 
         return await repositorio.ProyectarAsync(tarea.Id, ct);
     }

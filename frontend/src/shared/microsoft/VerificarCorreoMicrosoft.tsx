@@ -5,6 +5,8 @@ import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { useFormulario } from '@/shared/forms'
 import { z } from '@/shared/validacion'
+import { esIdentidadVencida } from './flujo'
+import { AvisoMicrosoftVencido } from './MicrosoftVencido'
 
 /** POST /api/auth/microsoft/codigo (anónimo): envía el código de 6 dígitos al correo de la cuenta (RN-86). */
 const enviarCodigo = (tokenIdentidad: string) =>
@@ -41,6 +43,7 @@ export function VerificarCorreoMicrosoft({ tokenIdentidad, email, onVerificado, 
   const [enviado, setEnviado] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [errorEnvio, setErrorEnvio] = useState<string>()
+  const [vencida, setVencida] = useState(false)
 
   const {
     register,
@@ -52,7 +55,6 @@ export function VerificarCorreoMicrosoft({ tokenIdentidad, email, onVerificado, 
     erroresPorCodigo: {
       'auth.codigo_incorrecto': { campo: 'codigo' },
       'auth.demasiados_intentos': { mensaje: 'Hiciste demasiados intentos. Espera unos minutos y pide un código nuevo.' },
-      'auth.identidad_invalida': { mensaje: 'La validación con Microsoft venció. Vuelve a empezar.' },
     },
   })
 
@@ -63,11 +65,14 @@ export function VerificarCorreoMicrosoft({ tokenIdentidad, email, onVerificado, 
       await enviarCodigo(tokenIdentidad)
       setEnviado(true)
     } catch (causa) {
-      setErrorEnvio(extraerError(causa).mensaje)
+      if (esIdentidadVencida(causa)) setVencida(true)
+      else setErrorEnvio(extraerError(causa).mensaje)
     } finally {
       setEnviando(false)
     }
   }
+
+  if (vencida) return <AvisoMicrosoftVencido proposito="registro" />
 
   return (
     <section aria-labelledby="titulo-verificar-correo" className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6">
@@ -88,7 +93,14 @@ export function VerificarCorreoMicrosoft({ tokenIdentidad, email, onVerificado, 
         <form
           noValidate
           className="grid gap-4"
-          onSubmit={enviar(async ({ codigo }) => onVerificado((await verificarCodigo({ tokenIdentidad, codigo })).tokenIdentidad))}
+          onSubmit={enviar(async ({ codigo }) => {
+            try {
+              onVerificado((await verificarCodigo({ tokenIdentidad, codigo })).tokenIdentidad)
+            } catch (causa) {
+              if (!esIdentidadVencida(causa)) throw causa
+              setVencida(true)
+            }
+          })}
         >
           <Aviso tipo="exito">Enviamos el código a {email}. Vence en unos 10 minutos.</Aviso>
           {errorGeneral && <Aviso tipo="error">{errorGeneral}</Aviso>}

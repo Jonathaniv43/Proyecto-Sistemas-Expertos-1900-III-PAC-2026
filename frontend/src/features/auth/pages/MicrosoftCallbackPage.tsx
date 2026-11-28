@@ -8,12 +8,15 @@ import { iniciarSesionEmpresaMicrosoft, obtenerIdentidadMicrosoft } from '../api
 import { VincularMicrosoftForm } from '../components/VincularMicrosoftForm'
 import { REDIRECT_URI, tomarPendiente, type PropositoMicrosoft } from '@/shared/microsoft/flujo'
 import { guardarIdentidad, type IdentidadMicrosoft } from '@/shared/microsoft/identidadGuardada'
+import { AvisoMicrosoftVencido } from '@/shared/microsoft/MicrosoftVencido'
 
 type Fase =
   | { fase: 'cargando' }
   | { fase: 'error'; mensaje: string; proposito?: PropositoMicrosoft }
   | { fase: 'vincular'; identidad: IdentidadMicrosoft; proposito: PropositoMicrosoft; idEmpresa?: string }
   | { fase: 'sin_cuenta'; identidad: IdentidadMicrosoft }
+  | { fase: 'vencida'; proposito: PropositoMicrosoft; idEmpresa?: string }
+  | { fase: 'sin_activar' }
 
 const ERROR_GENERICO = 'No pudimos entrar con Microsoft. Intenta de nuevo o usa tu correo y contraseña.'
 
@@ -56,7 +59,7 @@ export function MicrosoftCallbackPage() {
         })
         await continuar(identidad, pendiente.proposito, pendiente.idEmpresa)
       } catch (causa) {
-        setEstado({ fase: 'error', mensaje: extraerError(causa).mensaje || ERROR_GENERICO, proposito: pendiente.proposito })
+        fallo(causa, pendiente.proposito, pendiente.idEmpresa)
       }
     })()
     // Se ejecuta una sola vez al volver de Microsoft.
@@ -99,8 +102,16 @@ export function MicrosoftCallbackPage() {
     try {
       await continuar(vinculada, proposito, idEmpresa)
     } catch (causa) {
-      setEstado({ fase: 'error', mensaje: extraerError(causa).mensaje || ERROR_GENERICO, proposito })
+      fallo(causa, proposito, idEmpresa)
     }
+  }
+
+  /** Token vencido y cuenta sin activar tienen salida propia; el resto, el aviso de error. */
+  function fallo(causa: unknown, proposito: PropositoMicrosoft, idEmpresa?: string) {
+    const error = extraerError(causa)
+    if (error.codigo === 'auth.identidad_invalida') setEstado({ fase: 'vencida', proposito, idEmpresa })
+    else if (error.codigo === 'auth.cuenta_sin_activar') setEstado({ fase: 'sin_activar' })
+    else setEstado({ fase: 'error', mensaje: error.mensaje || ERROR_GENERICO, proposito })
   }
 
   return (
@@ -129,7 +140,28 @@ export function MicrosoftCallbackPage() {
             tokenIdentidad={estado.identidad.tokenIdentidad}
             email={estado.identidad.email}
             onVinculada={() => void alVincular(estado.identidad, estado.proposito, estado.idEmpresa)}
+            onVencida={() => setEstado({ fase: 'vencida', proposito: estado.proposito, idEmpresa: estado.idEmpresa })}
           />
+        </>
+      )}
+
+      {estado.fase === 'vencida' && (
+        <>
+          <h1 className="text-xl font-semibold">Vuelve a entrar con Microsoft</h1>
+          <AvisoMicrosoftVencido proposito={estado.proposito} idEmpresa={estado.idEmpresa} />
+        </>
+      )}
+
+      {estado.fase === 'sin_activar' && (
+        <>
+          <h1 className="text-xl font-semibold">Primero activa tu cuenta</h1>
+          <Aviso tipo="advertencia">
+            Ya tienes una cuenta en Norvia con este correo, pero todavía no la activas. Usa el código de 6 dígitos que te
+            llegó al correo; después podrás entrar también con Microsoft.
+          </Aviso>
+          <Link to="/verificar-cuenta" className={`${clasesBoton('primario')} justify-self-start`}>
+            Activar mi cuenta
+          </Link>
         </>
       )}
 

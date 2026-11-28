@@ -26,10 +26,12 @@ public sealed class CrearVinculoServicio(
         var preparado = await alta.PrepararAsync(datos, rol.Id, rol.Nombre, ct);
         if (!preparado.EsExito) return preparado.Error!;
 
-        var (vinculo, persona, acceso, cuentaNueva, correoActivacionEnviado) = preparado.Valor;
+        var (vinculo, persona, acceso, _, _) = preparado.Valor;
+        var cuentaNueva = preparado.Valor.CuentaNueva;
         auditor.Registrar(AccionesAuditoria.VinculoCreado, EntidadesAuditoria.VinculoEmpresa, vinculo.Id,
             new { persona = persona.NombreCompleto, email = acceso.Email, rol = rol.Codigo, cuentaNueva });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
+        var correoActivacionEnviado = await alta.EnviarActivacionAsync(preparado.Valor, ct);
 
         return new CrearVinculoResponseDto(vinculo.Id, persona.Id, acceso.Email, persona.NombreCompleto, rol.Codigo,
             vinculo.Estado, vinculo.CreadoEn, cuentaNueva, correoActivacionEnviado);

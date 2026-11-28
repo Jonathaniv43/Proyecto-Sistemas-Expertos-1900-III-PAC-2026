@@ -12,7 +12,8 @@ namespace Norvia.Application.Features.Auth.SolicitarCambioContrasena;
 /// persona puede acceder a ese correo antes de permitir el cambio.
 /// <list type="bullet">
 /// <item>Siempre responde igual, exista o no la cuenta (no enumera correos).</item>
-/// <item>Solo se envía a cuentas verificadas: una sin verificar se activa con su contraseña temporal (RN-67).</item>
+/// <item>Solo se envía a cuentas verificadas: una sin verificar se activa con su código (RN-67, RN-87). Una cuenta
+/// creada con Microsoft, sin contraseña, lo usa para agregar una (RN-81).</item>
 /// <item>El enlace vence en <see cref="MinutosVigencia"/> minutos y sirve una sola vez (ver <see cref="ITokenCambioContrasena"/>).</item>
 /// </list>
 /// </summary>
@@ -34,8 +35,9 @@ public sealed class SolicitarCambioContrasenaServicio(
     {
         var email = request.Email.Trim().ToLowerInvariant();
         var acceso = await repositorio.BuscarAccesoPorEmailAsync(email, cancellationToken);
-        // Una cuenta creada solo con un proveedor (sin contraseña, D29) no tiene qué cambiar.
-        if (acceso is null || !acceso.Verificado || acceso.PasswordHash is null) return RespuestaGenerica;
+        // Una cuenta sin verificar se activa con su código (D30). Una creada con Microsoft sin contraseña sí recibe el
+        // enlace: le sirve para agregar una (D29).
+        if (acceso is null || !acceso.Verificado) return RespuestaGenerica;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
         var token = tokens.Crear(acceso.Id, acceso.PasswordHash, ahora.AddMinutes(MinutosVigencia));
@@ -44,7 +46,8 @@ public sealed class SolicitarCambioContrasenaServicio(
         {
             ["Nombre"] = await repositorio.BuscarPrimerNombreAsync(acceso.Id, cancellationToken) ?? acceso.Email,
             ["UrlCambio"] = $"{urlBase}/restablecer-contrasena?token={Uri.EscapeDataString(token)}",
-            ["Minutos"] = MinutosVigencia.ToString()
+            ["Minutos"] = MinutosVigencia.ToString(),
+            ["Accion"] = acceso.PasswordHash is null ? "agregar una contraseña" : "cambiar la contraseña"
         };
         var renderizado = await plantillas.RenderizarAsync(CodigosPlantillaCorreo.CambioContrasena, variables, cancellationToken);
         if (renderizado is not null)
