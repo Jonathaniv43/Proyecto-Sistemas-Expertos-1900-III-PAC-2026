@@ -4,7 +4,6 @@ import { useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
-import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { listarVigentes } from '../api/documentos'
@@ -35,8 +34,7 @@ export function DocumentosVigentesPage() {
   const sinDocumentos = documentos?.length === 0 && !buscar
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow grid-cols-1 gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Políticas y procedimientos" />
+    <div className="grid w-full max-w-layout-narrow grid-cols-1 gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Políticas y procedimientos</h1>
         <p className="text-text-secondary">Los documentos de seguridad y salud vigentes en la empresa.</p>

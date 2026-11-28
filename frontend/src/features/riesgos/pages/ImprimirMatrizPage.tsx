@@ -60,7 +60,7 @@ export function ImprimirMatrizPage() {
   }, [datos])
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <Volver a="/riesgos" texto="Volver a la matriz" titulo="Imprimir matriz de riesgos" ancho="layout" />
 
       {peticion.error && !datos ? (

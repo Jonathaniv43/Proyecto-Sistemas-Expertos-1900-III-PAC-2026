@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { extraerError } from '@/shared/api/errores'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
-import { Volver } from '@/shared/components/ui/Volver'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { useScrollRecordado } from '@/shared/hooks/useScrollRecordado'
@@ -56,8 +55,7 @@ export function NotificacionesPage() {
 
   const datos = peticion.datos
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Notificaciones" />
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Notificaciones</h1>
         <p className="text-text-secondary">
@@ -136,7 +134,7 @@ function ItemNotificacion({ notificacion: n, cargando, ocupada, onMarcar, onAbri
       </div>
 
       {(destino || noLeida) && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-4">
           {destino && (
             <Link
               to={destino}
@@ -147,7 +145,7 @@ function ItemNotificacion({ notificacion: n, cargando, ocupada, onMarcar, onAbri
                 onAbrir(destino)
               }}
             >
-              {n.tipo === 'tarea_asignada' ? 'Ver mis tareas' : 'Ver la política'}
+              {n.tipo === 'tarea_asignada' ? 'Ver la tarea' : 'Ver la política'}
             </Link>
           )}
           {noLeida && (

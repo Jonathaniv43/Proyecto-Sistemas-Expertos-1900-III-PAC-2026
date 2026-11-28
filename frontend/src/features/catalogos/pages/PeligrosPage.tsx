@@ -64,7 +64,7 @@ export function PeligrosPage() {
           <p className="text-text-secondary">Cada peligro tiene plantillas: los controles que Norvia sugiere y las tareas modelo del plan.</p>
         </div>
         {puedeEditar && (
-          <Boton variante="secundario" onClick={() => setEditando('nuevo')}>
+          <Boton onClick={() => setEditando('nuevo')}>
             <Plus aria-hidden size={16} strokeWidth={1.5} />
             Nuevo peligro
           </Boton>

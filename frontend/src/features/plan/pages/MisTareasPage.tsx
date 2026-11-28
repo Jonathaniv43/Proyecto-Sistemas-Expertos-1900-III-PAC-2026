@@ -1,5 +1,6 @@
-import { ListChecks, TriangleAlert } from 'lucide-react'
+import { ChevronDown, ChevronRight, ListChecks, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { extraerError } from '@/shared/api/errores'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -21,13 +22,20 @@ const QUEDO: Record<EstadoAtendible, string> = {
 
 const abierta = (t: Tarea) => t.estado === 'pendiente' || t.estado === 'en_progreso'
 
+/** Por hacer: primero las vencidas y después por fecha límite, la más próxima arriba; sin fecha, al final. */
+const porUrgencia = (a: Tarea, b: Tarea) =>
+  Number(vencida(b)) - Number(vencida(a)) || (a.fechaLimite ?? '9999').localeCompare(b.fechaLimite ?? '9999')
+
 /**
  * HU-044: las tareas a cargo de quien tiene la sesión. Las pasa por pendiente, en progreso y completada (y puede
  * reabrirlas); solo ve las suyas, así que no puede cambiar tareas ajenas (RN-24). Si una tarea pide evidencia, no se
- * completa sin ella (RN-25): adjuntarla es HU-045.
+ * completa sin ella (RN-25): adjuntarla es HU-045. Mientras no se pueda adjuntar, la tarea lo explica y no ofrece
+ * completarla (decisión del 27-11-2026).
+ * Con `?tarea={id}` (desde la notificación, HU-117) esa tarea queda resaltada y a la vista.
  */
 export function MisTareasPage() {
   const peticion = usePeticion(listarMisTareas)
+  const resaltada = useSearchParams()[0].get('tarea') ?? undefined
   const cargandoVisible = useCargaVisible(peticion.cargando && !peticion.datos)
   const [mensaje, setMensaje] = useState<string>()
   const [cambiando, setCambiando] = useState<string>()
@@ -61,11 +69,20 @@ export function MisTareasPage() {
   }
 
   const tareas = peticion.datos ?? []
-  const porHacer = tareas.filter(abierta)
+  const porHacer = tareas.filter(abierta).sort(porUrgencia)
   const terminadas = tareas.filter((t) => !abierta(t))
+  const hayDatos = peticion.datos !== undefined
+
+  // La tarea de la notificación: a la vista y con el foco, una vez que la lista cargó.
+  useEffect(() => {
+    if (!hayDatos || !resaltada) return
+    const el = document.getElementById(`tarea-${resaltada}`)
+    el?.scrollIntoView({ block: 'center' })
+    el?.focus({ preventScroll: true })
+  }, [hayDatos, resaltada])
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-1">
         <h1 className="text-xl font-semibold">Mis tareas</h1>
         <p className="text-text-secondary">Las tareas que tienes a cargo. Marca tu avance para que el plan esté al día.</p>
@@ -98,9 +115,25 @@ export function MisTareasPage() {
         </section>
       ) : (
         <>
-          <Grupo titulo="Por hacer" vacio="No tienes tareas pendientes." tareas={porHacer} cambiando={cambiando} errores={errores} onCambiar={cambiar} />
+          <Grupo
+            titulo="Por hacer"
+            vacio="No tienes tareas pendientes."
+            tareas={porHacer}
+            resaltada={resaltada}
+            cambiando={cambiando}
+            errores={errores}
+            onCambiar={cambiar}
+          />
           {terminadas.length > 0 && (
-            <Grupo titulo="Terminadas" tareas={terminadas} cambiando={cambiando} errores={errores} onCambiar={cambiar} />
+            <Grupo
+              titulo="Terminadas"
+              plegable
+              tareas={terminadas}
+              resaltada={resaltada}
+              cambiando={cambiando}
+              errores={errores}
+              onCambiar={cambiar}
+            />
           )}
         </>
       )}
@@ -111,25 +144,56 @@ export function MisTareasPage() {
 interface GrupoProps {
   titulo: string
   vacio?: string
+  /** Empieza plegado (las terminadas), salvo que tenga la tarea resaltada. */
+  plegable?: boolean
   tareas: Tarea[]
+  resaltada: string | undefined
   cambiando: string | undefined
   errores: Record<string, string>
   onCambiar: (tarea: Tarea, estado: EstadoAtendible) => void
 }
 
-function Grupo({ titulo, vacio, tareas, cambiando, errores, onCambiar }: GrupoProps) {
+function Grupo({ titulo, vacio, plegable = false, tareas, resaltada, cambiando, errores, onCambiar }: GrupoProps) {
   const id = `grupo-${titulo.toLowerCase().replace(/\s/g, '-')}`
+  const [abierto, setAbierto] = useState(!plegable || tareas.some((t) => t.id === resaltada))
+  const Chevron = abierto ? ChevronDown : ChevronRight
+  const encabezado = (
+    <>
+      {titulo} <span className="font-normal text-text-secondary">({tareas.length})</span>
+    </>
+  )
   return (
     <section aria-labelledby={id} className="grid gap-3">
       <h2 id={id} className="text-md font-semibold">
-        {titulo} <span className="font-normal text-text-secondary">({tareas.length})</span>
+        {plegable ? (
+          <button
+            type="button"
+            className="inline-flex min-h-control-touch items-center gap-2 sm:min-h-control"
+            aria-expanded={abierto}
+            aria-controls={`${id}-lista`}
+            onClick={() => setAbierto((a) => !a)}
+          >
+            <Chevron aria-hidden size={16} strokeWidth={1.5} />
+            {encabezado}
+          </button>
+        ) : (
+          encabezado
+        )}
       </h2>
-      {tareas.length === 0 ? (
+      {!abierto ? null : tareas.length === 0 ? (
         <p className="text-text-secondary">{vacio}</p>
       ) : (
-        <ul aria-label={titulo} className="grid gap-3">
+        <ul id={`${id}-lista`} aria-label={titulo} className="grid gap-3">
           {tareas.map((t) => (
-            <ItemTarea key={t.id} tarea={t} ocupada={cambiando !== undefined} cargando={cambiando === t.id} error={errores[t.id]} onCambiar={onCambiar} />
+            <ItemTarea
+              key={t.id}
+              tarea={t}
+              resaltada={t.id === resaltada}
+              ocupada={cambiando !== undefined}
+              cargando={cambiando === t.id}
+              error={errores[t.id]}
+              onCambiar={onCambiar}
+            />
           ))}
         </ul>
       )}
@@ -139,13 +203,15 @@ function Grupo({ titulo, vacio, tareas, cambiando, errores, onCambiar }: GrupoPr
 
 interface ItemTareaProps {
   tarea: Tarea
+  /** La que abrió la notificación: fondo de selección y borde de foco. */
+  resaltada: boolean
   ocupada: boolean
   cargando: boolean
   error: string | undefined
   onCambiar: (tarea: Tarea, estado: EstadoAtendible) => void
 }
 
-function ItemTarea({ tarea, ocupada, cargando, error, onCambiar }: ItemTareaProps) {
+function ItemTarea({ tarea, resaltada, ocupada, cargando, error, onCambiar }: ItemTareaProps) {
   const estado = ESTADOS[tarea.estado]
   const origen =
     tarea.origen === 'riesgo'
@@ -156,7 +222,13 @@ function ItemTarea({ tarea, ocupada, cargando, error, onCambiar }: ItemTareaProp
   const faltaEvidencia = tarea.requiereEvidencia
 
   return (
-    <li className="grid gap-3 rounded-lg border border-border-default bg-bg-surface p-4">
+    <li
+      id={`tarea-${tarea.id}`}
+      tabIndex={resaltada ? -1 : undefined}
+      aria-current={resaltada ? 'true' : undefined}
+      // La resaltada recibe el foco por código; su borde ya la marca, así que no lleva además el anillo de foco.
+      className={`grid gap-3 rounded-lg border p-4 ${resaltada ? 'border-focus-ring bg-bg-selected focus-visible:outline-none' : 'border-border-default bg-bg-surface'}`}
+    >
       <div className="grid gap-1">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h3 className="font-medium">{tarea.titulo}</h3>
@@ -179,8 +251,11 @@ function ItemTarea({ tarea, ocupada, cargando, error, onCambiar }: ItemTareaProp
       {tarea.descripcion && tarea.descripcion !== tarea.titulo && (
         <p className="wrap-break-word whitespace-pre-line">{tarea.descripcion}</p>
       )}
-      {faltaEvidencia && tarea.estado !== 'completada' && tarea.estado !== 'cancelada' && (
-        <p className="text-sm text-text-secondary">Pide evidencia: para completarla tendrás que adjuntar una foto o un PDF.</p>
+      {faltaEvidencia && abierta(tarea) && (
+        <Aviso tipo="info">
+          Esta tarea pide una foto o un PDF como evidencia. Todavía no se pueden adjuntar archivos en Norvia, así que no se
+          puede marcar como completada.
+        </Aviso>
       )}
       {error && <Aviso tipo="error">{error}</Aviso>}
 
@@ -193,18 +268,26 @@ function ItemTarea({ tarea, ocupada, cargando, error, onCambiar }: ItemTareaProp
           )}
           {tarea.estado === 'en_progreso' && (
             <>
+              {!faltaEvidencia && (
+                <Boton
+                  variante="secundario"
+                  cargando={cargando}
+                  textoCargando="Guardando…"
+                  disabled={ocupada && !cargando}
+                  onClick={() => onCambiar(tarea, 'completada')}
+                >
+                  Marcar como completada
+                </Boton>
+              )}
               <Boton
                 variante="secundario"
-                cargando={cargando}
+                cargando={cargando && faltaEvidencia}
                 textoCargando="Guardando…"
-                disabled={(ocupada && !cargando) || faltaEvidencia}
-                onClick={() => onCambiar(tarea, 'completada')}
+                disabled={ocupada && !(cargando && faltaEvidencia)}
+                onClick={() => onCambiar(tarea, 'pendiente')}
               >
-                Marcar como completada
+                Marcar como pendiente
               </Boton>
-              <BotonEnlace disabled={ocupada} onClick={() => onCambiar(tarea, 'pendiente')}>
-                Volver a pendiente
-              </BotonEnlace>
             </>
           )}
           {tarea.estado === 'completada' && (

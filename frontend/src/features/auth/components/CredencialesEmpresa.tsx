@@ -23,7 +23,9 @@ const NO_SE_PUDO = 'No pudimos iniciar sesión. Revisa el correo y la contraseñ
 export function CredencialesEmpresa({ idEmpresa }: { idEmpresa: string }) {
   const { state } = useLocation()
   const guardada = leerUltimaEmpresa()
-  if (guardada?.idEmpresa !== idEmpresa) return <Navigate to={rutaLogin()} replace state={state} />
+  // El paso 1 avisa por qué se pide el RTN: el enlace no trae el nombre de la empresa (observación 15 del inventario).
+  if (guardada?.idEmpresa !== idEmpresa)
+    return <Navigate to={rutaLogin()} replace state={{ ...((state as object | null) ?? {}), enlaceSinEmpresa: true }} />
   return <FormularioCredenciales empresa={guardada} />
 }
 
@@ -53,7 +55,7 @@ function FormularioCredenciales({ empresa }: { empresa: EmpresaLogin }) {
       >
         <TarjetaEmpresa empresa={empresa} />
         <Link to={rutaLogin()} state={location.state} className="shrink-0 text-sm font-medium">
-          Cambiar empresa
+          Buscar otra empresa
         </Link>
       </section>
 

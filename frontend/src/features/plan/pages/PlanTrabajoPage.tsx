@@ -1,4 +1,4 @@
-import { ListChecks, Plus, Search, TriangleAlert } from 'lucide-react'
+import { CircleCheck, ListChecks, Plus, Search, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form'
 import { Link, useLocation } from 'react-router-dom'
@@ -76,16 +76,13 @@ export function PlanTrabajoPage() {
   const error = propuesta.error ?? tareas.error
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="grid gap-1">
           <h1 className="text-xl font-semibold">Plan de trabajo</h1>
           <p className="text-text-secondary">Las tareas para reducir los riesgos de la empresa, empezando por las más urgentes.</p>
         </div>
-        <Link to="/plan-de-trabajo/nueva" className={clasesBoton('secundario')}>
-          <Plus aria-hidden size={16} strokeWidth={1.5} />
-          Nueva tarea
-        </Link>
+        <BotonNuevaTarea />
       </header>
 
       <div role="status" className="contents">
@@ -114,13 +111,14 @@ export function PlanTrabajoPage() {
           {cargandoVisible &&
             [0, 1, 2].map((i) => <div key={i} className="h-table-row animate-pulse rounded-sm bg-bg-subtle motion-reduce:animate-none" />)}
         </div>
+      ) : propuesta.datos.tareas.length === 0 && tareas.datos.length === 0 && !hayFiltros ? (
+        <PlanVacio riesgosSinEvaluar={propuesta.datos.riesgosSinEvaluar} />
       ) : (
         <>
           <SeccionPropuesta
             key={propuesta.datos.tareas.map((t) => t.clave).join()}
             tareas={propuesta.datos.tareas}
             riesgosSinEvaluar={propuesta.datos.riesgosSinEvaluar}
-            hayPlan={hayFiltros || tareas.datos.length > 0}
             onConfirmado={(n) => {
               setAsignada(undefined)
               setAgregadas(n)
@@ -156,14 +154,47 @@ export function PlanTrabajoPage() {
   )
 }
 
+/** La acción de crear de la lista: botón principal (design-system.md § Layouts y navegación). */
+function BotonNuevaTarea() {
+  return (
+    <Link to="/plan-de-trabajo/nueva" className={clasesBoton('primario')}>
+      <Plus aria-hidden size={16} strokeWidth={1.5} />
+      Nueva tarea
+    </Link>
+  )
+}
+
+/** Sin tareas en el plan ni propuestas: un solo estado vacío, con de dónde salen las tareas y la acción de crear. */
+function PlanVacio({ riesgosSinEvaluar }: { riesgosSinEvaluar: number }) {
+  return (
+    <section className="flex flex-col items-center gap-2 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
+      <ListChecks aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
+      <h2 className="text-md font-semibold">Todavía no hay tareas en el plan</h2>
+      <p className="max-w-layout-narrow text-text-secondary">
+        Las tareas salen de los controles de los riesgos evaluados. Cuando agregues controles en la matriz, aparecerán aquí
+        para confirmarlas. También puedes crear una tarea.
+      </p>
+      {riesgosSinEvaluar > 0 && (
+        <div className="mt-2 w-full max-w-layout-narrow text-left">
+          <AvisoSinEvaluar cantidad={riesgosSinEvaluar} />
+        </div>
+      )}
+      <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
+        <BotonNuevaTarea />
+        {/* Con el aviso, el link a la matriz ya está en él. */}
+        {riesgosSinEvaluar === 0 && <Link to="/riesgos">Ir a la matriz de riesgos</Link>}
+      </div>
+    </section>
+  )
+}
+
 interface SeccionPropuestaProps {
   tareas: TareaPropuesta[]
   riesgosSinEvaluar: number
-  hayPlan: boolean
   onConfirmado: (agregadas: number) => void
 }
 
-function SeccionPropuesta({ tareas, riesgosSinEvaluar, hayPlan, onConfirmado }: SeccionPropuestaProps) {
+function SeccionPropuesta({ tareas, riesgosSinEvaluar, onConfirmado }: SeccionPropuestaProps) {
   // Todas marcadas al empezar: revisar es desmarcar lo que no se quiere.
   const [marcadas, setMarcadas] = useState<string[]>(() => tareas.map((t) => t.clave))
   const [enviando, setEnviando] = useState(false)
@@ -189,15 +220,13 @@ function SeccionPropuesta({ tareas, riesgosSinEvaluar, hayPlan, onConfirmado }: 
     }
   }
 
+  // Sin propuestas pero con plan: una línea, para que las tareas suban (la card vuelve cuando hay algo que confirmar).
   if (tareas.length === 0)
     return (
-      <section aria-labelledby="titulo-propuesta" className="grid gap-3 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6">
-        <h2 id="titulo-propuesta" className="text-md font-semibold">
-          {hayPlan ? 'El plan está al día' : 'Todavía no hay tareas para proponer'}
-        </h2>
-        <p className="text-text-secondary">
-          Las tareas salen de los controles de los riesgos evaluados y de las tareas modelo de su peligro. Cuando agregues
-          controles en la <Link to="/riesgos">matriz de riesgos</Link>, aparecerán aquí para revisarlas.
+      <section aria-label="Tareas propuestas" className="grid gap-3">
+        <p className="flex items-center gap-2 text-text-secondary">
+          <CircleCheck aria-hidden size={16} strokeWidth={1.5} className="shrink-0" />
+          No hay tareas nuevas para proponer.
         </p>
         {riesgosSinEvaluar > 0 && <AvisoSinEvaluar cantidad={riesgosSinEvaluar} />}
       </section>

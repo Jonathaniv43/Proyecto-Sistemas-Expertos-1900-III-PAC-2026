@@ -836,3 +836,378 @@
     print-color-adjust: exact;
   }
 }
+
+/* =====================================================================
+   LAYOUTS Y NAVEGACIÓN (design-system.md § Layouts y navegación)
+   ===================================================================== */
+@layer components {
+  /* Layout público: una barra con "Norvia" (alto de 60px: control táctil + aire) sobre la columna de la página. */
+  .barra-publica {
+    height: calc(var(--control-height-touch) + 2 * var(--space-2) + var(--safe-top));
+    padding-top: var(--safe-top);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-surface);
+  }
+
+  .marca {
+    color: var(--color-text-primary);
+    font-size: var(--text-md);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .marca:hover {
+    color: var(--color-text-primary);
+  }
+
+  /* Layout de sesión: en escritorio, menú lateral fijo + contenido centrado en el área a su derecha, para que en
+     pantallas anchas no quede un espacio vacío grande de un solo lado (cambio del 28-11-2026). */
+  .layout-sesion {
+    min-height: 100dvh;
+  }
+
+  .layout-sesion[data-menu='lateral'] {
+    display: grid;
+    grid-template-columns: var(--layout-sidebar-width) minmax(0, 1fr);
+  }
+
+  .contenido-sesion {
+    min-width: 0;
+  }
+
+  /* Cada pantalla limita su ancho (--layout-max-width o --layout-max-width-narrow) y se centra en el área. */
+  .contenido-sesion > * {
+    margin-inline: auto;
+  }
+
+  .menu-lateral {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    border-right: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-surface);
+  }
+
+  /* Empresa (o "Plataforma Norvia") y rol, con la campana o el botón de cerrar a la derecha. */
+  .menu-identidad {
+    display: flex;
+    flex: none;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-border-default);
+  }
+
+  .menu-identidad-lugar {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .menu-nav {
+    display: grid;
+    flex: 1;
+    align-content: start;
+    gap: var(--space-4);
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .menu-grupo,
+  .menu-grupo ul {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .menu-grupo ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu-grupo-titulo {
+    padding: 0 var(--space-3);
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    line-height: 16px;
+  }
+
+  /* Ítem de menú (design-system.md § Estados de componentes): ícono de 20px, foco con contorno interno. */
+  .item-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: var(--control-height);
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.12s,
+      color 0.12s;
+  }
+
+  .item-menu svg {
+    flex: none;
+  }
+
+  .item-menu:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+  }
+
+  .item-menu[aria-current] {
+    background: var(--color-bg-selected);
+    color: var(--color-text-selected);
+  }
+
+  .item-menu:focus-visible {
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
+
+  .item-menu:disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Menú de cuenta: al pie del menú; se abre hacia arriba como la lista del select. */
+  .menu-cuenta {
+    position: relative;
+    flex: none;
+    padding: var(--space-2);
+    border-top: var(--border-width) solid var(--color-border-default);
+  }
+
+  .menu-cuenta-caja {
+    position: absolute;
+    right: var(--space-2);
+    bottom: calc(100% - var(--space-1));
+    left: var(--space-2);
+    z-index: 30;
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-2);
+  }
+
+  .menu-cuenta-caja .item-menu {
+    color: var(--color-text-primary);
+  }
+
+  .menu-cuenta-rol {
+    margin: 0;
+    padding: var(--space-2) var(--space-3) var(--space-1);
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    line-height: 16px;
+  }
+
+  /* Celular y tablet: barra superior de una fila (no fija, para no sumarse a la barra de "Volver"). */
+  .barra-superior {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: calc(var(--space-2) + var(--safe-top)) calc(var(--layout-gutter) + var(--safe-right)) var(--space-2)
+      calc(var(--layout-gutter) + var(--safe-left));
+    border-bottom: var(--border-width) solid var(--color-border-default);
+    background: var(--color-bg-surface);
+  }
+
+  /* Panel del menú: <dialog> modal desde la izquierda, sobre el fondo de los modales. */
+  .panel-menu {
+    width: calc(var(--layout-sidebar-width) + var(--safe-left));
+    max-width: calc(100% - var(--space-12));
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: var(--safe-top) 0 var(--safe-bottom) var(--safe-left);
+    border: 0;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-3);
+  }
+
+  .panel-menu[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-menu::backdrop {
+    background: var(--color-overlay);
+  }
+
+  .panel-menu .item-menu {
+    min-height: var(--control-height-touch);
+  }
+
+  /* La barra fija de "Volver" ocupa el área de contenido: a la derecha del menú lateral y centrada como la página. */
+  .barra-volver-contenido {
+    margin-inline: auto;
+  }
+
+  .layout-sesion[data-menu='lateral'] .barra-volver {
+    left: var(--layout-sidebar-width);
+  }
+}
+
+/* =====================================================================
+   INICIO (design-system.md § Inicio): lista de pendientes
+   ===================================================================== */
+@layer components {
+  .lista-pendientes {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-surface);
+    list-style: none;
+  }
+
+  .lista-pendientes li + li {
+    border-top: var(--border-width) solid var(--color-border-default);
+  }
+
+  /* Ícono · nombre y detalle · badge · flecha. Toda la fila es el link (como una fila de tabla). */
+  .fila-pendiente {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto 16px;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--space-16);
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: background-color 0.12s;
+  }
+
+  a.fila-pendiente:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+  }
+
+  .fila-pendiente:focus-visible {
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
+
+  .fila-pendiente-error {
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+  }
+
+  /* Celular: el badge baja debajo del texto, para que el detalle no se corte. */
+  @media (max-width: 639px) {
+    .fila-pendiente {
+      grid-template-columns: 20px minmax(0, 1fr) 16px;
+    }
+
+    .fila-pendiente > .insignia {
+      grid-row: 2;
+      grid-column: 2;
+      justify-self: start;
+    }
+
+    .fila-pendiente-flecha {
+      grid-row: 1 / span 2;
+      grid-column: 3;
+    }
+
+    .fila-pendiente > :nth-child(3):empty {
+      display: none;
+    }
+
+    .fila-pendiente-error {
+      grid-template-columns: 20px minmax(0, 1fr);
+    }
+
+    .fila-pendiente-error > button {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+}
+
+/* =====================================================================
+   LANDING (design-system.md § Landing)
+   ===================================================================== */
+@layer components {
+  /* Vista del producto en la portada: mapa de calor y una tarea, la tarea apenas superpuesta al mapa. */
+  .landing-vista {
+    display: grid;
+    gap: var(--space-4);
+    justify-self: center;
+    width: 100%;
+    max-width: calc(var(--layout-max-width-narrow) / 2 + var(--space-12));
+  }
+
+  .landing-vista-tarea {
+    position: relative;
+    justify-self: end;
+    width: calc(var(--layout-max-width-narrow) / 2 - var(--space-8));
+    max-width: 100%;
+    margin-top: calc(-1 * (var(--space-4) + var(--space-3)));
+    margin-right: calc(-1 * var(--space-8));
+  }
+
+  .landing-mapa {
+    display: grid;
+    grid-template-columns: auto repeat(5, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  /* Pasos de "Cómo funciona": número a la izquierda en celular, arriba en escritorio. */
+  .landing-paso {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-content: start;
+  }
+
+  .landing-paso-numero {
+    grid-row: span 2;
+  }
+
+  .landing-pregunta::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .landing-paso {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-2);
+    }
+
+    .landing-paso-numero {
+      grid-row: auto;
+      margin-bottom: var(--space-2);
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .landing-vista-tarea {
+      justify-self: stretch;
+      width: auto;
+      margin: 0;
+    }
+  }
+}

@@ -1,4 +1,5 @@
-import { matchPath, type Location } from 'react-router-dom'
+import type { Location } from 'react-router-dom'
+import { esPublica, pantallaDe } from '@/shared/navegacion'
 
 /**
  * Historial para "Volver" (design-system.md § Volver): recuerda, por cada entrada del historial
@@ -60,51 +61,13 @@ export function registrarHistorial(router: RouterObservable) {
   })
 }
 
-/** Rutas sin sesión: no se mezclan con las de sesión (no se "vuelve" del inicio al login). */
-const PUBLICAS = ['/', '/login', '/plataforma', '/registro', '/verificar-cuenta', '/recuperar-contrasena', '/restablecer-contrasena']
-const esPublica = (pathname: string) => PUBLICAS.includes(pathname)
-
-/** Nombre de cada pantalla a la que se puede volver. Las que no están aquí usan la pantalla padre. */
-const TEXTOS: [patron: string, texto: string][] = [
-  ['/', 'Volver a la página principal'],
-  ['/plataforma', 'Volver al acceso del equipo'],
-  ['/registro', 'Volver al registro'],
-  ['/inicio', 'Volver al inicio'],
-  ['/cuenta/contrasena', 'Volver a cambiar tu contraseña'],
-  ['/personas', 'Volver a personas'],
-  ['/personas/nueva', 'Volver a agregar una persona'],
-  ['/personas/encuestados', 'Volver a agregar encuestados'],
-  ['/mis-encuestas', 'Volver a mis encuestas'],
-  ['/mis-encuestas/:id', 'Volver a la encuesta'],
-  ['/empresa', 'Volver al perfil de la empresa'],
-  ['/empresas', 'Volver a empresas'],
-  ['/riesgos', 'Volver a la matriz'],
-  ['/riesgos/nuevo', 'Volver a agregar riesgo'],
-  ['/riesgos/imprimir', 'Volver a imprimir la matriz'],
-  ['/riesgos/:id', 'Volver al riesgo'],
-  ['/encuestas', 'Volver a encuestas'],
-  ['/encuestas/nueva', 'Volver a nueva encuesta'],
-  ['/encuestas/historial', 'Volver a encuestas anteriores'],
-  ['/encuestas/comparar', 'Volver a comparar resultados'],
-  ['/encuestas/:id', 'Volver a la encuesta'],
-  ['/encuestas/:id/resultados', 'Volver a los resultados'],
-  ['/notificaciones', 'Volver a notificaciones'],
-  ['/documentos', 'Volver a documentos'],
-  ['/documentos/:id', 'Volver al documento'],
-  ['/documentos-vigentes', 'Volver a políticas y procedimientos'],
-  ['/documentos-vigentes/:id', 'Volver al documento'],
-  ['/auditoria', 'Volver a auditoría'],
-]
-
 function textoPara(anterior: URL, actual: Location): string | undefined {
   if (anterior.pathname === '/login') {
     // Del paso 2 del login al paso 1; desde otras pantallas, al login.
     return actual.pathname === '/login' && !anterior.searchParams.has('empresa') ? 'Volver a buscar tu empresa' : 'Volver a iniciar sesión'
   }
-  // Las rutas fijas ("/riesgos/nuevo") van antes que las de parámetro ("/riesgos/:id") en matchPath.
-  const fijas = TEXTOS.filter(([p]) => !p.includes(':'))
-  const conParametro = TEXTOS.filter(([p]) => p.includes(':'))
-  return [...fijas, ...conParametro].find(([p]) => matchPath(p, anterior.pathname))?.[1]
+  // Nombre de la pantalla en la lista única (shared/navegacion/pantallas.ts); sin nombre se usa la pantalla padre.
+  return pantallaDe(anterior.pathname)?.volver
 }
 
 export interface PantallaAnterior {

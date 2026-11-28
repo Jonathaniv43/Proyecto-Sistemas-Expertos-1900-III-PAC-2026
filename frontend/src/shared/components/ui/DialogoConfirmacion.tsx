@@ -20,6 +20,7 @@ interface DialogoConfirmacionProps {
 /**
  * Diálogo de confirmación (design-system.md § Diálogo de confirmación) sobre <dialog> nativo: el foco
  * queda dentro, Esc cancela, no se cierra con clic fuera y al cerrar el foco vuelve a quien lo abrió.
+ * Título, texto y botones van centrados (decisión del 28-11-2026).
  */
 export function DialogoConfirmacion({
   abierto,
@@ -53,13 +54,13 @@ export function DialogoConfirmacion({
         if (!cargando) onCancelar()
       }}
     >
-      <h2 id={`${id}-titulo`} className="text-md font-semibold">
+      <h2 id={`${id}-titulo`} className="text-center text-md font-semibold">
         {titulo}
       </h2>
-      <div id={`${id}-texto`} className="mt-2 text-text-secondary">
+      <div id={`${id}-texto`} className="mt-2 text-center text-text-secondary">
         {children}
       </div>
-      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
         <Boton variante="secundario" autoFocus={peligro} disabled={cargando} onClick={onCancelar}>
           Cancelar
         </Boton>

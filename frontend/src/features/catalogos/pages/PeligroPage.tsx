@@ -1,7 +1,7 @@
-import { ArrowLeft, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useController } from 'react-hook-form'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { AreaTexto } from '@/shared/components/ui/AreaTexto'
 import { Boton } from '@/shared/components/ui/Boton'
@@ -11,11 +11,13 @@ import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useFormulario } from '@/shared/forms'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { crearPlantillaTarea, editarPlantillaTarea, estadoPlantillaTarea, listarPeligros, listarPlantillasTarea } from '../api/catalogos'
 import { AvisoMensaje } from '../components/AvisoMensaje'
 import { BotonEstado, EstadoActivo } from '../components/Estado'
 import { EstadoCarga } from '../components/EstadoCarga'
 import { CuerpoFormulario, ModalFormulario, type EstadoFormulario } from '../components/ModalFormulario'
+import { AvisoConsulta } from '../components/AvisoConsulta'
 import { CLASIFICACIONES, NOMBRE_TIPO_CONTROL, PRIORIDADES, TIPOS_CONTROL } from '../etiquetas'
 import { usePuedeEditar } from '../permisos'
 import { plantillaTareaEsquema } from '../schemas/catalogos'
@@ -63,9 +65,9 @@ export function PeligroPage() {
   const grupo = (titulo: string, ayuda: string, items: PlantillaTarea[]) => (
     <section aria-label={titulo} className="grid gap-3">
       <div className="grid gap-1">
-        <h3 className="font-semibold">
+        <h2 className="font-semibold">
           {titulo} <span className="font-normal text-text-secondary">({items.length})</span>
-        </h3>
+        </h2>
         <p className="text-sm text-text-secondary">{ayuda}</p>
       </div>
       {items.length === 0 ? (
@@ -107,13 +109,9 @@ export function PeligroPage() {
   )
 
   return (
-    <div className="grid gap-6">
-      <div>
-        <Link to="/catalogos/peligros" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a los peligros
-        </Link>
-      </div>
+    <div className="grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/catalogos/peligros" texto="Volver a peligros y plantillas" titulo={peligro?.nombre} />
+      <AvisoConsulta />
       <EstadoCarga
         cargando={peligros.cargando || plantillas.cargando}
         error={peligros.error ?? plantillas.error}
@@ -125,9 +123,9 @@ export function PeligroPage() {
           <>
             <header className="flex flex-wrap items-start justify-between gap-4">
               <div className="grid gap-1">
-                <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+                <h1 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
                   {peligro.nombre} <EstadoActivo activo={peligro.activo} />
-                </h2>
+                </h1>
                 <p className="text-sm text-text-secondary">
                   {CLASIFICACIONES[peligro.clasificacion]} · {peligro.codigo}
                 </p>

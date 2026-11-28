@@ -1,15 +1,19 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { sesion } from '@/shared/api'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoTexto } from '@/shared/components/ui/CampoTexto'
 import { useFormulario } from '@/shared/forms'
 import { Volver } from '@/shared/components/ui/Volver'
+import type { EstadoLogin } from '@/shared/sesion'
+import { AvisoMotivo } from '../components/AvisoMotivo'
 import { iniciarSesionPlataforma } from '../api/sesion'
 import { loginPlataformaEsquema } from '../schemas/login'
 
 /** Ingreso del equipo de Norvia (StaffPlataforma), separado del de empresa (D23, RN-64). */
 export function LoginPlataformaPage() {
+  // Por qué se pide ingresar de nuevo (sesión vencida, reemplazada o cerrada), como en el login de empresa.
+  const motivo = (useLocation().state as EstadoLogin | null)?.motivo
   const {
     register,
     formState: { errors, isSubmitting },
@@ -29,6 +33,7 @@ export function LoginPlataformaPage() {
         <h1 className="text-xl font-semibold">Acceso del equipo de Norvia</h1>
         <p className="text-text-secondary">Solo para la administración de la plataforma. Las empresas entran desde el inicio de sesión habitual.</p>
       </header>
+      <AvisoMotivo motivo={motivo} />
       <form
         noValidate
         className="grid gap-4 rounded-lg border border-border-default bg-bg-surface p-4 sm:p-6"

@@ -29,7 +29,7 @@ export function VersionDocumentoPage() {
   const v = d?.version
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver
         a={`/documentos/${id}`}
         texto="Volver al documento"
