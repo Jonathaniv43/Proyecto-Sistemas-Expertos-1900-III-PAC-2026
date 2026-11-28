@@ -861,8 +861,8 @@
     color: var(--color-text-primary);
   }
 
-  /* Layout de sesión: en escritorio, menú lateral fijo + contenido alineado a su lado (no centrado), así el título
-     no cambia de lugar entre una lista y un formulario. */
+  /* Layout de sesión: en escritorio, menú lateral fijo + contenido centrado en el área a su derecha, para que en
+     pantallas anchas no quede un espacio vacío grande de un solo lado (cambio del 28-11-2026). */
   .layout-sesion {
     min-height: 100dvh;
   }
@@ -874,6 +874,11 @@
 
   .contenido-sesion {
     min-width: 0;
+  }
+
+  /* Cada pantalla limita su ancho (--layout-max-width o --layout-max-width-narrow) y se centra en el área. */
+  .contenido-sesion > * {
+    margin-inline: auto;
   }
 
   .menu-lateral {
@@ -1055,13 +1060,9 @@
     min-height: var(--control-height-touch);
   }
 
-  /* La barra fija de "Volver" ocupa el área de contenido: a la derecha del menú lateral y alineada con la página. */
+  /* La barra fija de "Volver" ocupa el área de contenido: a la derecha del menú lateral y centrada como la página. */
   .barra-volver-contenido {
     margin-inline: auto;
-  }
-
-  .layout-sesion .barra-volver-contenido {
-    margin-inline: 0;
   }
 
   .layout-sesion[data-menu='lateral'] .barra-volver {

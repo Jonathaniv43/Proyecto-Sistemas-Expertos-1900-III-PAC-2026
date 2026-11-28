@@ -169,17 +169,20 @@ const PREGUNTAS: [string, string][] = [
 export function Preguntas() {
   return (
     <Seccion id="preguntas">
-      <Titulo titulo="Preguntas frecuentes" />
-      <div className="grid max-w-layout-narrow gap-2">
-        {PREGUNTAS.map(([pregunta, respuesta], i) => (
-          <details key={pregunta} open={i === 0} className="group rounded-lg border border-border-default bg-bg-surface">
-            <summary className="landing-pregunta flex min-h-control-touch cursor-pointer list-none items-center justify-between gap-4 p-4 font-medium">
-              {pregunta}
-              <ChevronDown aria-hidden size={16} strokeWidth={1.5} className="shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
-            </summary>
-            <p className="px-4 pb-4 text-text-secondary">{respuesta}</p>
-          </details>
-        ))}
+      {/* Columna angosta centrada: alineada a la izquierda dejaba vacía la mitad derecha de la franja. */}
+      <div className="mx-auto w-full max-w-layout-narrow">
+        <Titulo titulo="Preguntas frecuentes" />
+        <div className="grid gap-2">
+          {PREGUNTAS.map(([pregunta, respuesta], i) => (
+            <details key={pregunta} open={i === 0} className="group rounded-lg border border-border-default bg-bg-surface">
+              <summary className="landing-pregunta flex min-h-control-touch cursor-pointer list-none items-center justify-between gap-4 p-4 font-medium">
+                {pregunta}
+                <ChevronDown aria-hidden size={16} strokeWidth={1.5} className="shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
+              </summary>
+              <p className="px-4 pb-4 text-text-secondary">{respuesta}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </Seccion>
   )
