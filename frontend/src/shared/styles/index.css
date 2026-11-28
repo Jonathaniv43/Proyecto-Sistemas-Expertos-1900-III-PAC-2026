@@ -1068,3 +1068,79 @@
     left: var(--layout-sidebar-width);
   }
 }
+
+/* =====================================================================
+   INICIO (design-system.md § Inicio): lista de pendientes
+   ===================================================================== */
+@layer components {
+  .lista-pendientes {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-surface);
+    list-style: none;
+  }
+
+  .lista-pendientes li + li {
+    border-top: var(--border-width) solid var(--color-border-default);
+  }
+
+  /* Ícono · nombre y detalle · badge · flecha. Toda la fila es el link (como una fila de tabla). */
+  .fila-pendiente {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto 16px;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--space-16);
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: background-color 0.12s;
+  }
+
+  a.fila-pendiente:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+  }
+
+  .fila-pendiente:focus-visible {
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
+
+  .fila-pendiente-error {
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+  }
+
+  /* Celular: el badge baja debajo del texto, para que el detalle no se corte. */
+  @media (max-width: 639px) {
+    .fila-pendiente {
+      grid-template-columns: 20px minmax(0, 1fr) 16px;
+    }
+
+    .fila-pendiente > .insignia {
+      grid-row: 2;
+      grid-column: 2;
+      justify-self: start;
+    }
+
+    .fila-pendiente-flecha {
+      grid-row: 1 / span 2;
+      grid-column: 3;
+    }
+
+    .fila-pendiente > :nth-child(3):empty {
+      display: none;
+    }
+
+    .fila-pendiente-error {
+      grid-template-columns: 20px minmax(0, 1fr);
+    }
+
+    .fila-pendiente-error > button {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+}
