@@ -47,7 +47,7 @@ export function DocumentosPage() {
           <p className="text-text-secondary">Políticas y procedimientos modelo que cada empresa adapta.</p>
         </div>
         {puedeEditar && (
-          <Link to="/catalogos/documentos/nuevo" className={clasesBoton('secundario')}>
+          <Link to="/catalogos/documentos/nuevo" className={clasesBoton('primario')}>
             <Plus aria-hidden size={16} strokeWidth={1.5} />
             Nueva plantilla
           </Link>

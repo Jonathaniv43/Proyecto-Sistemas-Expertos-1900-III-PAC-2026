@@ -6,7 +6,6 @@ import { clasesBoton } from '@/shared/components/ui/clases'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
-import { Volver } from '@/shared/components/ui/Volver'
 import { ROLES, useTieneRol } from '@/shared/sesion'
 import { listarDocumentos } from '../api/documentos'
 import { ESTADOS_VERSION, fecha, NOMBRE_TIPO } from '../etiquetas'
@@ -33,8 +32,7 @@ export function DocumentosPage() {
   )
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Documentos" ancho="layout" />
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="grid gap-1">
           <h1 className="text-xl font-semibold">Documentos</h1>

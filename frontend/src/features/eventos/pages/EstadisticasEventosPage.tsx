@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, ChartColumn, ShieldCheck, TriangleAlert } from 'lucide-react'
+import { ChartColumn, ShieldCheck, TriangleAlert } from 'lucide-react'
 import { useEffect, useMemo, type ReactNode } from 'react'
 import { useController, useForm, useWatch } from 'react-hook-form'
-import { Link } from 'react-router-dom'
 import { Indicador } from '@/shared/components/datos/Indicador'
 import { ListaMedidores } from '@/shared/components/datos/ListaMedidores'
 import { Boton } from '@/shared/components/ui/Boton'
+import { Volver } from '@/shared/components/ui/Volver'
 import { CampoFecha } from '@/shared/components/ui/CampoFecha'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
@@ -73,13 +73,8 @@ export function EstadisticasEventosPage() {
   const datos = peticion.datos
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
-      <div>
-        <Link to="/eventos" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a los eventos
-        </Link>
-      </div>
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
+      <Volver a="/eventos" texto="Volver a eventos" titulo="Estadísticas de eventos" ancho="layout" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Estadísticas de eventos</h1>
         <p className="flex items-start gap-2 text-text-secondary">

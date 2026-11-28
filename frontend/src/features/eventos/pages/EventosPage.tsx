@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoSelect } from '@/shared/components/ui/CampoSelect'
 import { clasesBoton } from '@/shared/components/ui/clases'
+import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
@@ -42,10 +43,10 @@ export function EventosPage() {
   const eventos = peticion.datos
 
   return (
-    <div className="mx-auto grid w-full max-w-layout grid-cols-1 gap-6">
+    <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-xl font-semibold">Eventos reportados</h1>
+          <h1 className="text-xl font-semibold">Eventos</h1>
           <p className="text-text-secondary">Accidentes, incidentes, enfermedades y condiciones inseguras. Los reportes son anónimos.</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -53,36 +54,36 @@ export function EventosPage() {
             <ChartColumn aria-hidden size={16} strokeWidth={1.5} />
             Estadísticas
           </Link>
-          <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
-            <Megaphone aria-hidden size={16} strokeWidth={1.5} />
-            Reportar un evento
-          </Link>
+          <BotonReportar />
         </div>
       </header>
 
-      <form role="search" aria-label="Filtrar eventos" className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => e.preventDefault()}>
-        <CampoSelect
-          etiqueta="Tipo"
-          todos="Todos los tipos"
-          registro={register('tipo')}
-          opciones={TIPOS_EVENTO.map((t) => ({ valor: t.valor, texto: t.texto }))}
-        />
-        <CampoSelect
-          etiqueta="Estado"
-          todos="Todos los estados"
-          registro={register('estado')}
-          opciones={Object.entries(ESTADOS_EVENTO).map(([valor, e]) => ({ valor, texto: e.texto }))}
-        />
-        <CampoSelect
-          etiqueta="Gravedad"
-          todos="Graves y no graves"
-          registro={register('gravedad')}
-          opciones={[
-            { valor: 'graves', texto: 'Solo los graves' },
-            { valor: 'no_graves', texto: 'Solo los no graves' },
-          ]}
-        />
-      </form>
+      {/* Sin eventos ni filtros, los filtros no aportan (design-system.md § Estados de pantalla). */}
+      {(hayFiltros || (eventos !== undefined && eventos.length > 0)) && (
+        <form role="search" aria-label="Filtrar eventos" className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => e.preventDefault()}>
+          <CampoSelect
+            etiqueta="Tipo"
+            todos="Todos los tipos"
+            registro={register('tipo')}
+            opciones={TIPOS_EVENTO.map((t) => ({ valor: t.valor, texto: t.texto }))}
+          />
+          <CampoSelect
+            etiqueta="Estado"
+            todos="Todos los estados"
+            registro={register('estado')}
+            opciones={Object.entries(ESTADOS_EVENTO).map(([valor, e]) => ({ valor, texto: e.texto }))}
+          />
+          <CampoSelect
+            etiqueta="Gravedad"
+            todos="Graves y no graves"
+            registro={register('gravedad')}
+            opciones={[
+              { valor: 'graves', texto: 'Solo los graves' },
+              { valor: 'no_graves', texto: 'Solo los no graves' },
+            ]}
+          />
+        </form>
+      )}
 
       {peticion.error && !eventos ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
@@ -117,8 +118,11 @@ export function EventosPage() {
               <Megaphone aria-hidden size={32} strokeWidth={1.5} className="text-text-tertiary" />
               <h2 className="text-md font-semibold">Todavía no hay eventos reportados</h2>
               <p className="max-w-layout-narrow text-text-secondary">
-                Cualquier persona de la empresa puede reportar uno desde su inicio, de forma anónima.
+                Cualquier persona de la empresa puede reportar uno desde el menú, de forma anónima.
               </p>
+              <div className="mt-4">
+                <BotonReportar />
+              </div>
             </>
           )}
         </section>
@@ -177,5 +181,15 @@ function FilaEvento({ evento: e }: { evento: Evento }) {
         <Insignia tipo={estado.tipo}>{estado.texto}</Insignia>
       </td>
     </tr>
+  )
+}
+
+/** La acción de crear de la lista: botón principal. Pasa su origen para que el reporte vuelva aquí. */
+function BotonReportar() {
+  return (
+    <Link to="/eventos/reportar" state={estadoVolver('/eventos', 'Volver a eventos')} className={clasesBoton('primario')}>
+      <Megaphone aria-hidden size={16} strokeWidth={1.5} />
+      Reportar un evento
+    </Link>
   )
 }

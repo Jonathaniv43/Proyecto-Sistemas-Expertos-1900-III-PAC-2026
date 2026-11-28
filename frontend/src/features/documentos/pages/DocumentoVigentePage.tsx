@@ -43,7 +43,7 @@ export function DocumentoVigentePage() {
   if (peticion.error?.status === 404) return <NotFoundPage />
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/documentos-vigentes" texto="Volver a políticas y procedimientos" titulo={d?.titulo} />
       {peticion.error && !d ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">

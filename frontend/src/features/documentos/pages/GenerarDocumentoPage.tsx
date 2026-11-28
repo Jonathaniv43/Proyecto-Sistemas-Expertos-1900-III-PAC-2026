@@ -29,7 +29,7 @@ export function GenerarDocumentoPage() {
   const sinRubro = plantillas.error?.codigo === 'documentos.sin_rubro'
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/documentos" texto="Volver a documentos" titulo="Generar documento" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Generar documento</h1>

@@ -1,9 +1,10 @@
-import { ArrowLeft, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
+import { Volver } from '@/shared/components/ui/Volver'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
@@ -43,13 +44,8 @@ export function EventoPage() {
   const e = actualizado?.id === id ? actualizado : peticion.datos
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to="/eventos" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a los eventos
-        </Link>
-      </div>
+    <div className="grid w-full max-w-layout-narrow gap-6">
+      <Volver a="/eventos" texto="Volver a eventos" titulo={e ? NOMBRE_TIPO[e.tipo] : undefined} />
       {peticion.error && !e ? (
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />

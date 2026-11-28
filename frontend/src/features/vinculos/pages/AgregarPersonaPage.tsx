@@ -53,7 +53,7 @@ export function AgregarPersonaPage() {
 
   if (resultado) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/personas" texto="Volver a personas" titulo="Persona agregada" />
         <h1 className="text-xl font-semibold">Persona agregada</h1>
         <PersonaAgregada
@@ -69,7 +69,7 @@ export function AgregarPersonaPage() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/personas" texto="Volver a personas" titulo="Agregar una persona" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Agregar una persona</h1>

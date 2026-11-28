@@ -10,7 +10,6 @@ import { useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { useTieneRol, ROLES } from '@/shared/sesion'
-import { Volver } from '@/shared/components/ui/Volver'
 import { actualizarPerfil, obtenerPerfil } from '../api/perfil'
 import { listarRubrosRegistro } from '../api/registro'
 import { perfilEmpresaEsquema } from '../schemas/perfilEmpresa'
@@ -43,8 +42,7 @@ export function PerfilEmpresaPage() {
   const listo = actual && (!puedeEditar || rubros.datos)
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
-      <Volver a="/inicio" texto="Volver al inicio" titulo="Perfil de la empresa" />
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Perfil de la empresa</h1>
         <p className="text-text-secondary">

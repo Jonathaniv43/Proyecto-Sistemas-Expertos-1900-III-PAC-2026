@@ -48,7 +48,7 @@ export function HistorialEncuestasPage() {
   const sinHistorial = datos?.length === 0 && !buscar
 
   return (
-    <div className="mx-auto grid w-full max-w-layout gap-6">
+    <div className="grid w-full max-w-layout gap-6">
       <Volver a="/encuestas" texto="Volver a encuestas" titulo="Encuestas anteriores" ancho="layout" />
 
       <header className="flex flex-wrap items-start justify-between gap-4">

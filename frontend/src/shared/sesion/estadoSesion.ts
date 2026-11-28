@@ -9,8 +9,11 @@ import { api, renovarSesion, sesion, type MotivoFinSesion, type UsuarioSesion } 
 export type EstadoSesion =
   | { estado: 'verificando' }
   | { estado: 'sin_conexion' }
-  /** `rtn`: empresa de la sesión que terminó, si había una (para no volver a una página de otra empresa). */
-  | { estado: 'sin_sesion'; motivo?: MotivoFinSesion; rtn?: string }
+  /**
+   * `rtn`: empresa de la sesión que terminó, si había una (para no volver a una página de otra empresa).
+   * `plataforma`: la sesión que terminó era del staff de Norvia; el próximo ingreso es por /plataforma.
+   */
+  | { estado: 'sin_sesion'; motivo?: MotivoFinSesion; rtn?: string; plataforma?: boolean }
   | { estado: 'activa'; usuario: UsuarioSesion }
 
 let actual: EstadoSesion = sesion.hayRefresh() ? { estado: 'verificando' } : { estado: 'sin_sesion' }
@@ -29,7 +32,11 @@ sesion.alTerminar((motivo) => {
 sesion.alCambiar(() => {
   const usuario = sesion.obtenerUsuario()
   if (usuario) fijar({ estado: 'activa', usuario })
-  else fijar({ estado: 'sin_sesion', motivo: ultimoMotivo, rtn: sesion.empresaTerminada()?.rtn })
+  else {
+    // Si la sesión que termina era del staff, se recuerda para llevarlo a su propio login (/plataforma).
+    const eraPlataforma = actual.estado === 'activa' ? actual.usuario.tipo === 'plataforma' : actual.estado === 'sin_sesion' && actual.plataforma
+    fijar({ estado: 'sin_sesion', motivo: ultimoMotivo, rtn: sesion.empresaTerminada()?.rtn, plataforma: eraPlataforma || undefined })
+  }
 })
 
 export const estadoSesion = {

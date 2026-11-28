@@ -61,7 +61,7 @@ export function EncuestaPage() {
   if (encuesta.error?.status === 404) return <NotFoundPage />
   if (encuesta.error || tipos.error) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/encuestas" texto="Volver a encuestas" />
         <section className="flex flex-col items-center gap-4 rounded-lg border border-border-default bg-bg-surface px-4 py-16 text-center">
           <TriangleAlert aria-hidden size={32} strokeWidth={1.5} className="text-error-icon" />
@@ -82,7 +82,7 @@ export function EncuestaPage() {
   }
   if (!encuesta.datos || !tipos.datos) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/encuestas" texto="Volver a encuestas" />
         <div aria-busy="true" aria-label="Cargando encuesta" className="grid gap-3">
           {cargandoVisible &&
@@ -216,7 +216,7 @@ function Encuesta({ encuesta, tipos, onCambio }: { encuesta: EncuestaDetalle; ti
   const errorPreguntas = errors.preguntas?.root?.message ?? errors.preguntas?.message
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/encuestas" texto="Volver a encuestas" titulo={encuesta.titulo} />
 
       <header className="grid gap-2">

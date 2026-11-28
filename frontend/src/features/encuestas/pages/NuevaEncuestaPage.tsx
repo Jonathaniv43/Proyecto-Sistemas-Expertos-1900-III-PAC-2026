@@ -64,7 +64,7 @@ export function NuevaEncuestaPage() {
 
   if (creada) {
     return (
-      <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+      <div className="grid w-full max-w-layout-narrow gap-6">
         <Volver a="/encuestas" texto="Volver a encuestas" titulo="Borrador creado" />
         <h1 className="text-xl font-semibold">Borrador creado</h1>
         <Aviso tipo="exito" titulo={`"${creada.encuesta.titulo}" quedó como borrador`}>
@@ -92,7 +92,7 @@ export function NuevaEncuestaPage() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-layout-narrow gap-6">
+    <div className="grid w-full max-w-layout-narrow gap-6">
       <Volver a="/encuestas" texto="Volver a encuestas" titulo="Nueva encuesta" />
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">Nueva encuesta</h1>
