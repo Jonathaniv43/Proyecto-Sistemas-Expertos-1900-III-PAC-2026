@@ -1144,3 +1144,69 @@
     }
   }
 }
+
+/* =====================================================================
+   LANDING (design-system.md § Landing)
+   ===================================================================== */
+@layer components {
+  /* Vista del producto en la portada: mapa de calor y una tarea, la tarea apenas superpuesta al mapa. */
+  .landing-vista {
+    display: grid;
+    gap: var(--space-4);
+    justify-self: center;
+    width: 100%;
+    max-width: calc(var(--layout-max-width-narrow) / 2 + var(--space-12));
+  }
+
+  .landing-vista-tarea {
+    position: relative;
+    justify-self: end;
+    width: calc(var(--layout-max-width-narrow) / 2 - var(--space-8));
+    max-width: 100%;
+    margin-top: calc(-1 * (var(--space-4) + var(--space-3)));
+    margin-right: calc(-1 * var(--space-8));
+  }
+
+  .landing-mapa {
+    display: grid;
+    grid-template-columns: auto repeat(5, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  /* Pasos de "Cómo funciona": número a la izquierda en celular, arriba en escritorio. */
+  .landing-paso {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-content: start;
+  }
+
+  .landing-paso-numero {
+    grid-row: span 2;
+  }
+
+  .landing-pregunta::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .landing-paso {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-2);
+    }
+
+    .landing-paso-numero {
+      grid-row: auto;
+      margin-bottom: var(--space-2);
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .landing-vista-tarea {
+      justify-self: stretch;
+      width: auto;
+      margin: 0;
+    }
+  }
+}

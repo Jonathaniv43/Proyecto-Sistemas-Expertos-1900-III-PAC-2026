@@ -78,10 +78,11 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <ErrorInesperado />,
     children: [
+      // La landing usa su propia barra y franjas de borde a borde: es la excepción del layout público (design-system.md § Landing).
+      { index: true, element: <LandingPage /> },
       {
         element: <LayoutPublico />,
         children: [
-          { index: true, element: <LandingPage /> },
           // HU-022: el enlace del correo; funciona con o sin sesión.
           { path: 'restablecer-contrasena', element: <RestablecerContrasenaPage /> },
           {

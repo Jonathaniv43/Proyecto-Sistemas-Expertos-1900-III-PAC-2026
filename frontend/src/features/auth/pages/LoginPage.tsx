@@ -1,4 +1,5 @@
 import { useLocation, useSearchParams } from 'react-router-dom'
+import { Aviso } from '@/shared/components/ui/Aviso'
 import { Volver } from '@/shared/components/ui/Volver'
 import type { EstadoLogin } from '@/shared/sesion'
 import { AvisoMotivo } from '../components/AvisoMotivo'
@@ -16,6 +17,8 @@ export function LoginPage() {
   const { state } = useLocation()
   const [parametros] = useSearchParams()
   const motivo = (state as EstadoLogin | null)?.motivo
+  // Se llegó con un enlace /login?empresa=… que este navegador no puede usar (CredencialesEmpresa).
+  const enlaceSinEmpresa = Boolean((state as { enlaceSinEmpresa?: boolean } | null)?.enlaceSinEmpresa)
   const idEmpresa = parametros.get('empresa')?.trim() ?? ''
 
   return (
@@ -33,6 +36,9 @@ export function LoginPage() {
       </header>
 
       <AvisoMotivo motivo={motivo} />
+      {enlaceSinEmpresa && !idEmpresa && (
+        <Aviso tipo="info">El enlace que abriste no sirve en este navegador. Busca tu empresa por su RTN para continuar.</Aviso>
+      )}
 
       {idEmpresa ? <CredencialesEmpresa key={idEmpresa} idEmpresa={idEmpresa} /> : <BuscarEmpresa />}
     </div>
