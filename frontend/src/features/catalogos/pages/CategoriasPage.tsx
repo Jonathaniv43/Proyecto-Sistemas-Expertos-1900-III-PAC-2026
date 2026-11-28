@@ -55,7 +55,7 @@ export function CategoriasPage() {
           <p className="text-text-secondary">Cada categoría agrupa preguntas de la encuesta y pertenece a un rubro.</p>
         </div>
         {puedeEditar && (
-          <Boton variante="secundario" onClick={() => setEditando('nueva')}>
+          <Boton onClick={() => setEditando('nueva')}>
             <Plus aria-hidden size={16} strokeWidth={1.5} />
             Nueva categoría
           </Boton>

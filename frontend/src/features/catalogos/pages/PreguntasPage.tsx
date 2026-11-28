@@ -64,7 +64,7 @@ export function PreguntasPage() {
           <p className="text-text-secondary">Lo que se pregunta en la encuesta de cada categoría, en el orden en que aparece.</p>
         </div>
         {puedeEditar && (
-          <Link to={`/catalogos/preguntas/nueva${categoriaId ? `?categoria=${categoriaId}` : ''}`} className={clasesBoton('secundario')}>
+          <Link to={`/catalogos/preguntas/nueva${categoriaId ? `?categoria=${categoriaId}` : ''}`} className={clasesBoton('primario')}>
             <Plus aria-hidden size={16} strokeWidth={1.5} />
             Nueva pregunta
           </Link>

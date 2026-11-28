@@ -1,6 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Aviso } from '@/shared/components/ui/Aviso'
-import { usePuedeEditar } from '../permisos'
+import { AvisoConsulta } from './AvisoConsulta'
 
 const SECCIONES = [
   { a: '/catalogos/categorias', texto: 'Categorías' },
@@ -13,9 +12,9 @@ const SECCIONES = [
 /**
  * HU-023: área de catálogos del staff de Norvia. Navegación de sección (design-system.md § Navegación de sección) y,
  * para soporte de plataforma, aviso de solo consulta: solo el administrador de plataforma crea, edita o desactiva.
+ * Envuelve solo las listas; los detalles y formularios son nivel 2 y llevan su propio título y "Volver".
  */
 export function CatalogosLayout() {
-  const puedeEditar = usePuedeEditar()
   return (
     <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="grid gap-1">
@@ -32,7 +31,7 @@ export function CatalogosLayout() {
           </NavLink>
         ))}
       </nav>
-      {!puedeEditar && <Aviso tipo="info">Tienes acceso de consulta: solo el administrador de plataforma hace cambios.</Aviso>}
+      <AvisoConsulta />
       <Outlet />
     </div>
   )

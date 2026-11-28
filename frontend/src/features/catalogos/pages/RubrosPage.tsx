@@ -35,7 +35,7 @@ export function RubrosPage() {
           <p className="text-text-secondary">A qué se dedica cada empresa. Cada rubro tiene sus categorías de riesgo.</p>
         </div>
         {puedeEditar && (
-          <Boton variante="secundario" onClick={() => setEditando('nuevo')}>
+          <Boton onClick={() => setEditando('nuevo')}>
             <Plus aria-hidden size={16} strokeWidth={1.5} />
             Nuevo rubro
           </Boton>

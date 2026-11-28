@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowLeft, ArrowUp, Check, Plus, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, Plus, X } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { useController, useFieldArray, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -14,8 +14,10 @@ import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
 import { SelectBusqueda } from '@/shared/components/ui/SelectBusqueda'
 import { useFormulario } from '@/shared/forms'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { crearPregunta, editarPregunta, listarCategorias, listarPeligros, listarPreguntas, listarRubros } from '../api/catalogos'
 import { EstadoCarga } from '../components/EstadoCarga'
+import { AvisoConsulta } from '../components/AvisoConsulta'
 import { CLASIFICACIONES, TIPOS_RESPUESTA } from '../etiquetas'
 import { preguntaEsquema } from '../schemas/catalogos'
 import type { CategoriaRiesgo, Peligro, Pregunta, Rubro } from '../types/catalogos'
@@ -55,16 +57,16 @@ export function PreguntaPage() {
 
   return (
     <div className="grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to={`/catalogos/preguntas${volverA ? `?categoria=${volverA}` : ''}`} className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a las preguntas
-        </Link>
-      </div>
+      <Volver
+        a={`/catalogos/preguntas${volverA ? `?categoria=${volverA}` : ''}`}
+        texto="Volver a preguntas"
+        titulo={id ? 'Editar pregunta' : 'Nueva pregunta'}
+      />
       <header className="grid gap-1">
-        <h2 className="text-lg font-semibold">{id ? 'Editar pregunta' : 'Nueva pregunta'}</h2>
+        <h1 className="text-xl font-semibold">{id ? 'Editar pregunta' : 'Nueva pregunta'}</h1>
         <p className="text-text-secondary">Los cambios no alteran las encuestas ya generadas: guardan su propia copia de las preguntas.</p>
       </header>
+      <AvisoConsulta />
       <EstadoCarga
         cargando={!listo}
         error={rubros.error ?? categorias.error ?? peligros.error ?? preguntas.error}

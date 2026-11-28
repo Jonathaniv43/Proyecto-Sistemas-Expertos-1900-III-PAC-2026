@@ -100,7 +100,7 @@ export function AuditoriaPage() {
   return (
     <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="grid gap-1">
-        <h1 className="text-xl font-semibold">Auditoría de acciones</h1>
+        <h1 className="text-xl font-semibold">Auditoría</h1>
         <p className="text-text-secondary">
           Registro cronológico e inalterable de las acciones de gestión realizadas en la empresa.
         </p>

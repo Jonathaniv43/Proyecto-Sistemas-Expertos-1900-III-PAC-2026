@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
@@ -11,8 +10,10 @@ import { GrupoRadio } from '@/shared/components/ui/GrupoRadio'
 import { MARCADORES_DOCUMENTO } from '@/shared/documentos'
 import { useFormulario } from '@/shared/forms'
 import { usePeticion } from '@/shared/hooks/usePeticion'
+import { Volver } from '@/shared/components/ui/Volver'
 import { crearDocumento, editarDocumento, listarDocumentos, listarRubros } from '../api/catalogos'
 import { EstadoCarga } from '../components/EstadoCarga'
+import { AvisoConsulta } from '../components/AvisoConsulta'
 import { ERRORES_CATALOGO, TIPOS_DOCUMENTO } from '../etiquetas'
 import { usePuedeEditar } from '../permisos'
 import { documentoEsquema } from '../schemas/catalogos'
@@ -38,16 +39,13 @@ export function DocumentoPage() {
   const documento = id ? documentos.datos?.find((d) => d.id === id) : undefined
   if (id && documentos.datos && !documento) return <NotFoundPage />
   const listo = !!rubros.datos && (!id || !!documento)
+  const titulo = id ? (documento?.titulo ?? 'Plantilla de documento') : 'Nueva plantilla de documento'
 
   return (
     <div className="grid w-full max-w-layout-narrow gap-6">
-      <div>
-        <Link to="/catalogos/documentos" className="inline-flex items-center gap-1 text-sm">
-          <ArrowLeft aria-hidden size={16} strokeWidth={1.5} />
-          Volver a las plantillas
-        </Link>
-      </div>
-      <h2 className="text-lg font-semibold">{id ? documento?.titulo ?? 'Plantilla de documento' : 'Nueva plantilla de documento'}</h2>
+      <Volver a="/catalogos/documentos" texto="Volver a plantillas de documento" titulo={titulo} />
+      <h1 className="text-xl font-semibold wrap-break-word">{titulo}</h1>
+      <AvisoConsulta />
       <EstadoCarga
         cargando={!listo}
         error={rubros.error ?? documentos.error}

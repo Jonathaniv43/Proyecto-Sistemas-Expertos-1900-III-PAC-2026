@@ -131,22 +131,24 @@ export const router = createBrowserRouter([
             children: [
               { path: 'empresas', element: <EmpresasRegistradasPage /> },
               {
+                // Las listas del área llevan su encabezado y la navegación de sección (design-system.md § Navegación de sección).
                 path: 'catalogos',
                 element: <CatalogosLayout />,
                 children: [
                   { index: true, element: <Navigate to="categorias" replace /> },
                   { path: 'categorias', element: <CategoriasPage /> },
                   { path: 'preguntas', element: <PreguntasPage /> },
-                  { path: 'preguntas/nueva', element: <PreguntaPage /> },
-                  { path: 'preguntas/:id', element: <PreguntaPage /> },
                   { path: 'peligros', element: <PeligrosPage /> },
-                  { path: 'peligros/:id', element: <PeligroPage /> },
                   { path: 'rubros', element: <RubrosPage /> },
                   { path: 'documentos', element: <DocumentosPage /> },
-                  { path: 'documentos/nuevo', element: <DocumentoPage /> },
-                  { path: 'documentos/:id', element: <DocumentoPage /> },
                 ],
               },
+              // Los detalles y formularios son nivel 2: su propio título y "Volver", sin el encabezado del área.
+              { path: 'catalogos/preguntas/nueva', element: <PreguntaPage /> },
+              { path: 'catalogos/preguntas/:id', element: <PreguntaPage /> },
+              { path: 'catalogos/peligros/:id', element: <PeligroPage /> },
+              { path: 'catalogos/documentos/nuevo', element: <DocumentoPage /> },
+              { path: 'catalogos/documentos/:id', element: <DocumentoPage /> },
             ],
           },
           {

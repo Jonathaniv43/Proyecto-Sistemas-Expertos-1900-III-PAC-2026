@@ -46,9 +46,9 @@ export function EmpresasRegistradasPage() {
   return (
     <div className="grid w-full max-w-layout grid-cols-1 gap-6">
       <header className="grid gap-1">
-        <h1 className="text-xl font-semibold">Empresas registradas</h1>
+        <h1 className="text-xl font-semibold">Empresas</h1>
         <p className="text-text-secondary">
-          Uso general de la plataforma por empresa, sin acceso a su información de seguridad y salud.
+          Las empresas registradas en Norvia y su uso general, sin acceso a su información de seguridad y salud.
         </p>
       </header>
 
