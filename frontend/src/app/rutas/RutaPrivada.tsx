@@ -30,6 +30,8 @@ export function RutaPrivada() {
       // puede entrar otra persona, con otro rol.
       const volver = sesion.motivo !== 'cerrada' && sesion.motivo !== 'contrasena_cambiada'
       const estado: EstadoLogin = { desde: volver ? rutaActual(location) : undefined, motivo: sesion.motivo, rtn: sesion.rtn }
+      // El staff de Norvia entra por su propio login, no por el de empresa (D23, RN-64).
+      if (sesion.plataforma) return <Navigate to="/plataforma" replace state={estado} />
       // Si la empresa de la sesión que terminó es la última resuelta aquí, se va directo a su login.
       const ultima = leerUltimaEmpresa()
       const idEmpresa = ultima && ultima.rtn === sesion.rtn ? ultima.idEmpresa : undefined
