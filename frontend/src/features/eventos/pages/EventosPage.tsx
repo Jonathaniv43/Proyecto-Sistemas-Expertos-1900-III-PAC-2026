@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { Boton } from '@/shared/components/ui/Boton'
 import { CampoSelect } from '@/shared/components/ui/CampoSelect'
 import { clasesBoton } from '@/shared/components/ui/clases'
+import { estadoVolver } from '@/shared/components/ui/estadoVolver'
 import { Insignia } from '@/shared/components/ui/Insignia'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
@@ -53,7 +54,7 @@ export function EventosPage() {
             <ChartColumn aria-hidden size={16} strokeWidth={1.5} />
             Estadísticas
           </Link>
-          <Link to="/eventos/reportar" className={clasesBoton('secundario')}>
+          <Link to="/eventos/reportar" state={estadoVolver('/eventos', 'Volver a eventos')} className={clasesBoton('secundario')}>
             <Megaphone aria-hidden size={16} strokeWidth={1.5} />
             Reportar un evento
           </Link>

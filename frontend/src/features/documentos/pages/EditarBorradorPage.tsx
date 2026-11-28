@@ -1,7 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
-import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { NotFoundPage } from '@/shared/components/NotFoundPage'
 import { AreaTexto } from '@/shared/components/ui/AreaTexto'
 import { Aviso } from '@/shared/components/ui/Aviso'
@@ -9,7 +9,7 @@ import { Boton } from '@/shared/components/ui/Boton'
 import { DialogoConfirmacion } from '@/shared/components/ui/DialogoConfirmacion'
 import { Volver } from '@/shared/components/ui/Volver'
 import { ContenidoDocumento, porCompletar } from '@/shared/documentos'
-import { useFormulario } from '@/shared/forms'
+import { useConfirmarSalida, useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { editarBorrador, obtenerDocumento } from '../api/documentos'
@@ -81,20 +81,8 @@ function Editor({ documento: d }: { documento: DocumentoDetalle }) {
   const contenido = useWatch({ control, name: 'contenido' }) ?? ''
   const faltan = porCompletar(contenido)
 
-  // Avisa antes de salir con cambios sin guardar: al recargar o cerrar la pestaña, el navegador; dentro de Norvia, un diálogo.
-  useEffect(() => {
-    if (!isDirty) return
-    const avisar = (e: BeforeUnloadEvent) => e.preventDefault()
-    window.addEventListener('beforeunload', avisar)
-    return () => window.removeEventListener('beforeunload', avisar)
-  }, [isDirty])
-  // Al guardar se navega con `guardado`: esa salida no se bloquea.
-  const bloqueo = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      isDirty &&
-      currentLocation.pathname !== nextLocation.pathname &&
-      !(nextLocation.state as EstadoDocumentoNavegacion | null)?.guardado,
-  )
+  // Avisa antes de salir con cambios sin guardar. Al guardar se navega con `guardado`: esa salida no se bloquea.
+  const salida = useConfirmarSalida(isDirty, (destino) => Boolean((destino.state as EstadoDocumentoNavegacion | null)?.guardado))
 
   return (
     <>
@@ -159,12 +147,12 @@ function Editor({ documento: d }: { documento: DocumentoDetalle }) {
       </form>
 
       <DialogoConfirmacion
-        abierto={bloqueo.state === 'blocked'}
+        abierto={salida.bloqueado}
         titulo="¿Salir sin guardar los cambios?"
         textoConfirmar="Salir sin guardar"
         peligro
-        onConfirmar={() => bloqueo.proceed?.()}
-        onCancelar={() => bloqueo.reset?.()}
+        onConfirmar={salida.salir}
+        onCancelar={salida.quedarse}
       >
         Lo que cambiaste en el borrador se pierde.
       </DialogoConfirmacion>

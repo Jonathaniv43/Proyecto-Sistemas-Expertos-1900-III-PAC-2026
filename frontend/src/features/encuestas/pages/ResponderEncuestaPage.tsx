@@ -5,8 +5,9 @@ import { Link, useParams } from 'react-router-dom'
 import { Aviso } from '@/shared/components/ui/Aviso'
 import { Boton } from '@/shared/components/ui/Boton'
 import { clasesBoton } from '@/shared/components/ui/clases'
+import { DialogoConfirmacion } from '@/shared/components/ui/DialogoConfirmacion'
 import { Volver } from '@/shared/components/ui/Volver'
-import { useFormulario } from '@/shared/forms'
+import { useConfirmarSalida, useFormulario } from '@/shared/forms'
 import { useCargaVisible } from '@/shared/hooks/useCargaVisible'
 import { usePeticion } from '@/shared/hooks/usePeticion'
 import { listarPendientes, responderEncuesta } from '../api/encuestas'
@@ -90,13 +91,8 @@ function Formulario({ encuesta }: { encuesta: EncuestaPendiente }) {
     },
   })
 
-  // Avisa antes de salir con respuestas sin enviar.
-  useEffect(() => {
-    if (!isDirty || enviada) return
-    const avisar = (e: BeforeUnloadEvent) => e.preventDefault()
-    window.addEventListener('beforeunload', avisar)
-    return () => window.removeEventListener('beforeunload', avisar)
-  }, [isDirty, enviada])
+  // Avisa antes de salir con respuestas sin enviar: dentro de Norvia con un diálogo; al cerrar la pestaña, el navegador.
+  const salida = useConfirmarSalida(isDirty && !enviada)
 
   if (enviada) {
     return (
@@ -177,6 +173,16 @@ function Formulario({ encuesta }: { encuesta: EncuestaPendiente }) {
           )}
         </div>
       </form>
+      <DialogoConfirmacion
+        abierto={salida.bloqueado}
+        titulo="¿Salir sin enviar tus respuestas?"
+        textoConfirmar="Salir sin enviar"
+        peligro
+        onConfirmar={salida.salir}
+        onCancelar={salida.quedarse}
+      >
+        Lo que respondiste en esta encuesta se pierde.
+      </DialogoConfirmacion>
     </div>
   )
 }

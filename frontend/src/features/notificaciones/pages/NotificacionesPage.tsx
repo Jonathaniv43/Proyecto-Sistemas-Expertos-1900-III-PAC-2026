@@ -134,7 +134,7 @@ function ItemNotificacion({ notificacion: n, cargando, ocupada, onMarcar, onAbri
       </div>
 
       {(destino || noLeida) && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-4">
           {destino && (
             <Link
               to={destino}
@@ -145,7 +145,7 @@ function ItemNotificacion({ notificacion: n, cargando, ocupada, onMarcar, onAbri
                 onAbrir(destino)
               }}
             >
-              {n.tipo === 'tarea_asignada' ? 'Ver mis tareas' : 'Ver la política'}
+              {n.tipo === 'tarea_asignada' ? 'Ver la tarea' : 'Ver la política'}
             </Link>
           )}
           {noLeida && (
