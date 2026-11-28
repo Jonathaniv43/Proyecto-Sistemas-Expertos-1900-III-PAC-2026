@@ -68,10 +68,14 @@ public sealed class CrearEncuestadosLoteServicio(
             await unidadDeTrabajo.GuardarCambiosAsync(ct);
         }
 
-        var cuentas = preparados
-            .Select(p => new EncuestadoCreadoDto(p.Fila, p.Datos.Vinculo.Id, p.Datos.Acceso.Email,
-                p.Datos.Persona.NombreCompleto, p.Datos.CuentaNueva, p.Datos.CorreoActivacionEnviado))
-            .ToList();
+        // Los correos salen solo después de confirmar el lote: si el guardado falla, no queda ningún código suelto.
+        var cuentas = new List<EncuestadoCreadoDto>(preparados.Count);
+        foreach (var (fila, datos) in preparados)
+        {
+            var enviado = await alta.EnviarActivacionAsync(datos, ct);
+            cuentas.Add(new EncuestadoCreadoDto(fila, datos.Vinculo.Id, datos.Acceso.Email,
+                datos.Persona.NombreCompleto, datos.CuentaNueva, enviado));
+        }
         return new CrearEncuestadosLoteResponseDto(cuentas.Count, cuentas, errores);
     }
 }

@@ -24,6 +24,8 @@ const MINUTOS_VIGENCIA = 30
 export function SolicitarCambioContrasenaPage() {
   const sesion = useSesion()
   const emailSesion = sesion.estado === 'activa' ? sesion.usuario.email : null
+  // Una cuenta creada con Microsoft no tiene contraseña: el mismo enlace sirve para agregarla.
+  const agregar = sesion.estado === 'activa' && !sesion.usuario.tienePassword
   const [enviadoA, setEnviadoA] = useState<string>()
   // Regreso: a donde se vino (p. ej. el login de la empresa) o, si se entró por URL, al padre fijo.
   const origen = leerEstadoVolver(useLocation().state)
@@ -31,7 +33,7 @@ export function SolicitarCambioContrasenaPage() {
     ? { a: '/inicio', texto: 'Volver al inicio' }
     : { a: rutaLogin(leerUltimaEmpresa()?.idEmpresa), texto: 'Volver a iniciar sesión' }
   const regreso = origen ?? padre
-  const titulo = emailSesion ? 'Cambiar mi contraseña' : '¿Olvidaste tu contraseña?'
+  const titulo = agregar ? 'Agregar una contraseña' : emailSesion ? 'Cambiar mi contraseña' : '¿Olvidaste tu contraseña?'
 
   const {
     register,
@@ -51,6 +53,9 @@ export function SolicitarCambioContrasenaPage() {
       <header className="grid gap-2">
         <h1 className="text-xl font-semibold">{titulo}</h1>
         <p className="text-text-secondary">
+          {agregar
+            ? 'Hoy entras con Microsoft. Si agregas una contraseña, también podrás entrar con tu correo. '
+            : ''}
           Para proteger tu cuenta, te enviamos un enlace a tu correo y desde ahí eliges la contraseña nueva. Vale para
           todas las empresas donde tienes acceso.
         </p>

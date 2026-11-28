@@ -29,7 +29,7 @@ export function EncabezadoSesion({ usuario, acciones }: { usuario: UsuarioSesion
         {acciones}
         <Link to="/cuenta/contrasena" className={clasesBoton('secundario')}>
           <KeyRound aria-hidden size={16} strokeWidth={1.5} />
-          Cambiar contraseña
+          {usuario.tienePassword ? 'Cambiar contraseña' : 'Agregar contraseña'}
         </Link>
         <Boton
           variante="secundario"

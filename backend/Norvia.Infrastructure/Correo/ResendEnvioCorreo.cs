@@ -24,6 +24,8 @@ public sealed class ResendEnvioCorreo(
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "emails") { Content = JsonContent.Create(payload) };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.ApiKeyResend);
+        if (mensaje.ClaveIdempotencia is not null)
+            request.Headers.Add("Idempotency-Key", mensaje.ClaveIdempotencia);
 
         try
         {

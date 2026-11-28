@@ -24,7 +24,7 @@ public static class CatalogoPlantillasCorreo
                   <p>Te agregaron a Norvia dentro de la empresa <strong>{{EmpresaNombre}}</strong> con el rol <strong>{{RolNombre}}</strong>.</p>
                   <p>Para iniciar sesión con <strong>{{Email}}</strong>, primero activá tu cuenta con este código y elegí tu contraseña:</p>
                   <p style="font-size: 1.75rem; letter-spacing: 0.35em; font-weight: 600;">{{Codigo}}</p>
-                  <p>El código vence en unos {{Minutos}} minutos.</p>
+                  <p>El código vence en {{Vigencia}}.</p>
                   <p><a href="{{UrlActivacion}}" style="color: #4f46e5;">Activar mi cuenta</a></p>
                   <p style="font-size: 0.875rem; color: #666;">Si no reconocés esta empresa, ignorá este mensaje: nadie podrá entrar sin activar la cuenta con este código.</p>
                 </body>
@@ -42,7 +42,7 @@ public static class CatalogoPlantillasCorreo
                 <head><meta charset="utf-8" /><title>Cambio de contraseña</title></head>
                 <body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #1a1a1a; max-width: 520px;">
                   <p>Hola <strong>{{Nombre}}</strong>,</p>
-                  <p>Recibimos una solicitud para cambiar la contraseña de tu cuenta Norvia.</p>
+                  <p>Recibimos una solicitud para {{Accion}} en tu cuenta Norvia.</p>
                   <p><a href="{{UrlCambio}}" style="color: #4f46e5;">Establecer nueva contraseña</a></p>
                   <p>El enlace vence en {{Minutos}} minutos y sirve una sola vez. La contraseña nueva valdrá en todas las empresas donde tenés acceso, y se cerrarán las sesiones abiertas.</p>
                   <p style="font-size: 0.875rem; color: #666;">Si no fuiste vos, ignorá este mensaje.</p>

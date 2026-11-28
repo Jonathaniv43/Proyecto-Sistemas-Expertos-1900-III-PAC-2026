@@ -25,7 +25,7 @@ public sealed class AprobarDocumentoServicio(
     IReloj reloj,
     ITenantActual sesion,
     Notificador notificador,
-    IEnvioInmediatoNotificacion envioInmediato,
+    IAvisoCorreosPendientes avisoCorreos,
     Auditor auditor) : IServicioCasoDeUso
 {
     public async Task<Resultado<DocumentoDetalleResponseDto>> EjecutarAsync(Guid documentoId, CancellationToken ct)
@@ -67,7 +67,7 @@ public sealed class AprobarDocumentoServicio(
             await unidadDeTrabajo.GuardarCambiosAsync(t);
         }, ct);
 
-        foreach (var notificacion in notificaciones) await envioInmediato.IntentarAsync(notificacion.Id, ct);
+        if (notificaciones.Count > 0) avisoCorreos.Avisar();
 
         return await repositorio.DetalleAsync(documentoId, ct);
     }

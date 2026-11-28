@@ -14,6 +14,7 @@ namespace Norvia.API.SegundoPlano;
 /// </summary>
 public sealed class ProcesadorCorreosPendientes(
     IServiceScopeFactory scopes,
+    SenalCorreosPendientes senal,
     IOptions<NotificacionesOpciones> opciones,
     ILogger<ProcesadorCorreosPendientes> log) : BackgroundService
 {
@@ -26,12 +27,20 @@ public sealed class ProcesadorCorreosPendientes(
             return;
         }
 
-        using var temporizador = new PeriodicTimer(TimeSpan.FromSeconds(cfg.IntervaloSegundos));
-        do
+        // Despierta cuando la API avisa que creó notificaciones, o cada intervalo para los reintentos programados.
+        var intervalo = TimeSpan.FromSeconds(cfg.IntervaloSegundos);
+        while (!stoppingToken.IsCancellationRequested)
         {
             await ProcesarAsync(cfg, stoppingToken);
+            try
+            {
+                await senal.EsperarAsync(intervalo, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
         }
-        while (await EsperarAsync(temporizador, stoppingToken));
     }
 
     /// <summary>Vacía lo vencido: si el lote salió lleno, puede haber más esperando y sigue sin aguardar al intervalo.</summary>
@@ -57,18 +66,6 @@ public sealed class ProcesadorCorreosPendientes(
         {
             // Por ejemplo, la base no responde: se reintenta en la próxima vuelta sin tumbar la API.
             log.LogError(ex, "No se pudo procesar la bandeja de correos de notificaciones.");
-        }
-    }
-
-    private static async Task<bool> EsperarAsync(PeriodicTimer temporizador, CancellationToken ct)
-    {
-        try
-        {
-            return await temporizador.WaitForNextTickAsync(ct);
-        }
-        catch (OperationCanceledException)
-        {
-            return false;
         }
     }
 }

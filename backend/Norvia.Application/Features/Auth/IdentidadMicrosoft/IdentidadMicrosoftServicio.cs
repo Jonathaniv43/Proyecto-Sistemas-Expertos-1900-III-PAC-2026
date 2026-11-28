@@ -15,7 +15,8 @@ public sealed class IdentidadMicrosoftServicio(
     IIdentidadMicrosoftRepositorio repo,
     IReloj reloj) : IServicioCasoDeUso
 {
-    public const int MinutosVigencia = 10;
+    /// <summary>Tiempo para terminar el paso siguiente (escribir la contraseña actual o el código), sin repetir el login de Microsoft.</summary>
+    public const int MinutosVigencia = 30;
 
     public async Task<Resultado<IdentidadMicrosoftResponseDto>> EjecutarAsync(
         IdentidadMicrosoftRequestDto request, CancellationToken cancellationToken)
@@ -41,7 +42,9 @@ public sealed class IdentidadMicrosoftServicio(
         var existente = await repo.BuscarAccesoPorEmailAsync(identidad.Email, cancellationToken);
         if (existente is null) return Respuesta(token, identidad, EstadosIdentidad.SinCuenta, false);
 
-        // Con contraseña: se puede vincular confirmándola. Sin contraseña es la cuenta de otro Microsoft: no hay cómo confirmar.
+        // Sin activar (D30): primero el código. Con contraseña: se vincula confirmándola. Verificada y sin contraseña:
+        // es la cuenta de otro Microsoft y no hay cómo confirmar.
+        if (!existente.Verificado) return Errores.CuentaSinActivar;
         return existente.PasswordHash is null
             ? Errores.ProveedorYaVinculado
             : Respuesta(token, identidad, EstadosIdentidad.CuentaConContrasena, false);

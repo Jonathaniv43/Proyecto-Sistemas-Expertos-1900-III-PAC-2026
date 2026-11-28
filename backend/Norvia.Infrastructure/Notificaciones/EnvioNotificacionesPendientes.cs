@@ -18,10 +18,11 @@ namespace Norvia.Infrastructure.Notificaciones;
 /// los intentos, el correo queda "fallido"; la notificación sigue visible en Norvia y la operación que la originó
 /// no se toca.
 /// <para>
-/// Un mismo método (<see cref="IntentarUnoAsync"/>) atiende los tres caminos que pueden intentar el envío de una
-/// fila: el intento inmediato al crearla, el botón "Reintentar" (<see cref="IntentarAsync"/>) y el poller de fondo
-/// <c>ProcesadorCorreosPendientes</c> (<see cref="ProcesarAsync"/>). Un guardo atómico (pasar a <c>en_proceso</c>
-/// solo si sigue <c>pendiente</c> o <c>fallido</c>) evita que dos de estos caminos envíen la misma fila a la vez.
+/// Solo el proceso de fondo (<c>ProcesadorCorreosPendientes</c>) llama a este servicio; la API únicamente lo
+/// despierta (<see cref="SenalCorreosPendientes"/>). Tomar una fila la pasa a <c>en_proceso</c> con un plazo
+/// (<see cref="PlazoEnProceso"/>) en <c>CorreoProximoIntentoEn</c>: si el proceso se interrumpe a mitad (reinicio
+/// del servidor, caída de la base), al vencer el plazo la fila se vuelve a tomar en vez de quedar trabada. Para
+/// que ese reintento no duplique un correo que sí salió, cada intento lleva una clave de idempotencia.
 /// </para>
 /// </summary>
 public sealed class EnvioNotificacionesPendientes(
@@ -31,9 +32,12 @@ public sealed class EnvioNotificacionesPendientes(
     IEnvioCorreo envioCorreo,
     IOptions<NotificacionesOpciones> opciones,
     IOptions<CorreoOpciones> correo,
-    ILogger<EnvioNotificacionesPendientes> log) : IEnvioInmediatoNotificacion
+    ILogger<EnvioNotificacionesPendientes> log)
 {
     private const int LargoMaximoError = 1000;
+
+    /// <summary>Más que el timeout de la llamada al proveedor de correo, para no retomar una fila que sigue en curso.</summary>
+    public static readonly TimeSpan PlazoEnProceso = TimeSpan.FromMinutes(2);
 
     /// <summary>Procesa un lote de correos vencidos (poller de fondo). Devuelve cuántos intentó.</summary>
     public async Task<int> ProcesarAsync(CancellationToken ct)
@@ -42,9 +46,11 @@ public sealed class EnvioNotificacionesPendientes(
         var ahora = await reloj.AhoraAsync(ct);
 
         // Proceso de plataforma, sin sesión de empresa: recorre los pendientes de todas las empresas.
+        // Pendientes cuya espera venció, y en_proceso cuyo plazo venció (un intento que se interrumpió).
         var ids = await db.Notificacion.IgnoreQueryFilters()
-            .Where(n => n.CorreoEstado == EstadoCorreo.Pendiente
-                        && (n.CorreoProximoIntentoEn == null || n.CorreoProximoIntentoEn <= ahora))
+            .Where(n => (n.CorreoEstado == EstadoCorreo.Pendiente
+                         && (n.CorreoProximoIntentoEn == null || n.CorreoProximoIntentoEn <= ahora))
+                        || (n.CorreoEstado == EstadoCorreo.EnProceso && n.CorreoProximoIntentoEn <= ahora))
             .OrderBy(n => n.CorreoProximoIntentoEn ?? n.CreadaEn)
             .ThenBy(n => n.Id)
             .Take(cfg.LoteMaximo)
@@ -59,25 +65,18 @@ public sealed class EnvioNotificacionesPendientes(
         return procesados;
     }
 
-    /// <summary>Intento inmediato (al crearla) o reintento manual (botón). Nunca lanza.</summary>
-    public async Task IntentarAsync(Guid notificacionId, CancellationToken ct)
-    {
-        try
-        {
-            await IntentarUnoAsync(notificacionId, opciones.Value, ct);
-        }
-        catch (Exception ex)
-        {
-            log.LogError(ex, "No se pudo intentar el correo de la notificación {Id}.", notificacionId);
-        }
-    }
-
-    /// <summary>Toma la fila (guardo atómico), intenta el envío y guarda. false si otro camino ya la tenía o no existe.</summary>
+    /// <summary>Toma la fila (guardo atómico con plazo), intenta el envío y guarda. false si ya no estaba disponible.</summary>
     private async Task<bool> IntentarUnoAsync(Guid id, NotificacionesOpciones cfg, CancellationToken ct)
     {
+        var ahora = await reloj.AhoraAsync(ct);
+        var plazo = ahora + PlazoEnProceso;
         var tomada = await db.Notificacion.IgnoreQueryFilters()
-            .Where(n => n.Id == id && (n.CorreoEstado == EstadoCorreo.Pendiente || n.CorreoEstado == EstadoCorreo.Fallido))
-            .ExecuteUpdateAsync(s => s.SetProperty(n => n.CorreoEstado, EstadoCorreo.EnProceso), ct);
+            .Where(n => n.Id == id
+                        && (n.CorreoEstado == EstadoCorreo.Pendiente
+                            || (n.CorreoEstado == EstadoCorreo.EnProceso && n.CorreoProximoIntentoEn <= ahora)))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(n => n.CorreoEstado, EstadoCorreo.EnProceso)
+                .SetProperty(n => n.CorreoProximoIntentoEn, plazo), ct);
         if (tomada == 0) return false;
 
         var n = await db.Notificacion.IgnoreQueryFilters()
@@ -152,8 +151,10 @@ public sealed class EnvioNotificacionesPendientes(
         if (renderizado is null)
             return ResultadoEnvioCorreo.Fallo($"Falta la plantilla de correo '{CodigosPlantillaCorreo.Notificacion}'.");
 
+        // Mismo número de intento si un envío se interrumpió antes de guardarse: el proveedor no lo duplica.
+        var clave = $"notificacion-{n.Id}-{n.CorreoIntentos}";
         return await envioCorreo.EnviarAsync(
-            new MensajeCorreo(n.Destinatario.Acceso.Email, renderizado.Asunto, renderizado.CuerpoHtml), ct);
+            new MensajeCorreo(n.Destinatario.Acceso.Email, renderizado.Asunto, renderizado.CuerpoHtml, clave), ct);
     }
 
     /// <summary>Pantalla del front que abre el correo. La de la política se fija con HU-116 (ver la versión vigente).</summary>

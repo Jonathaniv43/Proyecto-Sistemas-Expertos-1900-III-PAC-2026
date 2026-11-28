@@ -196,6 +196,41 @@ public sealed class MicrosoftTests(NorviaApiFactory api)
         return (await Escenario.Json(bien)).GetProperty("tokenIdentidad").GetString()!;
     }
 
+    [Fact]
+    public async Task Cuenta_local_sin_activar_que_entra_con_Microsoft_recibe_un_aviso_claro()
+    {
+        var empresa = await _escenario.CrearEmpresaAsync("MsSinActivar");
+        var email = CorreoUnico();
+        var alta = await empresa.Cliente.PostAsJsonAsync("/api/vinculos",
+            new { email, primerNombre = "Sin", primerApellido = "Activar", rolCodigo = "colaborador" });
+        alta.EnsureSuccessStatusCode();
+
+        var r = await api.CreateClient().PostAsJsonAsync("/api/auth/microsoft/identidad", new
+        {
+            codigo = api.Microsoft.Registrar(email, "ms-" + Guid.NewGuid()),
+            codeVerifier = Verificador,
+            redirectUri = "http://localhost:5173/auth/microsoft/callback"
+        });
+
+        Assert.Equal(HttpStatusCode.Conflict, r.StatusCode);
+        Assert.Equal("auth.cuenta_sin_activar", (await Escenario.Json(r)).GetProperty("codigo").GetString());
+    }
+
+    [Fact]
+    public async Task El_alta_por_otra_persona_da_un_codigo_que_vence_en_48_horas()
+    {
+        var empresa = await _escenario.CrearEmpresaAsync("MsVigencia");
+        var email = CorreoUnico();
+        var antes = DateTime.UtcNow;
+        (await empresa.Cliente.PostAsJsonAsync("/api/vinculos",
+            new { email, primerNombre = "Larga", primerApellido = "Vigencia", rolCodigo = "colaborador" })).EnsureSuccessStatusCode();
+
+        await using var db = api.NuevoContexto(empresaId: null);
+        var fila = await db.VerificacionCorreo.SingleAsync(v => v.Email == email);
+        Assert.InRange(fila.ExpiraEn - antes, TimeSpan.FromHours(47.9), TimeSpan.FromHours(48.1));
+        Assert.Contains("48 horas", api.Correos.Para(email)[^1].CuerpoHtml);
+    }
+
     private async Task<System.Text.Json.JsonElement> IdentidadAsync(string codigo)
     {
         var r = await api.CreateClient().PostAsJsonAsync("/api/auth/microsoft/identidad",

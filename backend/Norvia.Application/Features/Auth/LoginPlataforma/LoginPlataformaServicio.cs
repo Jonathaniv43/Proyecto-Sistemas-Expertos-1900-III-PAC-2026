@@ -27,7 +27,7 @@ public sealed class LoginPlataformaServicio(
             return Errores.CredencialesInvalidas;
 
         var ahora = await reloj.AhoraAsync(cancellationToken);
-        var sesion = new SesionToken(acceso.Id, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo, acceso.Email);
+        var sesion = new SesionToken(acceso.Id, TipoSesion.Plataforma, null, null, staff.RolStaffPlataforma.Codigo, acceso.Email, acceso.PasswordHash is not null);
         var (fila, respuesta) = emisor.Emitir(sesion, ahora);
 
         repo.AgregarRefresh(fila);
