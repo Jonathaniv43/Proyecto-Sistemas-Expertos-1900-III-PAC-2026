@@ -18,7 +18,3 @@ export const CLASES_NIVEL: Record<ClasificacionRiesgo, string> = {
   alto: 'bg-riesgo-alto text-riesgo-alto-texto',
   critico: 'bg-riesgo-critico text-riesgo-critico-texto',
 }
-
-/** Clasificación de un nivel (probabilidad × severidad) según RN-16. */
-export const clasificacionDe = (nivel: number): ClasificacionRiesgo =>
-  nivel >= 15 ? 'critico' : nivel >= 10 ? 'alto' : nivel >= 5 ? 'medio' : 'bajo'

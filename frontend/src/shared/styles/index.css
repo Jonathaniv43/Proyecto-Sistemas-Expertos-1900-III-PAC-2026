@@ -1150,41 +1150,79 @@
    LANDING (design-system.md § Landing)
    ===================================================================== */
 @layer components {
-  /* Vista del producto en la portada: mapa de calor y una tarea, la tarea apenas superpuesta al mapa. */
-  .landing-vista {
+  /* Portada: texto a la izquierda y la vista de la app a la derecha (apiladas en celular y tablet). */
+  .landing-portada {
     display: grid;
-    gap: var(--space-4);
-    justify-self: center;
-    width: 100%;
-    max-width: calc(var(--layout-max-width-narrow) / 2 + var(--space-12));
+    gap: var(--space-8);
+    padding-block: var(--space-12);
   }
 
-  .landing-vista-tarea {
+  /* Vista de la app: menú + inicio con lo pendiente, elevada sobre la portada. */
+  .landing-app {
+    display: grid;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-canvas);
+    box-shadow: var(--shadow-3);
+  }
+
+  .landing-app-menu {
+    display: none;
+  }
+
+  /* Ícono de tarjeta y de la franja de respaldo: cuadro neutro de 40px. */
+  .landing-icono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: calc(var(--space-8) + var(--space-2));
+    height: calc(var(--space-8) + var(--space-2));
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+  }
+
+  /* Pasos conectados por una línea: vertical en celular y tablet, horizontal en escritorio. */
+  .landing-pasos {
     position: relative;
-    justify-self: end;
-    width: calc(var(--layout-max-width-narrow) / 2 - var(--space-8));
-    max-width: 100%;
-    margin-top: calc(-1 * (var(--space-4) + var(--space-3)));
-    margin-right: calc(-1 * var(--space-8));
-  }
-
-  .landing-mapa {
     display: grid;
-    grid-template-columns: auto repeat(5, minmax(0, 1fr));
-    gap: 2px;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  /* Pasos de "Cómo funciona": número a la izquierda en celular, arriba en escritorio. */
+  .landing-pasos::before {
+    content: '';
+    position: absolute;
+    top: calc((var(--space-8) + var(--space-2)) / 2);
+    bottom: calc((var(--space-8) + var(--space-2)) / 2);
+    left: calc((var(--space-8) + var(--space-2)) / 2);
+    border-left: var(--border-width) solid var(--color-border-strong);
+  }
+
   .landing-paso {
+    position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: var(--space-3);
+    grid-template-columns: calc(var(--space-8) + var(--space-2)) minmax(0, 1fr);
+    column-gap: var(--space-4);
     row-gap: var(--space-1);
     align-content: start;
   }
 
   .landing-paso-numero {
+    display: grid;
     grid-row: span 2;
+    place-items: center;
+    width: calc(var(--space-8) + var(--space-2));
+    height: calc(var(--space-8) + var(--space-2));
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-canvas);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
   .landing-pregunta::-webkit-details-marker {
@@ -1192,6 +1230,37 @@
   }
 
   @media (min-width: 1024px) {
+    .landing-portada {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: var(--space-12);
+      align-items: center;
+      padding-block: var(--space-16);
+    }
+
+    .landing-app {
+      grid-template-columns: calc(var(--layout-sidebar-width) * 2 / 3) minmax(0, 1fr);
+    }
+
+    .landing-app-menu {
+      display: grid;
+      align-content: start;
+      gap: var(--space-1);
+      padding: var(--space-3) var(--space-2);
+      border-right: var(--border-width) solid var(--color-border-default);
+      background: var(--color-bg-surface);
+    }
+
+    .landing-pasos {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .landing-pasos::before {
+      right: calc((var(--space-8) + var(--space-2)) / 2);
+      bottom: auto;
+      border-top: var(--border-width) solid var(--color-border-strong);
+      border-left: 0;
+    }
+
     .landing-paso {
       grid-template-columns: minmax(0, 1fr);
       row-gap: var(--space-2);
@@ -1200,14 +1269,6 @@
     .landing-paso-numero {
       grid-row: auto;
       margin-bottom: var(--space-2);
-    }
-  }
-
-  @media (max-width: 1023px) {
-    .landing-vista-tarea {
-      justify-self: stretch;
-      width: auto;
-      margin: 0;
     }
   }
 }
