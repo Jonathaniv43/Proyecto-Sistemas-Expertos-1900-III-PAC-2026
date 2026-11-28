@@ -22,10 +22,12 @@ public sealed class CrearEncuestadoServicio(AltaDeVinculo alta, IUnidadDeTrabajo
         var preparado = await alta.PrepararAsync(datos, Rol.EncuestadoId, "Encuestado", ct);
         if (!preparado.EsExito) return preparado.Error!;
 
-        var (vinculo, persona, acceso, cuentaNueva, correoActivacionEnviado) = preparado.Valor;
+        var (vinculo, persona, acceso, _, _) = preparado.Valor;
+        var cuentaNueva = preparado.Valor.CuentaNueva;
         auditor.Registrar(AccionesAuditoria.EncuestadoCreado, EntidadesAuditoria.VinculoEmpresa, vinculo.Id,
             new { persona = persona.NombreCompleto, email = acceso.Email, rol = RolCodigo, cuentaNueva });
         await unidadDeTrabajo.GuardarCambiosAsync(ct);
+        var correoActivacionEnviado = await alta.EnviarActivacionAsync(preparado.Valor, ct);
 
         return new CrearEncuestadoResponseDto(vinculo.Id, persona.Id, acceso.Email, persona.NombreCompleto, RolCodigo,
             vinculo.Estado, vinculo.CreadoEn, cuentaNueva, correoActivacionEnviado);

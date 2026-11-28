@@ -119,7 +119,7 @@ public sealed class RegistrarEmpresaServicio(
             ["RTN"] = empresa.RTN,
             ["Email"] = acceso.Email,
             ["Codigo"] = codigo,
-            ["Minutos"] = VentanaEnvioCodigo.MinutosVigencia.ToString(),
+            ["Vigencia"] = VentanaEnvioCodigo.TextoVigenciaCorta,
             ["IdEmpresa"] = idEmpresaCifrado,
             ["UrlLogin"] = urlBase,
             ["UrlActivacion"] = urlActivacion

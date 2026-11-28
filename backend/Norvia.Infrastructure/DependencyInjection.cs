@@ -71,7 +71,12 @@ public static class DependencyInjection
         services.AddOptions<CorreoOpciones>()
             .Bind(configuration.GetSection(CorreoOpciones.Seccion));
         services.AddScoped<IPlantillasCorreo, PlantillasCorreoDb>();
-        services.AddHttpClient<IEnvioCorreo, ResendEnvioCorreo>(c => c.BaseAddress = new Uri("https://api.resend.com/"));
+        // Timeout menor que el plazo de una fila en_proceso (EnvioNotificacionesPendientes.PlazoEnProceso).
+        services.AddHttpClient<IEnvioCorreo, ResendEnvioCorreo>(c =>
+        {
+            c.BaseAddress = new Uri("https://api.resend.com/");
+            c.Timeout = TimeSpan.FromSeconds(20);
+        });
 
         // Notificaciones (M11): se crean con la operación de origen y el correo sale por la bandeja de salida (HU-118).
         services.AddOptions<NotificacionesOpciones>()
@@ -81,7 +86,8 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddScoped<IBandejaNotificaciones, BandejaNotificaciones>();
         services.AddScoped<EnvioNotificacionesPendientes>();
-        services.AddScoped<IEnvioInmediatoNotificacion, EnvioNotificacionesPendientes>();
+        services.AddSingleton<SenalCorreosPendientes>();
+        services.AddSingleton<IAvisoCorreosPendientes>(sp => sp.GetRequiredService<SenalCorreosPendientes>());
         services.AddScoped<IRegistroAuditoria, RepositorioRegistroAuditoria>();
 
         // Repositorios por slice: I<CasoDeUso>Repositorio → <CasoDeUso>Repositorio.

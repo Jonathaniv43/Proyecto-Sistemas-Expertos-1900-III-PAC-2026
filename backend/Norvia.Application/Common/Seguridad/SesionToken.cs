@@ -10,4 +10,6 @@ public sealed record SesionToken(
     Guid? EmpresaId,
     string? RolCodigo,
     /// <summary>Correo del Acceso: la web lo muestra (p. ej. a dónde se envía el enlace de HU-022).</summary>
-    string Email);
+    string Email,
+    /// <summary>Si la cuenta tiene contraseña (una creada con Microsoft puede no tenerla, D29). Solo para la interfaz.</summary>
+    bool TienePassword);

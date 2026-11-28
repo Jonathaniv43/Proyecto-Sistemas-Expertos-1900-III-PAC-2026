@@ -1,6 +1,7 @@
 using Norvia.Application.Common.CasosDeUso;
 using Norvia.Application.Common.Interfaces;
 using Norvia.Application.Common.Resultados;
+using Norvia.Application.Features.Auth.IdentidadMicrosoft;
 using Norvia.Application.Features.Auth.VerificarCodigoMicrosoft.DTOs;
 
 namespace Norvia.Application.Features.Auth.VerificarCodigoMicrosoft;
@@ -17,7 +18,7 @@ public sealed class VerificarCodigoMicrosoftServicio(
     IHashCodigoVerificacion hashCodigo,
     IReloj reloj) : IServicioCasoDeUso
 {
-    private const int MinutosVigenciaToken = 10;
+    private const int MinutosVigenciaToken = IdentidadMicrosoftServicio.MinutosVigencia;
     private const int MaximoIntentos = 5;
 
     public async Task<Resultado<VerificarCodigoMicrosoftResponseDto>> EjecutarAsync(

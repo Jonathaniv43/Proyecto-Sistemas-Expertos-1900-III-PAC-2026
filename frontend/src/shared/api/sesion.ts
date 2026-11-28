@@ -46,6 +46,8 @@ export interface UsuarioSesion {
   vinculoId: string | null
   /** Correo de la cuenta (claim `email`): a dónde se envía el enlace para cambiar la contraseña (HU-022). */
   email: string | null
+  /** false si la cuenta no tiene contraseña (creada con Microsoft): la web ofrece agregarla. Solo para la interfaz. */
+  tienePassword: boolean
   /** Solo en sesiones de empresa iniciadas desde este navegador. */
   empresa: EmpresaSesion | null
 }
@@ -125,6 +127,7 @@ function usuarioDe(token: string): UsuarioSesion | null {
     rol: texto(claims.role) ?? texto(claims[CLAIM_ROL_LARGO]),
     vinculoId: texto(claims.vinculo_id),
     email: texto(claims.email),
+    tienePassword: claims.tiene_password !== 'false',
     empresa: claims.tipo_sesion === 'plataforma' ? null : leerEmpresa(),
   }
 }

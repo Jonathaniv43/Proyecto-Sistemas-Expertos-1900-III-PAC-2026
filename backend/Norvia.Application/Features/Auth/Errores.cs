@@ -44,6 +44,10 @@ public static class Errores
     public static readonly Error CorreoNoEnviado =
         new("auth.correo_no_enviado", "No pudimos enviar el código. Intenta de nuevo en unos minutos.", TipoError.Servidor);
 
+    /// <summary>D30: el correo es de una cuenta local nueva que todavía no se activa con su código.</summary>
+    public static readonly Error CuentaSinActivar =
+        new("auth.cuenta_sin_activar", "Tu cuenta de Norvia todavía no está activada. Actívala con el código que te llegó al correo y después podrás vincular Microsoft.", TipoError.Conflicto);
+
     /// <summary>RN-82: esa cuenta del proveedor ya pertenece a otro Acceso.</summary>
     public static readonly Error ProveedorYaVinculado =
         new("auth.proveedor_ya_vinculado", "Esa cuenta de Microsoft ya está vinculada a otra cuenta de Norvia.", TipoError.Conflicto);
